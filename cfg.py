@@ -27,3 +27,12 @@ SAMPLE_FRACTIONS = dict(validation = 0.2,
 # seed that we use whenever we need something to be consistent between runs
 CONSISTENT_SEED = 137
 
+# arguments passed to the torch DataLoader constructor
+DATALOADER_ARGS = dict(batch_size=1,
+                       shuffle=True,
+                       num_workers=1,
+                       pin_memory=True,
+                       prefetch_factor=1)
+
+# the GPU we want to use -- this needs to be modified from somewhere
+DEVICE_IDX = 0
