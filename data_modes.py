@@ -13,7 +13,7 @@ class DataModes(Enum) :
     TESTING = auto()
 
 
-    def __repr__(self) :
+    def __str__(self) :
         """
         a nice human readable representation
         """
@@ -40,6 +40,6 @@ class DataModes(Enum) :
         except KeyError : # we have hit the one that is not specified
             Nsamples = Nsamples_tot - sum(int(round(Nsamples_tot * v)) for v in cfg.SAMPLE_FRACTIONS.values())
 
-        return np.random.default_rng(cfg.SAMPLE_SHUFFLE_SEED).choice(np.arange(Nsamples_tot),
-                                                                     size=Nsamples, replace=False)
+        return np.random.default_rng(cfg.CONSISTENT_SEED).choice(np.arange(Nsamples_tot),
+                                                                 size=Nsamples, replace=False)
     #}}}

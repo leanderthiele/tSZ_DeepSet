@@ -24,6 +24,6 @@ NORMALIZE_COORDS = True
 SAMPLE_FRACTIONS = dict(validation = 0.2,
                         testing = 0.1)
 
-# seed to shuffle the samples -- keep constant to get consistent splittings
-SAMPLE_SHUFFLE_SEED = 137
+# seed that we use whenever we need something to be consistent between runs
+CONSISTENT_SEED = 137
 
