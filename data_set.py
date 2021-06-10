@@ -30,6 +30,7 @@ class DataSet(torch_DataSet) :
 
     def __getitem__(self, idx) :
     #{{{ 
+        # TODO we may want to change this for distributed training
         h = Halo(self.halo_catalog, self.sample_indices[idx])
         indices = dict(DM = self.__get_indices(h, 'DM'),
                        TNG = self.__get_indices(h, 'TNG'))
@@ -39,6 +40,7 @@ class DataSet(torch_DataSet) :
 
     def __len__(self) :
     #{{{
+        # TODO we may want to change this for distributed training
         return len(self.sample_indices)
     #}}}
 
