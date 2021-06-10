@@ -7,6 +7,11 @@ import cfg
 class DataItem :
     """
     represents one data item, i.e. a collection of network input and target
+
+    Upon construction, the instance has the fields:
+        DM_in        ... currently just the dark matter particle coordinates, relative to the CM
+        TNG_coords   ... the coordinates of the gas particles
+        TNG_pressure ... the electron pressure at the position of those gas particles
     """
 
     def __init__(self, halo, indices=None) :
@@ -123,5 +128,5 @@ class DataItem :
         prt_start = self.halo.prt_start_DM if ptype=='DM' else self.halo.prt_start_TNG
         prt_len = self.halo.prt_len_DM if ptype=='DM' else self.halo.prt_len_TNG
 
-        return group[name][prt_start : prt_start+prt_len, :][self.__select(ptype)].astype(np.float32)
+        return group[name][prt_start : prt_start+prt_len][self.__select(ptype)].astype(np.float32)
     #}}}
