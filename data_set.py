@@ -60,9 +60,12 @@ class DataSet(torch_DataSet) :
            or cfg.PRT_FRACTION[ptype] is None :
             return None
 
-        N = halo.prt_len_DM if ptype == 'DM' else halo.prt_len_TNG
+        Nprt = halo.prt_len_DM if ptype == 'DM' else halo.prt_len_TNG
+        Nindices = int(cfg.PRT_FRACTION[ptype] * N) \
+                   if isinstance(cfg.PRT_FRACTION[ptype], float) \
+                   else cfg.PRT_FRACTION[ptype]
 
         # here we allow the possibility for duplicate entries
         # in practice, this should not be an issue and will make the code faster
-        return self.rng.integers(N, size=int(cfg.PRT_FRACTION[ptype] * N))
+        return self.rng.integers(Nprt, size=Nindices)
     #}}}
