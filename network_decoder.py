@@ -30,9 +30,14 @@ class NetworkDecoder(nn.Module) :
         """
         h ... the latent vectors, of shape [batch, latent feature, 3]
         x ... the positions where to evaluate, of shape [batch, Nvects, 3]
+              or a list of length batch and shapes [Nvectsi, 3]
         u ... the global vector, of shape [batch, Nglobals]
         """
     #{{{
+        if isinstance(x, list) :
+            return [self.forward(h[ii, ...].unsqueeze(0), x[ii].unsqueeze(0), u[ii, ...].unsqueeze(0))
+                    for ii in range(len(x))]
+
         # compute the projections of shape [batch, Nvects, latent feature]
         projections = torch.einsum('bvd,bld->bvl', x, h)
 

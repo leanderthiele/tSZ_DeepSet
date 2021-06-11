@@ -33,14 +33,17 @@ class DataBatch :
 
         astensor = lambda x : torch.tensor(x, dtype=torch.float32)
         stack_to_tensor = lambda s : astensor(np.stack((getattr(d, s) for d in data_items), axis=0))
+        list_tensors = lambda s : [astensor(getattr(d, s)) for d in data_items]
+        lengths_equal = lambda s : all(getattr(data_items[0], s).shape[0] == getattr(d, s).shape[0] for d in data_items)
+        batch = lambda s : stack_to_tensor(s) if lengths_equal(s) else list_tensors(s)
 
         if self.has_DM :
-            self.DM_in = stack_to_tensor('DM_in')
+            self.DM_in = batch('DM_in')
 
         if self.has_TNG :
-            self.TNG_coords = stack_to_tensor('TNG_coords')
-            self.TNG_radii = stack_to_tensor('TNG_radii')
-            self.TNG_Pth = stack_to_tensor('TNG_Pth')
+            self.TNG_coords = batch('TNG_coords')
+            self.TNG_radii = batch('TNG_radii')
+            self.TNG_Pth = batch('TNG_Pth')
 
         # the globals
         self.u = astensor(np.stack((np.array([np.log(d.halo.M200c_DM), ]) for d in data_items), axis=0))

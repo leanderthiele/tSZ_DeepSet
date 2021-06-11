@@ -27,9 +27,13 @@ class NetworkLayer(nn.Module) :
     def forward(self, x, u=None) :
         """
         x ... the input tensor, of shape [batch, Nvecs, 3]
+              or a list of length batch with shapes [Nvecs[ii], 3]
         u ... the global tensor -- assumed to be a vector, i.e. of shape [batch, Nglobals]
         """
     #{{{
+        if isinstance(x, list) :
+            return torch.cat((self.forward(xi.unsqueeze(0), u) for xi in x))
+
         # we know that the last dimension is the real space one
         scalars = torch.linalg.norm(x, dim=-1, keepdim=True)
 
