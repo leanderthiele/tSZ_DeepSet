@@ -29,6 +29,7 @@ class DataBatch :
         self.DM_in = astensor(np.stack((d.DM_in for d in data_items), axis=0))
         self.TNG_coords = astensor(np.stack((d.TNG_coords for d in data_items), axis=0))
         self.TNG_pressure = astensor(np.stack((d.TNG_pressure for d in data_items), axis=0))
+        self.logM200c = astensor(np.log(np.array([d.halo.M200c_DM for d in data_items])))
     #}}}
 
 
@@ -38,8 +39,11 @@ class DataBatch :
                 (it also returns the altered object)
         """
     #{{{
-        self.DM_in = self.DM_in.to(cfg.DEVICE_IDX)
-        self.TNG_coords = self.TNG_coords.to(cfg.DEVICE_IDX)
-        self.TNG_pressure = self.TNG_pressure.to(cfg.DEVICE_IDX)
+        if cfg.DEVICE_IDX is not None :
+            self.DM_in = self.DM_in.to(cfg.DEVICE_IDX)
+            self.TNG_coords = self.TNG_coords.to(cfg.DEVICE_IDX)
+            self.TNG_pressure = self.TNG_pressure.to(cfg.DEVICE_IDX)
+            self.logM200c = self.logM200c.to(cfg.DEVICE_IDX)
+
         return self
     #}}}
