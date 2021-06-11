@@ -1,5 +1,9 @@
 import os.path
 
+# FIXME
+if False :
+    import numpy as np
+
 import torch
 
 from spherical_model import SphericalModel
@@ -32,6 +36,14 @@ for epoch in range(1000) :
         data = data.to_device()
 
         prediction = model(data.M200c, data.TNG_radii)
+
+        # FIXME for debugging
+        if False :
+            np.savez('test.npz',
+                     pred=np.squeeze(prediction.detach().numpy()),
+                     targ=np.squeeze(data.TNG_Pth.detach().numpy()),
+                     r=np.squeeze(data.TNG_radii.detach().numpy()))
+            raise RuntimeError
 
         loss = loss_fn(prediction, data.TNG_Pth)
 

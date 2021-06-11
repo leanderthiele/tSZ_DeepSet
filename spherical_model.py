@@ -38,8 +38,8 @@ class SphericalModel(nn.Module) :
         """
     #{{{
         if isinstance(r, list) :
-            return [self.forward(torch.tensor([M200c[ii],]), ri.unsqueeze(0),
-                                 R200c=None if R200c is None else torch.tensor([R200c[ii], ]))
+            return [self(torch.tensor([M200c[ii],], requires_grad=False), ri,
+                         R200c=None if R200c is None else torch.tensor([R200c[ii], ], requires_grad=False))
                     for ii, ri in enumerate(r)]
 
         if R200c is not None :

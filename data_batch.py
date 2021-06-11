@@ -31,10 +31,10 @@ class DataBatch :
         self.has_TNG = data_items[0].has_TNG
         assert all(self.has_TNG == d.has_TNG for d in data_items)
 
-        astensor = lambda x : torch.tensor(x, dtype=torch.float32)
+        astensor = lambda x : torch.tensor(x, dtype=torch.float32, requires_grad=False)
         lengths_equal = lambda s : all(getattr(data_items[0], s).shape[0] == getattr(d, s).shape[0] for d in data_items)
         stack_to_tensor = lambda s : astensor(np.stack([getattr(d, s) for d in data_items], axis=0))
-        list_tensors = lambda s : [astensor(getattr(d, s)) for d in data_items]
+        list_tensors = lambda s : [astensor(getattr(d, s)).unsqueeze(0) for d in data_items]
         batch = lambda s : stack_to_tensor(s) if lengths_equal(s) else list_tensors(s)
 
         if self.has_DM :

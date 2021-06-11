@@ -60,7 +60,7 @@ class DataItem :
             coords = self.__read_prt_field(particles, 'Coordinates', 'DM')
 
         # remove the center of mass
-        coords -= self.halo.CM_DM
+        coords -= self.halo.pos_DM
 
         # take periodic boundary conditions into account
         coords = DataItem.__periodicize(coords, BoxSize)
@@ -97,7 +97,7 @@ class DataItem :
         # remove the center of mass
         # NOTE it is important that we remove that dark matter center of mass here,
         #      since we don't know the TNG CM when evaluating
-        coords -= self.halo.CM_DM
+        coords -= self.halo.pos_DM
 
         # take periodic boundary conditions into account
         coords = DataItem.__periodicize(coords, BoxSize)

@@ -28,14 +28,14 @@ SAMPLE_FRACTIONS = dict(validation = 0.2,
 CONSISTENT_SEED = 137
 
 # arguments passed to the torch DataLoader constructor
-DATALOADER_ARGS = dict(batch_size=1,
+DATALOADER_ARGS = dict(batch_size=2,
                        shuffle=True,
-                       num_workers=4,
+                       num_workers=1,
                        pin_memory=True,
                        prefetch_factor=1)
 
 # the GPU we want to use -- this needs to be modified from somewhere
-DEVICE_IDX = 0
+DEVICE_IDX = None
 
 # default number of hidden layers for the MLPs
 MLP_DEFAULT_NLAYERS = 4

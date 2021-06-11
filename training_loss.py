@@ -21,7 +21,8 @@ class TrainingLoss :
     #{{{
         if isinstance(x, list) :
             assert isinstance(y, list) and len(x) == len(y)
-            return torch.linalg.norm(torch.tensor([self(x[ii], y[ii]) for ii in range(len(x))])) / len(x)
+            return torch.linalg.norm(torch.tensor([self(x[ii], y[ii]) for ii in range(len(x))],
+                                                   requires_grad=True)) / len(x)
 
         return self.mse(x, y)
     #}}}
