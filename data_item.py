@@ -9,9 +9,11 @@ class DataItem :
     represents one data item, i.e. a collection of network input and target
 
     Upon construction, the instance has the fields:
+        halo         ... the Halo instance this data item is associated with
         DM_in        ... currently just the dark matter particle coordinates, relative to the CM
         TNG_coords   ... the coordinates of the gas particles
-        TNG_pressure ... the electron pressure at the position of those gas particles
+        TNG_radii    ... the radial coordinates of the gas particles (with the last dimension length 1)
+        TNG_Pth      ... the electron pressure at the position of those gas particles
     """
 
     def __init__(self, halo, indices=None) :
@@ -28,8 +30,10 @@ class DataItem :
         self.indices = indices
 
         self.DM_in = self.__get_DM()
-        self.TNG_coords, self.TNG_pressure = self.__get_TNG()
+        self.TNG_coords, self.TNG_Pth = self.__get_TNG()
+        self.TNG_radii = np.linalg.norm(self.TNG_coords, axis=-1, keepdims=True)
     #}}}
+
 
     def __get_DM(self) :
         """
@@ -78,7 +82,7 @@ class DataItem :
         # compute the electron pressure
         XH = 0.76
         gamma = 5.0/3.0
-        pressure = 2.0 * (1+XH) / (1 + 3*XH + 4*XH*x) * (gamma - 1) * d * e
+        Pth = 2.0 * (1+XH) / (1 + 3*XH + 4*XH*x) * (gamma - 1) * d * e
 
         # remove the center of mass
         coords -= self.halo.CM_DM
@@ -90,7 +94,7 @@ class DataItem :
         if cfg.NORMALIZE_COORDS :
             coords /= self.halo.R200c_DM
 
-        return coords, pressure
+        return coords, Pth 
     #}}}
 
 

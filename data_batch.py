@@ -25,11 +25,15 @@ class DataBatch :
             data_items = [data_items, ]
 
         astensor = lambda x : torch.tensor(x, dtype=torch.float32)
+        stack_to_tensor = lambda s : astensor(np.stack((d.__dict__[s] for d in data_items), axis=0))
 
-        self.DM_in = astensor(np.stack((d.DM_in for d in data_items), axis=0))
-        self.TNG_coords = astensor(np.stack((d.TNG_coords for d in data_items), axis=0))
-        self.TNG_pressure = astensor(np.stack((d.TNG_pressure for d in data_items), axis=0))
-        self.logM200c = astensor(np.log(np.array([d.halo.M200c_DM for d in data_items])))
+        self.DM_in = stack_to_tensor('DM_in')
+        self.TNG_coords = stack_to_tensor('TNG_coords')
+        self.TNG_radii = stack_to_tensor('TNG_radii')
+        self.TNG_Pth = stack_to_tensor('TNG_Pth')
+
+        # the globals
+        self.u = astensor(np.stack((np.array([np.log(d.halo.M200c_DM), ]) for d in data_items), axis=0))
     #}}}
 
 
@@ -42,8 +46,8 @@ class DataBatch :
         if cfg.DEVICE_IDX is not None :
             self.DM_in = self.DM_in.to(cfg.DEVICE_IDX)
             self.TNG_coords = self.TNG_coords.to(cfg.DEVICE_IDX)
-            self.TNG_pressure = self.TNG_pressure.to(cfg.DEVICE_IDX)
-            self.logM200c = self.logM200c.to(cfg.DEVICE_IDX)
+            self.TNG_Pth = self.TNG_Pth.to(cfg.DEVICE_IDX)
+            self.u = self.u.to(cfg.DEVICE_IDX)
 
         return self
     #}}}

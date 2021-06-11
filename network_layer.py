@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-import torch.linalg as LA
 
 from network_mlp import NetworkMLP
 import cfg
@@ -32,7 +31,7 @@ class NetworkLayer(nn.Module) :
         """
     #{{{
         # we know that the last dimension is the real space one
-        scalars = LA.norm(x, dim=-1, keepdim=True)
+        scalars = torch.linalg.norm(x, dim=-1, keepdim=True)
 
         if self.compute_dots :
             # compute the mutual dot products
