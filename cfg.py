@@ -36,3 +36,9 @@ DATALOADER_ARGS = dict(batch_size=1,
 
 # the GPU we want to use -- this needs to be modified from somewhere
 DEVICE_IDX = 0
+
+# default number of hidden layers for the MLPs
+MLP_DEFAULT_NLAYERS = 4
+
+# default number of neurons in the hidden layers for the MLPs
+MLP_DEFAULT_NHIDDEN = 100
