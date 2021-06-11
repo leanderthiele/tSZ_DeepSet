@@ -109,7 +109,7 @@ class DataItem :
         # normalize the thermal pressure
         Pth /= self.halo.P200c_DM
 
-        return coords, Pth 
+        return coords, Pth[:, None]
     #}}}
 
 

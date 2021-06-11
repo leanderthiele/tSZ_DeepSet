@@ -1,11 +1,16 @@
+import os.path
+
+import torch
+
 from spherical_model import SphericalModel
 from data_loader import DataLoader
 from data_modes import DataModes
 from training_loss import TrainingLoss
 from data_batch import DataBatch
+import cfg
 
 
-model = SphericalModel()
+model = SphericalModel().to_device()
 optimizer = torch.optim.Adam(model.parameters())
 loss_fn = TrainingLoss()
 training_loader = DataLoader(DataModes.TRAINING, 0, load_DM=False)
@@ -33,3 +38,7 @@ for epoch in range(1000) :
         loss.backward()
 
         optimizer.step()
+
+        print('loss = %f'%loss.item())
+
+    torch.save(model.state_dict(), os.path.join(cfg.RESULTS_PATH, 'spherical_model.pt'))

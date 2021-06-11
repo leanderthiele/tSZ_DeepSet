@@ -1,5 +1,7 @@
 import torch
-import torch.nn
+import torch.nn as nn
+
+import cfg
 
 
 class SphericalModel(nn.Module) :
@@ -43,7 +45,7 @@ class SphericalModel(nn.Module) :
         if R200c is not None :
             r /= R200c[:,None,None]
 
-        P0 = self.__primitive(M200c, 'P0'
+        P0 = self.__primitive(M200c, 'P0')
         xc = self.__primitive(M200c, 'xc')
         beta = self.__primitive(M200c, 'beta')
 
@@ -60,4 +62,13 @@ class SphericalModel(nn.Module) :
         """
     #{{{
         return getattr(self, 'A_'+s) * (0.7 * M200c / 1e4).pow(getattr(self, 'am_'+s))
+    #}}}
+
+
+    def to_device(self) :
+    #{{{
+        if cfg.DEVICE_IDX is not None :
+            return self.to(cfg.DEVICE_IDX)
+        else :
+            return self
     #}}}

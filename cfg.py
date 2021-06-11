@@ -15,7 +15,7 @@ SIM_FILES = dict(DM = '/tigress/lthiele/Illustris_300-1_Dark/simulation.hdf5',
 # how many particles of each type to use per halo
 # set to None if all particles are to be used
 # if an integer larger than one, not the fraction but this number is used
-PRT_FRACTION = dict(DM = None, TNG = None)
+PRT_FRACTION = dict(DM = None, TNG = 0.1)
 
 # whether to divide the coordinates by R200c
 NORMALIZE_COORDS = True
@@ -30,7 +30,7 @@ CONSISTENT_SEED = 137
 # arguments passed to the torch DataLoader constructor
 DATALOADER_ARGS = dict(batch_size=1,
                        shuffle=True,
-                       num_workers=1,
+                       num_workers=4,
                        pin_memory=True,
                        prefetch_factor=1)
 
@@ -53,3 +53,5 @@ ENCODER_DEFAULT_NLAYERS = 4
 # (which correspond to hidden layers at the encoder level)
 ENCODER_DEFAULT_NHIDDEN = 128
 
+# where our results (like model states and loss curves) will go
+RESULTS_PATH = 'results'

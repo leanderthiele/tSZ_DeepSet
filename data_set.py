@@ -67,7 +67,7 @@ class DataSet(torch_DataSet) :
             return None
 
         Nprt = halo.prt_len_DM if ptype == 'DM' else halo.prt_len_TNG
-        Nindices = int(cfg.PRT_FRACTION[ptype] * N) \
+        Nindices = int(cfg.PRT_FRACTION[ptype] * Nprt) \
                    if isinstance(cfg.PRT_FRACTION[ptype], float) \
                    else cfg.PRT_FRACTION[ptype]
 
