@@ -85,6 +85,8 @@ class DataItem :
         Pth = 2.0 * (1+XH) / (1 + 3*XH + 4*XH*x) * (gamma - 1) * d * e
 
         # remove the center of mass
+        # NOTE it is important that we remove that dark matter center of mass here,
+        #      since we don't know the TNG CM when evaluating
         coords -= self.halo.CM_DM
 
         # take periodic boundary conditions into account
