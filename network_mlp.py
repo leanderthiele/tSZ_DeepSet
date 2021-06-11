@@ -27,7 +27,7 @@ class NetworkMLP(nn.Sequential) :
                        **layer_kwargs) :
     #{{{
         super().__init__(*[_MLPLayer(Nin if ii==0 else Nhidden,
-                                     Nout if ii==Nlayers+1 else Nhidden,
+                                     Nout if ii==Nlayers else Nhidden,
                                      **layer_kwargs)
                            for ii in range(Nlayers+1)])
     #}}}

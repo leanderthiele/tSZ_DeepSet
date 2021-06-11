@@ -18,8 +18,10 @@ class NetworkLayer(nn.Module) :
         Nk_out ... number of neurons going out
         """
     #{{{
+        super().__init__()
+
         self.compute_dots = k_in > 0
-        self.mlp = NetworkMLP(1 + self.compute_dots * kin + Nglobals, k_out, **MLP_kwargs)
+        self.mlp = NetworkMLP(1 + self.compute_dots * k_in + Nglobals, k_out, **MLP_kwargs)
     #}}}
 
 
@@ -46,8 +48,8 @@ class NetworkLayer(nn.Module) :
         # pass through the MLP, transform scalars -> scalars
         fk = self.mlp(scalars)
 
-        # evaluate in the vector space TODO is the indexing correct here?
-        vecs = torch.einsum('bio,bid->biod', f_k, x)
+        # evaluate in the vector space
+        vecs = torch.einsum('bio,bid->biod', fk, x)
 
         # return the pooled version
         return self.__pool(vecs)
