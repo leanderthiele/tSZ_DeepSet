@@ -20,6 +20,8 @@ class NetworkDecoder(nn.Module) :
         MLP_kwargs ... to specify the multi-layer perceptron used here
         """
     #{{{
+        super().__init__()
+
         self.mlp = NetworkMLP(k_latent+cfg.NGLOBALS, k_out, **MLP_kwargs)
     #}}}
 

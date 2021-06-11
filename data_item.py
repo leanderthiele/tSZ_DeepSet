@@ -31,6 +31,8 @@ class DataItem :
 
         self.DM_in = self.__get_DM()
         self.TNG_coords, self.TNG_Pth = self.__get_TNG()
+
+        # compute the scalar distances
         self.TNG_radii = np.linalg.norm(self.TNG_coords, axis=-1, keepdims=True)
     #}}}
 
@@ -95,6 +97,9 @@ class DataItem :
         # if required, divide by R200c
         if cfg.NORMALIZE_COORDS :
             coords /= self.halo.R200c_DM
+
+        # normalize the thermal pressure
+        Pth /= self.halo.P200c_DM
 
         return coords, Pth 
     #}}}
