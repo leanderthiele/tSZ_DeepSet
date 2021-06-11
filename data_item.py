@@ -16,11 +16,13 @@ class DataItem :
         TNG_Pth      ... the electron pressure at the position of those gas particles
     """
 
-    def __init__(self, halo, indices=None) :
+    def __init__(self, halo, indices=None, load_DM=True, load_TNG=True) :
         """
-        halo    ... a Halo instance for the current halo
-        indices ... the relative indices, should either be None or have keys
-                    'DM', 'TNG'
+        halo     ... a Halo instance for the current halo
+        indices  ... the relative indices, should either be None or have keys
+                     'DM', 'TNG'
+        load_DM  ... whether to load the dark matter particles
+        load_TNG ... whether to load the TNG particles
         
         (we do not want to open the halo catalog file for each construction,
          also maybe the caller wants to modify it in some way)
@@ -29,11 +31,17 @@ class DataItem :
         self.halo = halo
         self.indices = indices
 
-        self.DM_in = self.__get_DM()
-        self.TNG_coords, self.TNG_Pth = self.__get_TNG()
+        if load_DM :
+            self.DM_in = self.__get_DM()
 
-        # compute the scalar distances
-        self.TNG_radii = np.linalg.norm(self.TNG_coords, axis=-1, keepdims=True)
+        if load_TNG :
+            self.TNG_coords, self.TNG_Pth = self.__get_TNG()
+
+            # compute the scalar distances
+            self.TNG_radii = np.linalg.norm(self.TNG_coords, axis=-1, keepdims=True)
+
+        self.has_DM = load_DM
+        self.has_TNG = load_TNG
     #}}}
 
 

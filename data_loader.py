@@ -11,15 +11,17 @@ class DataLoader(torch_DataLoader) :
     a torch-compatible data loader
     """
     
-    def __init__(self, mode, seed) :
+    def __init__(self, mode, seed, load_DM=True, load_TNG=True) :
         """
         mode ... one of training, validation, testing
         seed ... random seed to choose particles
+        load_DM  ... whether to load the DM particles
+        load_TNG ... whether to load the TNG particles
         """
     #{{{
         assert isinstance(mode, DataModes)
 
-        self.dataset = DataSet(mode, seed)
+        self.dataset = DataSet(mode, seed, load_DM=load_DM, load_TNG=load_TNG)
 
         super().__init__(self.dataset,
                          collate_fn=DataBatch,

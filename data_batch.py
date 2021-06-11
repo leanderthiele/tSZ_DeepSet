@@ -19,18 +19,28 @@ class DataBatch :
 
     def __init__(self, data_items) :
     #{{{
+
         if isinstance(data_items, list) :
-            assert all(isinstance(d) for d in data_items)
+            assert all(isinstance(d, DataItem) for d in data_items)
         else :
+            assert isinstance(data_items, DataItem)
             data_items = [data_items, ]
+
+        self.has_DM = data_items[0].has_DM
+        assert all(self.has_DM == d.has_DM for d in data_items)
+        self.has_TNG = data_items[0].has_TNG
+        assert all(self.has_TNG == d.has_TNG for d in data_items)
 
         astensor = lambda x : torch.tensor(x, dtype=torch.float32)
         stack_to_tensor = lambda s : astensor(np.stack((getattr(d, s) for d in data_items), axis=0))
 
-        self.DM_in = stack_to_tensor('DM_in')
-        self.TNG_coords = stack_to_tensor('TNG_coords')
-        self.TNG_radii = stack_to_tensor('TNG_radii')
-        self.TNG_Pth = stack_to_tensor('TNG_Pth')
+        if self.has_DM :
+            self.DM_in = stack_to_tensor('DM_in')
+
+        if self.has_TNG :
+            self.TNG_coords = stack_to_tensor('TNG_coords')
+            self.TNG_radii = stack_to_tensor('TNG_radii')
+            self.TNG_Pth = stack_to_tensor('TNG_Pth')
 
         # the globals
         self.u = astensor(np.stack((np.array([np.log(d.halo.M200c_DM), ]) for d in data_items), axis=0))
@@ -51,9 +61,15 @@ class DataBatch :
         """
     #{{{
         if cfg.DEVICE_IDX is not None :
-            self.DM_in = self.DM_in.to(cfg.DEVICE_IDX)
-            self.TNG_coords = self.TNG_coords.to(cfg.DEVICE_IDX)
-            self.TNG_Pth = self.TNG_Pth.to(cfg.DEVICE_IDX)
+
+            if self.has_DM :
+                self.DM_in = self.DM_in.to(cfg.DEVICE_IDX)
+
+            if self.has_TNG :
+                self.TNG_coords = self.TNG_coords.to(cfg.DEVICE_IDX)
+                self.TNG_radii = self.TNG_radii.to(cfg.DEVICE_IDX)
+                self.TNG_Pth = self.TNG_Pth.to(cfg.DEVICE_IDX)
+
             self.u = self.u.to(cfg.DEVICE_IDX)
             self.M200c = self.M200c.to(cfg.DEVICE_IDX)
             self.R200c = self.R200c.to(cfg.DEVICE_IDX)

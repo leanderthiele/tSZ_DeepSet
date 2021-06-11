@@ -13,15 +13,21 @@ class DataSet(torch_DataSet) :
     torch-compatible representation of the simulation data
     """
 
-    def __init__(self, mode, seed) :
+    def __init__(self, mode, seed, load_DM=True, load_TNG=True) :
         """
         mode ... one of training, validation, testing
         seed ... to choose the particle indices
+        load_DM  ... whether to load the DM particles
+        load_TNG ... whether to load the TNG particles
         """
     #{{{    
         assert isinstance(mode, DataModes)
+
         self.mode = mode
         self.sample_indices = mode.sample_indices()
+
+        self.load_DM = load_DM
+        self.load_TNG = load_TNG
 
         self.halo_catalog = dict(np.load(cfg.HALO_CATALOG))
         self.rng = np.random.default_rng(seed)
@@ -34,7 +40,7 @@ class DataSet(torch_DataSet) :
         h = Halo(self.halo_catalog, self.sample_indices[idx])
         indices = dict(DM = self.__get_indices(h, 'DM'),
                        TNG = self.__get_indices(h, 'TNG'))
-        return DataItem(h, indices)
+        return DataItem(h, indices, load_DM=self.load_DM, load_TNG=self.load_TNG)
     #}}}
 
 
