@@ -49,6 +49,9 @@ for epoch in range(1000) :
 
         loss.backward()
 
+        if cfg.GRADIENT_CLIP is not None :
+            nn.utils.clip_grad_norm_(model.parameters(), max_norm=cfg.GRADIENT_CLIP)
+
         optimizer.step()
 
         print('loss = %f'%loss.item())

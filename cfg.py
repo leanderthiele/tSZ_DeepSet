@@ -55,3 +55,6 @@ ENCODER_DEFAULT_NHIDDEN = 128
 
 # where our results (like model states and loss curves) will go
 RESULTS_PATH = 'results'
+
+# gradient clipping value (set to None for no clipping)
+GRADIENT_CLIP = 1.0
