@@ -11,7 +11,7 @@ class NetworkLayer(nn.Module) :
     one block of the network, transforms a set of vectors into another set of vectors
     """
 
-    def __init__(self, k_in, k_out, Nglobals=0, **MLP_kwargs) :
+    def __init__(self, k_in, k_out, **MLP_kwargs) :
         """
         Nk_in  ... number of feature vector coming in
                    (set to non-positive for the initial layer that takes the positions)
@@ -21,7 +21,7 @@ class NetworkLayer(nn.Module) :
         super().__init__()
 
         self.compute_dots = k_in > 0
-        self.mlp = NetworkMLP(1 + self.compute_dots * k_in + Nglobals, k_out, **MLP_kwargs)
+        self.mlp = NetworkMLP(1 + self.compute_dots * k_in + cfg.NGLOBALS, k_out, **MLP_kwargs)
     #}}}
 
 
@@ -42,8 +42,12 @@ class NetworkLayer(nn.Module) :
             # we are in the very first layer and need to normalize the vector
             x /= scalars
 
+        # concatenate with the global vector if requested
         if u is not None :
+            assert len(u) == cfg.NGLOBALS
             scalars = torch.cat((u.unsqueeze(1).repeat(1,scalars.shape[1],1), scalars), dim=-1)
+        else :
+            assert not cfg.NGLOBALS
 
         # pass through the MLP, transform scalars -> scalars
         fk = self.mlp(scalars)

@@ -41,4 +41,15 @@ DEVICE_IDX = 0
 MLP_DEFAULT_NLAYERS = 4
 
 # default number of neurons in the hidden layers for the MLPs
-MLP_DEFAULT_NHIDDEN = 100
+MLP_DEFAULT_NHIDDEN = 128
+
+# number of global features
+NGLOBALS = 1
+
+# default number of hidden layers in the encoder
+ENCODER_DEFAULT_NLAYERS = 4
+
+# default number of neurons in the outer layers of the MLPs
+# (which correspond to hidden layers at the encoder level)
+ENCODER_DEFAULT_NHIDDEN = 128
+
