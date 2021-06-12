@@ -45,12 +45,15 @@ class DataBatch :
             self.TNG_radii = batch('TNG_radii')
             self.TNG_Pth = batch('TNG_Pth')
 
-        # the globals
+        # the globals -- we can in principle include other halo properties here as well
         self.u = astensor(np.stack([np.array([np.log(d.halo.M200c_DM), ]) for d in data_items], axis=0))
+        assert self.u.shape[1] == cfg.NGLOBALS
 
         # the basis vectors if provided
         if cfg.NBASIS != 0 :
-            self.basis = batch('basis')
+            self.basis = astensor(np.stack([d.halo.basis for d in data_items], axis=0))
+            assert self.basis.shape[1] == cfg.NBASIS
+            assert self.basis.shape[2] == 3
 
         # halo properties for the SphericalModel
         halo_to_tensor = lambda s : astensor(np.array([getattr(d.halo, s) for d in data_items]))

@@ -36,6 +36,7 @@ class Halo :
 
         if cfg.NBASIS != 0 :
             self.basis = get_entry('basis')
+            assert self.basis.shape[0] == cfg.NBASIS
     #}}}
 
 
