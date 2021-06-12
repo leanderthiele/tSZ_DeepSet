@@ -1,3 +1,5 @@
+# whether the init_proc function has been called on this module
+INIT_PROC_CALLED = False
 
 # which redshift snapshot to work with
 SNAP_IDX = 99
@@ -34,9 +36,6 @@ DATALOADER_ARGS = dict(batch_size=2,
                        pin_memory=True,
                        prefetch_factor=1)
 
-# the GPU we want to use -- this needs to be modified from somewhere
-DEVICE_IDX = None
-
 # default number of hidden layers for the MLPs
 MLP_DEFAULT_NLAYERS = 4
 
@@ -58,3 +57,48 @@ RESULTS_PATH = 'results'
 
 # gradient clipping value (set to None for no clipping)
 GRADIENT_CLIP = 1.0
+
+# multiprocessing environment -- these variables are potentially changed by init_proc
+# and set to head-node process defaults
+
+# number of MPI-level processes
+MPI_WORLD_SIZE = 1
+
+# rank within the MPI team
+MPI_RANK = 0
+
+# number of MPI processes running on this node
+MPI_LOCAL_WORLD_SIZE = 1
+
+# rank within the MPI processes running on this node
+MPI_LOCAL_RANK = 0
+
+# our name
+MPI_NODENAME = 'localhost'
+
+# the name of the root machine
+MASTER_ADDR = None
+
+# number of GPUs visible from this MPI-level process
+VISIBLE_GPUS = 0
+
+# what type of MPI environment we are in
+MPI_ENV_TYPE = None
+
+# total number of processes, including spawned training processes
+# but not workers
+WORLD_SIZE = 1
+
+# our rank in the entire world, including spawned training processes
+# but not workers
+RANK = 0
+
+# whether the RANK variable has been set
+SET_RANK = False
+
+# our rank within this MPI process (usually zero, except for spawned training processes)
+LOCAL_RANK = 0
+
+# the GPU we want to use -- this needs to be modified from somewhere
+DEVICE_IDX = None
+
