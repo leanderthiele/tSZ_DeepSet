@@ -48,6 +48,10 @@ class DataBatch :
         # the globals
         self.u = astensor(np.stack([np.array([np.log(d.halo.M200c_DM), ]) for d in data_items], axis=0))
 
+        # the basis vectors if provided
+        if cfg.NBASIS != 0 :
+            self.basis = batch('basis')
+
         # halo properties for the SphericalModel
         halo_to_tensor = lambda s : astensor(np.array([getattr(d.halo, s) for d in data_items]))
 
@@ -64,21 +68,17 @@ class DataBatch :
         """
     #{{{
         if cfg.DEVICE_IDX is not None :
-            
-            push_to_dev = lambda t : [x.to(cfg.DEVICE_IDX) for x in t] if isinstance(t, list) else t.to(cfg.DEVICE_IDX)
 
-            if self.has_DM :
-                self.DM_in = push_to_dev(self.DM_in)
-
-            if self.has_TNG :
-                self.TNG_coords = push_to_dev(self.TNG_coords)
-                self.TNG_radii = push_to_dev(self.TNG_radii)
-                self.TNG_Pth = push_to_dev(self.TNG_Pth)
-
-            self.u = self.u.to(cfg.DEVICE_IDX)
-            self.M200c = self.M200c.to(cfg.DEVICE_IDX)
-            self.R200c = self.R200c.to(cfg.DEVICE_IDX)
-            self.P200c = self.P200c.to(cfg.DEVICE_IDX)
+            # TODO is this correct -- is torch.Tensor the base class?
+            for k, v in self.__dict__.items() :
+                if k.startswith('__') :
+                    continue
+                elif isinstance(v, torch.Tensor) :
+                    setattr(self, k, v.to(cfg.DEVICE_IDX))
+                elif isinstance(v, list) and isinstance(v[0], torch.Tensor) :
+                    setattr(self, k, [t.to(cfg.DEVICE_IDX) for t in v])
+                else :
+                    raise RuntimeError(f'Attribute {k} has unexpected type.')
 
         return self
     #}}}

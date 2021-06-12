@@ -45,6 +45,9 @@ MLP_DEFAULT_NHIDDEN = 128
 # number of global features
 NGLOBALS = 1
 
+# number of global basis vectors
+NBASIS = 0
+
 # default number of hidden layers in the encoder
 ENCODER_DEFAULT_NLAYERS = 4
 
