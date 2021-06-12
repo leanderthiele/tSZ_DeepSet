@@ -35,18 +35,49 @@ class DataSet(torch_DataSet) :
 
 
     def __getitem__(self, idx) :
-    #{{{ 
-        # TODO we may want to change this for distributed training
-        h = Halo(self.halo_catalog, self.sample_indices[idx])
-        indices = dict(DM = self.__get_indices(h, 'DM'),
-                       TNG = self.__get_indices(h, 'TNG'))
-        return DataItem(h, indices, load_DM=self.load_DM, load_TNG=self.load_TNG)
+        """
+        idx ... local index within the samples this rank operates on
+        """
+    #{{{
+        return self.__getitem_all(idx * cfg.WORLD_SIZE + cfg.RANK)
     #}}}
 
 
     def __len__(self) :
+        """
+        returns number of samples this rank operates on
+        (if the world size does not divide the available number of samples,
+         we round up and some camples will be used twice)
+        """
     #{{{
-        # TODO we may want to change this for distributed training
+        return int(np.ceil(self.__len_all() / cfg.WORLD_SIZE))
+    #}}}
+
+
+    def __getitem_all(self, idx) :
+        """
+        idx ... global index over the entire halo catalog
+                (can be somewhat larger than the largest index in the catalog,
+                 see doc to __len__)
+        """
+    #{{{ 
+        # bring back into the allowed range
+        idx %= self.__len_all()
+
+        h = Halo(self.halo_catalog, self.sample_indices[idx])
+
+        indices = dict(DM = self.__get_indices(h, 'DM'),
+                       TNG = self.__get_indices(h, 'TNG'))
+
+        return DataItem(h, indices, load_DM=self.load_DM, load_TNG=self.load_TNG)
+    #}}}
+
+
+    def __len_all(self) :
+        """
+        operates on the entire halo catalog
+        """
+    #{{{
         return len(self.sample_indices)
     #}}}
 
