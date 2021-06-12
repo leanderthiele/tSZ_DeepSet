@@ -36,17 +36,17 @@ DATALOADER_ARGS = dict(batch_size=2,
                        pin_memory=True,
                        prefetch_factor=1)
 
-# default number of hidden layers for the MLPs
-MLP_DEFAULT_NLAYERS = 4
-
-# default number of neurons in the hidden layers for the MLPs
-MLP_DEFAULT_NHIDDEN = 128
-
 # number of global features
 NGLOBALS = 1
 
 # number of global basis vectors
 NBASIS = 0
+
+# default number of hidden layers for the MLPs
+MLP_DEFAULT_NLAYERS = 4
+
+# default number of neurons in the hidden layers for the MLPs
+MLP_DEFAULT_NHIDDEN = 128
 
 # default number of hidden layers in the encoder
 ENCODER_DEFAULT_NLAYERS = 4
@@ -54,6 +54,12 @@ ENCODER_DEFAULT_NLAYERS = 4
 # default number of neurons in the outer layers of the MLPs
 # (which correspond to hidden layers at the encoder level)
 ENCODER_DEFAULT_NHIDDEN = 128
+
+# default number of latent features in the space separating encoder and decoder
+NETWORK_DEFAULT_NLATENT = 128
+
+# number of features per point in the final output
+OUTPUT_NFEATURES = 1
 
 # where our results (like model states and loss curves) will go
 RESULTS_PATH = 'results'

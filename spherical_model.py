@@ -30,7 +30,7 @@ class SphericalModel(nn.Module) :
     def forward(self, M200c, r, R200c=None) :
         """
         M200c ... shape [batch]
-        r     ... shape [batch, Nvecs, 1] or list of length batch with shapes [Nvecsi, 1]
+        r     ... shape [batch, Nvecs, 1] or list of length batch with shapes [1, Nvecsi, 1]
 
         Returns thermal pressure at r in units of P200c, in the same shape as r
         if R200c is not None, we assume that the radii are not normalized yet
