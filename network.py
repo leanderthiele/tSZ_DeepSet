@@ -4,6 +4,8 @@ import torch.nn as nn
 from network_encoder import NetworkEncoder
 from network_decoder import NetworkDecoder
 from spherical_model import SphericalModel
+from global_fields import GlobalFields
+from basis import Basis
 from data_batch import DataBatch
 
 
@@ -26,10 +28,12 @@ class Network(nn.Module) :
     #{{{ 
         assert isinstance(batch, DataBatch)
 
-        x = self.encoder(batch.DM_coords, u=batch.u,
-                         basis=batch.basis if cfg.NBASIS != 0 else None)
-        x = self.decoder(x, batch.TNG_coords, u=batch.u,
-                         basis=batch.basis if cfg.NBASIS != 0 else None,
+        x = self.encoder(batch.DM_coords,
+                         u=batch.u if len(GlobalFields) != 0 else None,
+                         basis=batch.basis if len(Basis) != 0 else None)
+        x = self.decoder(x, batch.TNG_coords,
+                         u=batch.u if len(GlobalFields) != 0 else None,
+                         basis=batch.basis if len(Basis) != 0 else None,
                          # do not have an activation function before the final output
                          # since we generally want to map to the entire real line
                          layer_kwargs_dict=dict(last={'activation' : False})

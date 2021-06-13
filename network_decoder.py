@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 
 from network_mlp import NetworkMLP
+from global_fields import GlobalFields
+from basis import Basis
 import cfg
 
 
@@ -22,7 +24,7 @@ class NetworkDecoder(nn.Module) :
     #{{{
         super().__init__()
 
-        self.mlp = NetworkMLP(k_latent+cfg.NGLOBALS, k_out, **MLP_kwargs)
+        self.mlp = NetworkMLP(k_latent+len(GlobalFields)+len(Basis), k_out, **MLP_kwargs)
     #}}}
 
 
@@ -50,13 +52,14 @@ class NetworkDecoder(nn.Module) :
         if basis is not None :
             basis_projections = torch.einsum('bid,bnd->bin', x, basis)
             projections = torch.cat((projections, basis_projections), dim=-1)
+        else :
+            assert len(Basis) == 0
 
         # concatenate with the global vector if requested
         if u is not None :
-            assert len(u) == cfg.NGLOBALS
             projections = torch.cat((u.unsqueeze(1).repeat(1,projections.shape[1],1), projections), dim=-1)
         else :
-            assert not cfg.NGLOBALS
+            assert len(GlobalFields) == 0
 
         # pass through the MLP, transform scalars -> scalars
         return self.mlp(projections)

@@ -36,12 +36,6 @@ DATALOADER_ARGS = dict(batch_size=2,
                        pin_memory=True,
                        prefetch_factor=1)
 
-# number of global features
-NGLOBALS = 1
-
-# number of global basis vectors
-NBASIS = 0
-
 # default number of hidden layers for the MLPs
 MLP_DEFAULT_NLAYERS = 4
 

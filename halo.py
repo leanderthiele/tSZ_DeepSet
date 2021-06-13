@@ -33,10 +33,6 @@ class Halo :
         self.P200c_TNG = self.__P200c(self.M200c_TNG, self.R200c_TNG)
         self.prt_start_TNG = get_entry('prt_start_TNG')
         self.prt_len_TNG = get_entry('prt_len_TNG')
-
-        if cfg.NBASIS != 0 :
-            self.basis = get_entry('basis')
-            assert self.basis.shape[0] == cfg.NBASIS
     #}}}
 
 

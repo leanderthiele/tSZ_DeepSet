@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 
 from network_mlp import NetworkMLP
+from global_fields import GlobalFields
+from basis import Basis
 import cfg
 
 
@@ -23,7 +25,7 @@ class NetworkLayer(nn.Module) :
         # whether the forward method takes some latent vectors or actual particle positions
         # (in the latter case, we do not compute all the mutual dot products)
         self.x_is_latent = k_in > 0
-        self.mlp = NetworkMLP(1 + cfg.NBASIS + self.x_is_latent * k_in + cfg.NGLOBALS, k_out, **MLP_kwargs)
+        self.mlp = NetworkMLP(1 + len(GlobalFields) + len(Basis) + self.x_is_latent * k_in, k_out, **MLP_kwargs)
     #}}}
 
 
@@ -49,6 +51,8 @@ class NetworkLayer(nn.Module) :
         if basis is not None :
             basis_projections = torch.einsum('bid,bnd->bin', x, basis)
             scalars = torch.cat((scalars, basis_projections), dim=-1)
+        else :
+            assert len(Basis) == 0
 
         if self.x_is_latent :
             # compute the mutual dot products
@@ -60,10 +64,9 @@ class NetworkLayer(nn.Module) :
 
         # concatenate with the global vector if requested
         if u is not None :
-            assert len(u) == cfg.NGLOBALS
             scalars = torch.cat((u.unsqueeze(1).repeat(1,scalars.shape[1],1), scalars), dim=-1)
         else :
-            assert not cfg.NGLOBALS
+            assert len(GlobalFields) == 0
 
         # pass through the MLP, transform scalars -> scalars
         fk = self.mlp(scalars)

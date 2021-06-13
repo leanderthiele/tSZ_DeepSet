@@ -4,6 +4,8 @@ import torch
 
 from data_item import DataItem
 from origin import Origin
+from global_fields import GlobalFields
+from basis import Basis
 import cfg
 
 
@@ -49,15 +51,13 @@ class DataBatch :
             if self.has_origin :
                 self.TNG_radii = batch('TNG_radii')
 
-        # the globals -- we can in principle include other halo properties here as well
-        self.u = astensor(np.stack([np.array([np.log(d.halo.M200c_DM), ]) for d in data_items], axis=0))
-        assert self.u.shape[1] == cfg.NGLOBALS
+        # the globals if provided
+        if len(GlobalFields) != 0 :
+            self.u = astensor(np.stack([GlobalFields(d.halo) for d in data_items], axis=0))
 
         # the basis vectors if provided
-        if cfg.NBASIS != 0 :
-            self.basis = astensor(np.stack([d.halo.basis for d in data_items], axis=0))
-            assert self.basis.shape[1] == cfg.NBASIS
-            assert self.basis.shape[2] == 3
+        if len(Basis) != 0 :
+            self.basis = astensor(np.stack([Basis(d.halo) for d in data_items], axis=0))
 
         # halo properties for the SphericalModel
         halo_to_tensor = lambda s : astensor(np.array([getattr(d.halo, s) for d in data_items]))
