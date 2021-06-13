@@ -3,6 +3,7 @@ import numpy as np
 from data_modes import DataModes
 from data_item import DataItem
 from halo import Halo
+from origin import Origin
 import cfg
 
 import torch
@@ -13,7 +14,7 @@ class DataSet(torch_DataSet) :
     torch-compatible representation of the simulation data
     """
 
-    def __init__(self, mode, seed, load_DM=True, load_TNG=True) :
+    def __init__(self, mode, seed, load_DM=True, load_TNG=True, origin=Origin.PREDICTED) :
         """
         mode ... one of training, validation, testing
         seed ... to choose the particle indices
@@ -22,8 +23,10 @@ class DataSet(torch_DataSet) :
         """
     #{{{    
         assert isinstance(mode, DataModes)
+        assert isinstance(origin, Origin)
 
         self.mode = mode
+        self.origin = origin
         self.sample_indices = mode.sample_indices()
 
         self.load_DM = load_DM
@@ -39,7 +42,7 @@ class DataSet(torch_DataSet) :
         idx ... local index within the samples this rank operates on
         """
     #{{{
-        return self.__getitem_all(idx * cfg.WORLD_SIZE + cfg.RANK)
+        return self.__getitem_all((idx * cfg.WORLD_SIZE + cfg.RANK) % self.__len_all())
     #}}}
 
 
@@ -57,19 +60,14 @@ class DataSet(torch_DataSet) :
     def __getitem_all(self, idx) :
         """
         idx ... global index over the entire halo catalog
-                (can be somewhat larger than the largest index in the catalog,
-                 see doc to __len__)
         """
     #{{{ 
-        # bring back into the allowed range
-        idx %= self.__len_all()
-
         h = Halo(self.halo_catalog, self.sample_indices[idx])
 
         indices = dict(DM = self.__get_indices(h, 'DM'),
                        TNG = self.__get_indices(h, 'TNG'))
 
-        return DataItem(h, indices, load_DM=self.load_DM, load_TNG=self.load_TNG)
+        return DataItem(h, indices, load_DM=self.load_DM, load_TNG=self.load_TNG, origin=self.origin)
     #}}}
 
 

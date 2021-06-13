@@ -110,7 +110,3 @@ LOCAL_RANK = 0
 
 # the GPU we want to use -- this needs to be modified from somewhere
 DEVICE_IDX = None
-
-# how we define the origin, can be either
-# CM, pos, or predicted
-ORIGIN = 'predicted'

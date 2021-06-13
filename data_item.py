@@ -1,6 +1,7 @@
 import numpy as np
 import h5py
 
+from origin import Origin
 import cfg
 
 
@@ -16,7 +17,7 @@ class DataItem :
         TNG_radii    ... the radial coordinates of the gas particles (with the last dimension length 1)
     """
 
-    def __init__(self, halo, indices=None, load_DM=True, load_TNG=True) :
+    def __init__(self, halo, indices=None, load_DM=True, load_TNG=True, origin=Origin.PREDICTED) :
         """
         halo     ... a Halo instance for the current halo
         indices  ... the relative indices, should either be None or have keys
@@ -39,12 +40,13 @@ class DataItem :
         if load_TNG :
             self.TNG_coords, self.TNG_Pth = self.__get_TNG()
 
-            if cfg.ORIGIN in ['CM', 'pos'] :
+            if origin is not Origin.PREDICTED :
                 # compute the scalar distances if coordinates are already in the correct frame
                 self.TNG_radii = np.linalg.norm(self.TNG_coords, axis=-1, keepdims=True)
 
         self.has_DM = load_DM
         self.has_TNG = load_TNG
+        self.origin = origin
     #}}}
 
 
@@ -71,12 +73,12 @@ class DataItem :
             coords = self.__read_prt_field(particles, 'Coordinates', 'DM')
 
         # remove the origin if required
-        if cfg.ORIGIN == 'CM' :
+        if self.origin is Origin.CM :
             coords -= self.halo.CM_DM
-        elif cfg.ORIGIN == 'pos' :
+        elif self.origin is Origin.POS :
             coords -= self.halo.pos_DM
 
-        if cfg.ORIGIN in ['CM', 'pos'] :
+        if self.origin is not Origin.PREDICTED :
             # take periodic boundary conditions into account
             coords = self.__periodicize(coords)
 
@@ -109,12 +111,12 @@ class DataItem :
         Pth = 2.0 * (1+XH) / (1 + 3*XH + 4*XH*x) * (gamma - 1) * d * e
 
         # remove the origin if required 
-        if cfg.ORIGIN == 'CM' :
+        if self.origin is Origin.CM :
             coords -= self.halo.CM_DM
-        elif cfg.ORIGIN == 'pos' :
+        elif self.origin is Origin.POS :
             coords -= self.halo.pos_DM
 
-        if cfg.ORIGIN in ['CM', 'pos', ] :
+        if self.origin is not Origin.PREDICTED :
             # take periodic boundary conditions into account
             coords = self.__periodicize(coords)
 

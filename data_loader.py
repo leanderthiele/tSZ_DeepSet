@@ -6,6 +6,7 @@ from init_proc import InitProc
 from data_modes import DataModes
 from data_set import DataSet
 from data_batch import DataBatch
+from origin import Origin
 import cfg
 
 
@@ -35,7 +36,7 @@ class DataLoader(torch_DataLoader) :
     a torch-compatible data loader
     """
     
-    def __init__(self, mode, seed, load_DM=True, load_TNG=True) :
+    def __init__(self, mode, seed, load_DM=True, load_TNG=True, origin=Origin.PREDICTED) :
         """
         mode ... one of training, validation, testing
         seed ... random seed to choose particles
@@ -44,8 +45,9 @@ class DataLoader(torch_DataLoader) :
         """
     #{{{
         assert isinstance(mode, DataModes)
+        assert isinstance(origin, Origin)
 
-        self.dataset = DataSet(mode, seed, load_DM=load_DM, load_TNG=load_TNG)
+        self.dataset = DataSet(mode, seed, load_DM=load_DM, load_TNG=load_TNG, origin=origin)
         self.worker_pool = _WorkerPool()
 
         super().__init__(self.dataset,
