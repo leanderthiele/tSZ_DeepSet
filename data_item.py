@@ -10,10 +10,10 @@ class DataItem :
 
     Upon construction, the instance has the fields:
         halo         ... the Halo instance this data item is associated with
-        DM_in        ... currently just the dark matter particle coordinates, relative to the CM
+        DM_coords    ... the coordinates of the dark matter particles
         TNG_coords   ... the coordinates of the gas particles
-        TNG_radii    ... the radial coordinates of the gas particles (with the last dimension length 1)
         TNG_Pth      ... the electron pressure at the position of those gas particles
+        TNG_radii    ... the radial coordinates of the gas particles (with the last dimension length 1)
     """
 
     def __init__(self, halo, indices=None, load_DM=True, load_TNG=True) :
@@ -32,7 +32,7 @@ class DataItem :
         self.indices = indices
 
         if load_DM :
-            self.DM_in = self.__get_DM()
+            self.DM_coords = self.__get_DM()
 
         if load_TNG :
             self.TNG_coords, self.TNG_Pth = self.__get_TNG()

@@ -38,7 +38,7 @@ class DataBatch :
         batch = lambda s : stack_to_tensor(s) if lengths_equal(s) else list_tensors(s)
 
         if self.has_DM :
-            self.DM_in = batch('DM_in')
+            self.DM_coords = batch('DM_coords')
 
         if self.has_TNG :
             self.TNG_coords = batch('TNG_coords')
@@ -75,6 +75,8 @@ class DataBatch :
             # TODO is this correct -- is torch.Tensor the base class?
             for k, v in self.__dict__.items() :
                 if k.startswith('__') :
+                    continue
+                elif isinstance(v, bool) :
                     continue
                 elif isinstance(v, torch.Tensor) :
                     setattr(self, k, v.to(cfg.DEVICE_IDX))
