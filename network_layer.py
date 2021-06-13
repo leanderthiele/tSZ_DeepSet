@@ -20,8 +20,10 @@ class NetworkLayer(nn.Module) :
     #{{{
         super().__init__()
 
-        self.compute_dots = k_in > 0
-        self.mlp = NetworkMLP(1 + cfg.NBASIS + self.compute_dots * k_in + cfg.NGLOBALS, k_out, **MLP_kwargs)
+        # whether the forward method takes some latent vectors or actual particle positions
+        # (in the latter case, we do not compute all the mutual dot products)
+        self.x_is_latent = k_in > 0
+        self.mlp = NetworkMLP(1 + cfg.NBASIS + self.x_is_latent * k_in + cfg.NGLOBALS, k_out, **MLP_kwargs)
     #}}}
 
 
@@ -48,7 +50,7 @@ class NetworkLayer(nn.Module) :
             basis_projections = torch.einsum('bid,bnd->bin', x, basis)
             scalars = torch.cat((scalars, basis_projections), dim=-1)
 
-        if self.compute_dots :
+        if self.x_is_latent :
             # compute the mutual dot products
             dots = torch.sqrt( torch.einsum('bid,bjd->bij', x, x) )
             scalars = torch.cat((scalars, dots), dim=-1)
