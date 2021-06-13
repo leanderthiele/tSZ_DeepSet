@@ -21,8 +21,10 @@ class NetworkEncoder(nn.Sequential) :
         Nlayers  ... number of hidden layers (i.e. hidden h-vectors)
         Nhidden  ... either an integer, which is the number of h-vectors used in the hidden layers,
                      or a dict indexed by str(layer index) -- does not need to have all keys
+                     NOTE 'first' and 'last' are special keywords that can also be used
         MLP_kwargs_dict ... a dict indexed by str(layer_index) -- does not need to have all keys
                             note that the indices here can be one more than the Nhidden indices
+                            NOTE 'first' and 'last' are special keywords that can also be used
         MLP_kwargs      ... default values for the MLP kwargs, can by overriden by specific entries
                             in MLP_kwargs_dict
         """
@@ -36,8 +38,12 @@ class NetworkEncoder(nn.Sequential) :
                                         k_latent if ii==Nlayers \
                                         else Nhidden if isinstance(Nhidden, int) \
                                         else Nhidden[str(ii)] if str(ii) in Nhidden \
+                                        else Nhidden['first'] if 'first' in Nhidden and ii==0 \
+                                        else Nhidden['last'] if 'last' in Nhidden and ii==Nlayers-1 \
                                         else cfg.ENCODER_DEFAULT_NHIDDEN,
                                         **(MLP_kwargs_dict[str(ii)] if str(ii) in MLP_kwargs_dict \
+                                           else MLP_kwargs_dict['first'] if 'first' in MLP_kwargs_dict and ii==0 \
+                                           else MLP_kwargs_dict['last'] if 'last' in MLP_kwargs_dict and ii==Nlayers \
                                            else MLP_kwargs)
-                                       ) for ii in range(Nlayers)])
+                                       ) for ii in range(Nlayers+1)])
     #}}}

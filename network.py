@@ -29,7 +29,10 @@ class Network(nn.Module) :
         x = self.encoder(batch.DM_coords, u=batch.u,
                          basis=batch.basis if cfg.NBASIS != 0 else None)
         x = self.decoder(x, batch.TNG_coords, u=batch.u,
-                         basis=batch.basis if cfg.NBASIS != 0 else None)
+                         basis=batch.basis if cfg.NBASIS != 0 else None,
+                         # do not have an activation function before the final output
+                         # since we generally want to map to the entire real line
+                         layer_kwargs_dict=dict(last={'activation' : False})
         spherical = self.spherical(batch.M200c, batch.TNG_radii,
                                    R200c=batch.R200c if not cfg.NORMALIZE_COORDS else None)
         return Network.__combine(x, spherical)
