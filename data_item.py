@@ -31,17 +31,29 @@ class DataItem :
         self.halo = halo
         self.indices = indices
 
+        self.BoxSize = self.__get_BoxSize()
+
         if load_DM :
             self.DM_coords = self.__get_DM()
 
         if load_TNG :
             self.TNG_coords, self.TNG_Pth = self.__get_TNG()
 
-            # compute the scalar distances
-            self.TNG_radii = np.linalg.norm(self.TNG_coords, axis=-1, keepdims=True)
+            if cfg.ORIGIN in ['CM', 'pos'] :
+                # compute the scalar distances if coordinates are already in the correct frame
+                self.TNG_radii = np.linalg.norm(self.TNG_coords, axis=-1, keepdims=True)
 
         self.has_DM = load_DM
         self.has_TNG = load_TNG
+    #}}}
+
+
+    def __get_BoxSize(self) :
+    #{{{
+        with h5py.File(cfg.SIM_FILES['DM'], 'r') as f :
+            BoxSize = f['Parameters'].attrs['BoxSize']
+
+        return BoxSize
     #}}}
 
 
@@ -55,15 +67,18 @@ class DataItem :
         # FIXME parallel hdf5
         # load the particle coordinates from file
         with h5py.File(cfg.SIM_FILES['DM'], 'r') as f :
-            BoxSize = f['Parameters'].attrs['BoxSize']
             particles = f['Snapshots/%d/PartType%d'%(cfg.SNAP_IDX, cfg.PART_TYPES['DM'])]
             coords = self.__read_prt_field(particles, 'Coordinates', 'DM')
 
-        # remove the center of mass
-        coords -= self.halo.pos_DM
+        # remove the origin if required
+        if cfg.ORIGIN == 'CM' :
+            coords -= self.halo.CM_DM
+        elif cfg.ORIGIN == 'pos' :
+            coords -= self.halo.pos_DM
 
-        # take periodic boundary conditions into account
-        coords = DataItem.__periodicize(coords, BoxSize)
+        if cfg.ORIGIN in ['CM', 'pos'] :
+            # take periodic boundary conditions into account
+            coords = self.__periodicize(coords)
 
         # if required, divide by R200c
         if cfg.NORMALIZE_COORDS :
@@ -82,7 +97,6 @@ class DataItem :
 
         # FIXME parallel hdf5
         with h5py.File(cfg.SIM_FILES['TNG'], 'r') as f :
-            BoxSize = f['Parameters'].attrs['BoxSize']
             particles = f['Snapshots/%d/PartType%d'%(cfg.SNAP_IDX, cfg.PART_TYPES['TNG'])]
             coords = self.__read_prt_field(particles, 'Coordinates', 'TNG')
             e = self.__read_prt_field(particles, 'InternalEnergy', 'TNG')
@@ -94,13 +108,15 @@ class DataItem :
         gamma = 5.0/3.0
         Pth = 2.0 * (1+XH) / (1 + 3*XH + 4*XH*x) * (gamma - 1) * d * e
 
-        # remove the center of mass
-        # NOTE it is important that we remove that dark matter center of mass here,
-        #      since we don't know the TNG CM when evaluating
-        coords -= self.halo.pos_DM
+        # remove the origin if required 
+        if cfg.ORIGIN == 'CM' :
+            coords -= self.halo.CM_DM
+        elif cfg.ORIGIN == 'pos' :
+            coords -= self.halo.pos_DM
 
-        # take periodic boundary conditions into account
-        coords = DataItem.__periodicize(coords, BoxSize)
+        if cfg.ORIGIN in ['CM', 'pos', ] :
+            # take periodic boundary conditions into account
+            coords = self.__periodicize(coords)
 
         # if required, divide by R200c
         if cfg.NORMALIZE_COORDS :
@@ -113,14 +129,13 @@ class DataItem :
     #}}}
 
 
-    @staticmethod
-    def __periodicize(x, b) :
+    def __periodicize(self, x) :
         """
-        remaps the array x into the interval [0, b] with periodic boundary conditions
+        remaps the array x into the interval [-BoxSize/2, +BoxSize/2] with periodic boundary conditions
         """
     #{{{
-        x[x >  0.5*b] -= b
-        x[x < -0.5*b] += b
+        x[x >  0.5*self.BoxSize] -= self.BoxSize
+        x[x < -0.5*self.BoxSize] += self.BoxSize
 
         return x
     #}}}
