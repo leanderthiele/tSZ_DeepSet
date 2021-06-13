@@ -17,7 +17,7 @@ SIM_FILES = dict(DM = '/tigress/lthiele/Illustris_300-1_Dark/simulation.hdf5',
 # how many particles of each type to use per halo
 # set to None if all particles are to be used
 # if an integer larger than one, not the fraction but this number is used
-PRT_FRACTION = dict(DM = None, TNG = 0.1)
+PRT_FRACTION = dict(DM = 0.1, TNG = 0.1)
 
 # whether to divide the coordinates by R200c
 NORMALIZE_COORDS = True
@@ -30,7 +30,7 @@ SAMPLE_FRACTIONS = dict(validation = 0.2,
 CONSISTENT_SEED = 137
 
 # arguments passed to the torch DataLoader constructor
-DATALOADER_ARGS = dict(batch_size=1,
+DATALOADER_ARGS = dict(batch_size=2,
                        shuffle=True,
                        num_workers=1,
                        pin_memory=True,

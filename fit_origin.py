@@ -39,6 +39,9 @@ for epoch in range(1000) :
                            u=data.u if len(GlobalFields) != 0 else None,
                            basis=data.basis if len(Basis) != 0 else None)
 
+        # remove the singleton feature channel dimension
+        prediction = prediction.squeeze(dim=1)
+
         cm = data.CM_DM
         if cfg.NORMALIZE_COORDS :
             cm /= data.R200c.unsqueeze(-1)
@@ -49,7 +52,7 @@ for epoch in range(1000) :
         if cfg.NORMALIZE_COORDS :
             target /= data.R200c.unsqueeze(-1)
 
-        loss = loss_fn(prediction, target.unsqueeze(1))
+        loss = loss_fn(prediction, target)
 
         loss.backward()
 
