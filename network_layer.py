@@ -35,7 +35,9 @@ class NetworkLayer(nn.Module) :
         """
     #{{{
         if isinstance(x, list) :
-            return torch.cat((self(xi, u, basis[ii, ...].unsqueeze(0) if basis is not None else basis)
+            return torch.cat((self(xi,
+                                   u[ii, ...].unsqueeze(0) if u is not None else u,
+                                   basis[ii, ...].unsqueeze(0) if basis is not None else basis)
                               for ii, xi in enumerate(x)))
 
         # we know that the last dimension is the real space one
@@ -43,8 +45,8 @@ class NetworkLayer(nn.Module) :
 
         # concatenate with the basis projections if required
         if basis is not None :
-            projections = torch.einsum('bid,bnd->bin', x, basis)
-            scalars = torch.cat((scalars, projections), dim=-1)
+            basis_projections = torch.einsum('bid,bnd->bin', x, basis)
+            scalars = torch.cat((scalars, basis_projections), dim=-1)
 
         if self.compute_dots :
             # compute the mutual dot products

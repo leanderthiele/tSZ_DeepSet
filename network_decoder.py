@@ -26,20 +26,30 @@ class NetworkDecoder(nn.Module) :
     #}}}
 
 
-    def forward(self, h, x, u=None) :
+    def forward(self, h, x, u=None, basis=None) :
         """
         h ... the latent vectors, of shape [batch, latent feature, 3]
         x ... the positions where to evaluate, of shape [batch, Nvects, 3]
               or a list of length batch and shapes [1, Nvectsi, 3]
         u ... the global vector, of shape [batch, Nglobals]
+        basis ... the basis vectors to use -- either None if no basis is provided
+                  or of shape [batch, Nbasis, 3]
         """
     #{{{
         if isinstance(x, list) :
-            return [self(h[ii, ...], x[ii], u[ii, ...])
-                    for ii in range(len(x))]
+            return [self(h[ii, ...].unsqueeze(0),
+                         xi,
+                         u[ii, ...].unsqueeze(0) if u is not None else u,
+                         basis[ii, ...].unsqueeze(0) if basis is not None else basis)
+                    for ii, xi in enumerate(x)]
 
         # compute the projections of shape [batch, Nvects, latent feature]
         projections = torch.einsum('bvd,bld->bvl', x, h)
+
+        # concatenate with the basis projections if needed
+        if basis is not None :
+            basis_projections = torch.einsum('bid,bnd->bin', x, basis)
+            projections = torch.cat((projections, basis_projections), dim=-1)
 
         # concatenate with the global vector if requested
         if u is not None :

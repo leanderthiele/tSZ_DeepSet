@@ -28,7 +28,8 @@ class Network(nn.Module) :
 
         x = self.encoder(batch.DM_coords, u=batch.u,
                          basis=batch.basis if cfg.NBASIS != 0 else None)
-        x = self.decoder(x, batch.TNG_coords, u=batch.u)
+        x = self.decoder(x, batch.TNG_coords, u=batch.u,
+                         basis=batch.basis if cfg.NBASIS != 0 else None)
         spherical = self.spherical(batch.M200c, batch.TNG_radii,
                                    R200c=batch.R200c if not cfg.NORMALIZE_COORDS else None)
         return Network.__combine(x, spherical)
