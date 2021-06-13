@@ -19,7 +19,10 @@ class Network(nn.Module) :
         super().__init__()
         k_latent = cfg.NETWORK_DEFAULT_NLATENT
         self.encoder = NetworkEncoder(k_latent)
-        self.decoder = NetworkDecoder(k_latent, k_out=cfg.OUTPUT_NFEATURES)
+        self.decoder = NetworkDecoder(k_latent, k_out=cfg.OUTPUT_NFEATURES,
+                                      # do not have an activation function before the final output
+                                      # since we generally want to map to the entire real line
+                                      layer_kwargs_dict=dict(last={'activation' : False})
         self.spherical = SphericalModel()
     #}}}
 
@@ -33,10 +36,7 @@ class Network(nn.Module) :
                          basis=batch.basis if len(Basis) != 0 else None)
         x = self.decoder(x, batch.TNG_coords,
                          u=batch.u if len(GlobalFields) != 0 else None,
-                         basis=batch.basis if len(Basis) != 0 else None,
-                         # do not have an activation function before the final output
-                         # since we generally want to map to the entire real line
-                         layer_kwargs_dict=dict(last={'activation' : False})
+                         basis=batch.basis if len(Basis) != 0 else None)
         spherical = self.spherical(batch.M200c, batch.TNG_radii,
                                    R200c=batch.R200c if not cfg.NORMALIZE_COORDS else None)
         return Network.__combine(x, spherical)
