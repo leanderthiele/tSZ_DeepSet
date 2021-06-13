@@ -42,8 +42,9 @@ class DataBatch :
 
         if self.has_TNG :
             self.TNG_coords = batch('TNG_coords')
-            self.TNG_radii = batch('TNG_radii')
             self.TNG_Pth = batch('TNG_Pth')
+            if cfg.ORIGIN in ['CM', 'pos'] :
+                self.TNG_radii = batch('TNG_radii')
 
         # the globals -- we can in principle include other halo properties here as well
         self.u = astensor(np.stack([np.array([np.log(d.halo.M200c_DM), ]) for d in data_items], axis=0))
@@ -61,6 +62,24 @@ class DataBatch :
         self.M200c = halo_to_tensor('M200c_DM')
         self.R200c = halo_to_tensor('R200c_DM')
         self.P200c = halo_to_tensor('P200c_DM')
+    #}}}
+
+
+    def add_origin(self, origin) :
+        """
+        in the case when the origin was not known upon construction, we can pass it here now
+        origin ... the origins we want to use, of shape [batch, 1, 3]
+                   if normalization by R200c is used globally, the passed origins should
+                   be in those normalized units
+        """
+    #{{{
+        assert cfg.ORIGIN not in ['CM', 'pos']
+
+        self.DM_coords -= origin
+        self.TNG_coords -= origin
+        self.TNG_radii = torch.linalg.norm(self.TNG_coords, axis=-1, keepdims=True)
+
+        return self
     #}}}
 
 
