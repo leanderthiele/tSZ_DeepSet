@@ -11,6 +11,8 @@ from global_fields import GlobalFields
 from basis import Basis
 import cfg
 
+# FIXME for debugging on head node
+torch.set_num_threads(4)
 
 model = NetworkOrigin().to_device()
 optimizer = torch.optim.Adam(model.parameters())
@@ -39,11 +41,15 @@ for epoch in range(1000) :
 
         cm = data.CM_DM
         if cfg.NORMALIZE_COORDS :
-            cm /= data.R200c
+            cm /= data.R200c.unsqueeze(-1)
 
         prediction += cm
 
-        loss = loss_fn(prediction, data.pos_TNG)
+        target = data.pos_TNG
+        if cfg.NORMALIZE_COORDS :
+            target /= data.R200c.unsqueeze(-1)
+
+        loss = loss_fn(prediction, target.unsqueeze(1))
 
         loss.backward()
 

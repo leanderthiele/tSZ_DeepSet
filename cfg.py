@@ -30,7 +30,7 @@ SAMPLE_FRACTIONS = dict(validation = 0.2,
 CONSISTENT_SEED = 137
 
 # arguments passed to the torch DataLoader constructor
-DATALOADER_ARGS = dict(batch_size=2,
+DATALOADER_ARGS = dict(batch_size=1,
                        shuffle=True,
                        num_workers=1,
                        pin_memory=True,

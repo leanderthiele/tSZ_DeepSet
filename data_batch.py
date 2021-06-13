@@ -68,7 +68,7 @@ class DataBatch :
 
         self.CM_DM   = halo_to_tensor('CM_DM')
         self.pos_DM  = halo_to_tensor('pos_DM')
-        self.CM_TNG  = halo_to_tensor('DM_TNG')
+        self.CM_TNG  = halo_to_tensor('CM_TNG')
         self.pos_TNG = halo_to_tensor('pos_TNG')
     #}}}
 

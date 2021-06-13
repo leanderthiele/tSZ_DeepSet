@@ -39,10 +39,10 @@ class NetworkLayer(nn.Module) :
         """
     #{{{
         if isinstance(x, list) :
-            return torch.cat((self(xi,
+            return torch.cat([self(xi,
                                    u[ii, ...].unsqueeze(0) if u is not None else u,
                                    basis[ii, ...].unsqueeze(0) if basis is not None else basis)
-                              for ii, xi in enumerate(x)))
+                              for ii, xi in enumerate(x)])
 
         # we know that the last dimension is the real space one
         scalars = torch.linalg.norm(x, dim=-1, keepdim=True)

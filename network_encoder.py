@@ -5,7 +5,7 @@ from network_layer import NetworkLayer
 import cfg
 
 
-class NetworkEncoder(nn.Sequential) :
+class NetworkEncoder(nn.Module) :
     """
     transforms the input into a latent space representation
     which we can than evaluate at specific points
@@ -31,19 +31,38 @@ class NetworkEncoder(nn.Sequential) :
     #{{{
         assert isinstance(Nhidden, int) or isinstance(Nhidden, dict)
 
-        super().__init__(*[NetworkLayer(0 if ii==0 \
-                                        else Nhidden if isinstance(Nhidden, int) \
-                                        else Nhidden[str(ii-1)] if str(ii-1) in Nhidden \
-                                        else cfg.ENCODER_DEFAULT_NHIDDEN,
-                                        k_latent if ii==Nlayers \
-                                        else Nhidden if isinstance(Nhidden, int) \
-                                        else Nhidden[str(ii)] if str(ii) in Nhidden \
-                                        else Nhidden['first'] if 'first' in Nhidden and ii==0 \
-                                        else Nhidden['last'] if 'last' in Nhidden and ii==Nlayers-1 \
-                                        else cfg.ENCODER_DEFAULT_NHIDDEN,
-                                        **(MLP_kwargs_dict[str(ii)] if str(ii) in MLP_kwargs_dict \
-                                           else MLP_kwargs_dict['first'] if 'first' in MLP_kwargs_dict and ii==0 \
-                                           else MLP_kwargs_dict['last'] if 'last' in MLP_kwargs_dict and ii==Nlayers \
-                                           else MLP_kwargs)
-                                       ) for ii in range(Nlayers+1)])
+        super().__init__()
+
+        self.layers = nn.ModuleList(
+            [NetworkLayer(0 if ii==0 \
+                          else Nhidden if isinstance(Nhidden, int) \
+                          else Nhidden[str(ii-1)] if str(ii-1) in Nhidden \
+                          else cfg.ENCODER_DEFAULT_NHIDDEN,
+                          k_latent if ii==Nlayers \
+                          else Nhidden if isinstance(Nhidden, int) \
+                          else Nhidden[str(ii)] if str(ii) in Nhidden \
+                          else Nhidden['first'] if 'first' in Nhidden and ii==0 \
+                          else Nhidden['last'] if 'last' in Nhidden and ii==Nlayers-1 \
+                          else cfg.ENCODER_DEFAULT_NHIDDEN,
+                          **(MLP_kwargs_dict[str(ii)] if str(ii) in MLP_kwargs_dict \
+                             else MLP_kwargs_dict['first'] if 'first' in MLP_kwargs_dict and ii==0 \
+                             else MLP_kwargs_dict['last'] if 'last' in MLP_kwargs_dict and ii==Nlayers \
+                             else MLP_kwargs)
+                         ) for ii in range(Nlayers+1)])
+    #}}}
+
+
+    def forward(self, x, u=None, basis=None) :
+        """
+        x     ... the input tensor, of shape [batch, Nvecs, 3]
+                  or a list of length batch with shapes [1, Nvecs[ii], 3]
+        u     ... the global tensor -- assumed to be a vector, i.e. of shape [batch, Nglobals]
+        basis ... the basis vectors to use -- either None if no basis is provided
+                  or of shape [batch, Nbasis, 3]
+        """
+    #{{{
+        for l in self.layers :
+            x = l(x, u, basis)
+
+        return x
     #}}}

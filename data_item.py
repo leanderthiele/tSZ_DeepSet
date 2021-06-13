@@ -32,6 +32,10 @@ class DataItem :
         self.halo = halo
         self.indices = indices
 
+        self.has_DM = load_DM
+        self.has_TNG = load_TNG
+        self.origin = origin
+
         self.BoxSize = self.__get_BoxSize()
 
         if load_DM :
@@ -43,10 +47,6 @@ class DataItem :
             if origin is not Origin.PREDICTED :
                 # compute the scalar distances if coordinates are already in the correct frame
                 self.TNG_radii = np.linalg.norm(self.TNG_coords, axis=-1, keepdims=True)
-
-        self.has_DM = load_DM
-        self.has_TNG = load_TNG
-        self.origin = origin
     #}}}
 
 
