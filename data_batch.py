@@ -65,6 +65,11 @@ class DataBatch :
         self.M200c = halo_to_tensor('M200c_DM')
         self.R200c = halo_to_tensor('R200c_DM')
         self.P200c = halo_to_tensor('P200c_DM')
+
+        self.CM_DM   = halo_to_tensor('CM_DM')
+        self.pos_DM  = halo_to_tensor('pos_DM')
+        self.CM_TNG  = halo_to_tensor('DM_TNG')
+        self.pos_TNG = halo_to_tensor('pos_TNG')
     #}}}
 
 

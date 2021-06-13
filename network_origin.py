@@ -16,3 +16,12 @@ class NetworkOrigin(NetworkEncoder) :
                          MLP_kwargs_dict=dict(last=dict(layer_kwargs_dict=dict(last={'activation' : False})))
                         )
     #}}}
+
+
+    def to_device(self) :
+    #{{{
+        if cfg.DEVICE_IDX is not None :
+            return self.to(cfg.DEVICE_IDX)
+        else :
+            return self
+    #}}}
