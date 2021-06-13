@@ -36,7 +36,7 @@ class NetworkMLP(nn.Sequential) :
         super().__init__(*[_MLPLayer(Nin if ii==0 else Nhidden,
                                      Nout if ii==Nlayers else Nhidden,
                                      # only apply layer normalization to the hidden states
-                                     layernorm=False if ii==0 else default_layernorm,
+                                     layernorm=False if ii==0 or ii==Nlayers else default_layernorm,
                                      **layer_kwargs)
                            for ii in range(Nlayers+1)])
     #}}}
