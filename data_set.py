@@ -14,26 +14,26 @@ class DataSet(torch_DataSet) :
     torch-compatible representation of the simulation data
     """
 
-    def __init__(self, mode, seed, load_DM=True, load_TNG=True, origin=Origin.PREDICTED) :
+    def __init__(self, mode, seed, **data_item_kwargs) :
         """
         mode ... one of training, validation, testing
         seed ... to choose the particle indices
-        load_DM  ... whether to load the DM particles
-        load_TNG ... whether to load the TNG particles
         """
     #{{{    
         assert isinstance(mode, DataModes)
-        assert isinstance(origin, Origin)
 
         self.mode = mode
-        self.origin = origin
         self.sample_indices = mode.sample_indices()
-
-        self.load_DM = load_DM
-        self.load_TNG = load_TNG
 
         self.halo_catalog = dict(np.load(cfg.HALO_CATALOG))
         self.rng = np.random.default_rng(seed)
+
+        self.data_items = []
+
+        # load all the data from disk
+        for idx in self.sample_indices :
+            h = Halo(self.halo_catalog, idx)
+            self.data_items.append(DataItem(h, **data_item_kwargs))
     #}}}
 
 
@@ -59,21 +59,19 @@ class DataSet(torch_DataSet) :
 
     def __getitem_all(self, idx) :
         """
-        idx ... global index over the entire halo catalog
+        idx ... global index over the entire halo catalog (used for this mode)
         """
     #{{{ 
-        h = Halo(self.halo_catalog, self.sample_indices[idx])
+        indices = dict(DM=self.__get_indices(h, 'DM'),
+                       TNG=self.__get_indices(h, 'TNG'))
 
-        indices = dict(DM = self.__get_indices(h, 'DM'),
-                       TNG = self.__get_indices(h, 'TNG'))
-
-        return DataItem(h, indices, load_DM=self.load_DM, load_TNG=self.load_TNG, origin=self.origin)
+        return self.data_items[idx].sample_particles(indices)
     #}}}
 
 
     def __len_all(self) :
         """
-        operates on the entire halo catalog
+        operates on the entire halo catalog (used for this mode)
         """
     #{{{
         return len(self.sample_indices)

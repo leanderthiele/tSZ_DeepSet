@@ -17,12 +17,11 @@ class DataItem :
         TNG_radii    ... the radial coordinates of the gas particles (with the last dimension length 1)
     """
 
-    def __init__(self, halo, indices=None,
-                       load_DM=True, load_TNG=True, origin=Origin.CM, compute_TNG_radii=False) :
+    def __init__(self, halo,
+                       load_DM=True, load_TNG=True,
+                       origin=Origin.CM, compute_TNG_radii=False) :
         """
         halo     ... a Halo instance for the current halo
-        indices  ... the relative indices, should either be None or have keys
-                     'DM', 'TNG'
         load_DM  ... whether to load the dark matter particles
         load_TNG ... whether to load the TNG particles
         origin   ... definition of the origin of our coordinate system, either CM or POS
@@ -33,7 +32,6 @@ class DataItem :
         """
     #{{{
         self.halo = halo
-        self.indices = indices
 
         self.has_DM = load_DM
         self.has_TNG = load_TNG
@@ -59,11 +57,9 @@ class DataItem :
         returns the properties for the network input 
         """
     #{{{
-        select = self.__select('DM')
-
         # load the particle coordinates from file
         with np.load(self.halo.storage_DM) as f :
-            coords = f['coords'][select]
+            coords = f['coords']
 
         # remove the origin if required
         if self.origin is Origin.CM :
@@ -87,13 +83,11 @@ class DataItem :
         returns the properties for the network output
         """
     #{{{
-        select = self.__select('TNG')
-
         # load particle coordinates and thermal pressure at their position
         # from file
         with np.load(self.halo.storage_TNG) as f :
-            coords = f['coords'][select]
-            Pth = f['Pth'][select]
+            coords = f['coords']
+            Pth = f['Pth']
 
         # remove the origin if required 
         if self.origin is Origin.CM :
@@ -127,14 +121,35 @@ class DataItem :
         return x
     #}}}
 
-    
-    def __select(self, ptype) :
+
+    def sample_particles(self, indices) :
         """
-        returns an object that can be used to index arrays,
-        ptype is either 'DM' or 'TNG'
+        returns a copy of this data item with only a subset of the particles randomly sampled.
+        (this instance is not modified!)
+        indices ... a dict with keys 'DM', 'TNG', each an array of integers corresponding to the particle
+                    indices
         """
     #{{{
-        assert ptype in ['DM', 'TNG']
-        indices = None if (self.indices is None or ptype not in self.indices) else self.indices[ptype]
-        return indices if indices is not None else slice(None)
+        # construct a new DataItem without any data
+        out = DataItem(self.halo, load_DM=False, load_TNG=False)
+
+        # copy our fields
+        out.origin = self.origin
+        out.has_DM = self.has_DM
+        out.has_TNG = self.has_TNG
+        out.has_TNG_radii = self.has_TNG_radii
+
+        # now fill in the sampled particles
+
+        if self.has_DM :
+            out.DM_coords = self.DM_coords[indices['DM']]
+
+        if self.has_TNG :
+            out.TNG_coords = self.TNG_coords[indices['TNG']]
+            out.TNG_Pth = self.TNG_Pth[indices['TNG']]
+
+            if self.has_TNG_radii :
+                out.TNG_radii = self.TNG_radii[indices['TNG']]
+
+        return out
     #}}}

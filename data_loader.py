@@ -36,18 +36,9 @@ class DataLoader(torch_DataLoader) :
     a torch-compatible data loader
     """
     
-    def __init__(self, mode, seed, load_DM=True, load_TNG=True, origin=Origin.PREDICTED) :
-        """
-        mode ... one of training, validation, testing
-        seed ... random seed to choose particles
-        load_DM  ... whether to load the DM particles
-        load_TNG ... whether to load the TNG particles
-        """
+    def __init__(self, **data_set_kwargs) :
     #{{{
-        assert isinstance(mode, DataModes)
-        assert isinstance(origin, Origin)
-
-        self.dataset = DataSet(mode, seed, load_DM=load_DM, load_TNG=load_TNG, origin=origin)
+        self.dataset = DataSet(**data_set_kwargs)
         self.worker_pool = _WorkerPool()
 
         super().__init__(self.dataset,
