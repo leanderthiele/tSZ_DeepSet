@@ -17,13 +17,16 @@ class DataItem :
         TNG_radii    ... the radial coordinates of the gas particles (with the last dimension length 1)
     """
 
-    def __init__(self, halo, indices=None, load_DM=True, load_TNG=True, origin=Origin.PREDICTED) :
+    def __init__(self, halo, indices=None,
+                       load_DM=True, load_TNG=True, origin=Origin.CM, compute_TNG_radii=False) :
         """
         halo     ... a Halo instance for the current halo
         indices  ... the relative indices, should either be None or have keys
                      'DM', 'TNG'
         load_DM  ... whether to load the dark matter particles
         load_TNG ... whether to load the TNG particles
+        origin   ... definition of the origin of our coordinate system, either CM or POS
+        compute_TNG_radii ... whether the radial positions of the TNG particles are to be computed
         
         (we do not want to open the halo catalog file for each construction,
          also maybe the caller wants to modify it in some way)
@@ -34,6 +37,9 @@ class DataItem :
 
         self.has_DM = load_DM
         self.has_TNG = load_TNG
+        self.has_TNG_radii = compute_TNG_radii
+
+        assert origin in [Origin.CM, Origin.POS, ]
         self.origin = origin
 
         self.BoxSize = self.__get_BoxSize()
@@ -44,7 +50,7 @@ class DataItem :
         if load_TNG :
             self.TNG_coords, self.TNG_Pth = self.__get_TNG()
 
-            if origin is not Origin.PREDICTED :
+            if compute_TNG_radii :
                 # compute the scalar distances if coordinates are already in the correct frame
                 self.TNG_radii = np.linalg.norm(self.TNG_coords, axis=-1, keepdims=True)
     #}}}
@@ -78,9 +84,8 @@ class DataItem :
         elif self.origin is Origin.POS :
             coords -= self.halo.pos_DM
 
-        if self.origin is not Origin.PREDICTED :
-            # take periodic boundary conditions into account
-            coords = self.__periodicize(coords)
+        # take periodic boundary conditions into account
+        coords = self.__periodicize(coords)
 
         # if required, divide by R200c
         if cfg.NORMALIZE_COORDS :
@@ -116,9 +121,8 @@ class DataItem :
         elif self.origin is Origin.POS :
             coords -= self.halo.pos_DM
 
-        if self.origin is not Origin.PREDICTED :
-            # take periodic boundary conditions into account
-            coords = self.__periodicize(coords)
+        # take periodic boundary conditions into account
+        coords = self.__periodicize(coords)
 
         # if required, divide by R200c
         if cfg.NORMALIZE_COORDS :

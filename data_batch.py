@@ -33,8 +33,8 @@ class DataBatch :
         assert all(self.has_DM == d.has_DM for d in data_items)
         self.has_TNG = data_items[0].has_TNG
         assert all(self.has_TNG == d.has_TNG for d in data_items)
-        self.has_origin = data_items[0].origin is not Origin.PREDICTED
-        assert all(self.has_origin == (d.origin is not Origin.PREDICTED) for d in data_items)
+        self.has_TNG_radii = data_items[0].has_TNG_radii
+        assert all(self.has_TNG_radii == d.has_TNG_radii for d in data_items)
 
         astensor = lambda x : torch.tensor(x, dtype=torch.float32, requires_grad=False)
         lengths_equal = lambda s : all(getattr(data_items[0], s).shape[0] == getattr(d, s).shape[0] for d in data_items)
@@ -48,7 +48,7 @@ class DataBatch :
         if self.has_TNG :
             self.TNG_coords = batch('TNG_coords')
             self.TNG_Pth = batch('TNG_Pth')
-            if self.has_origin :
+            if self.has_TNG_radii :
                 self.TNG_radii = batch('TNG_radii')
 
         # the globals if provided
@@ -73,7 +73,7 @@ class DataBatch :
     #}}}
 
 
-    def add_origin(self, origin) :
+    def add_origin(self, origin, compute_TNG_radii=True) :
         """
         CAUTION this function modifies the instance in-place
                 (it also returns the altered object)
@@ -81,16 +81,18 @@ class DataBatch :
         origin ... the origins we want to use, of shape [batch, 1, 3]
                    if normalization by R200c is used globally, the passed origins should
                    be in those normalized units
+                   (this origin is in the coordinate system that was used to center the particles
+                    initially)
+        compute_TNG_radii ... whether the radial positions of the TNG particles
+                              (with respect to the new origin)
         """
     #{{{
-        assert not self.has_origin
-
         self.DM_coords -= origin
         self.TNG_coords -= origin
         # FIXME need to impose periodic bcs here
-        self.TNG_radii = torch.linalg.norm(self.TNG_coords, axis=-1, keepdims=True)
-
-        self.has_origin = True
+        if compute_TNG_radii :
+            self.TNG_radii = torch.linalg.norm(self.TNG_coords, axis=-1, keepdims=True)
+            self.has_TNG_radii = True
 
         return self
     #}}}
