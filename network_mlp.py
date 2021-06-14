@@ -1,3 +1,5 @@
+import math
+
 import torch
 import torch.nn as nn
 
@@ -9,11 +11,17 @@ class _MLPLayer(nn.Sequential) :
     a single layer perceptron, used as building blocks to build the MLPs
     """
 
-    def __init__(self, Nin, Nout, bias=True, layernorm=True, activation=True) :
+    def __init__(self, Nin, Nout, bias=True, layernorm=cfg.LAYERNORM, activation=True) :
     #{{{ 
         super().__init__(nn.LayerNorm(Nin) if layernorm else nn.Identity(),
                          torch.nn.Linear(Nin, Nout, bias=bias),
                          torch.nn.LeakyReLU() if activation else nn.Identity())
+
+        nn.init.kaiming_uniform_(self[1].weight,
+                                 a=self[2].negative_slope if activation else math.sqrt(5)
+                                )
+        if bias :
+            nn.init.ones_(self[1].bias)
     #}}}
 
 
@@ -45,7 +53,7 @@ class NetworkMLP(nn.Sequential) :
             default_layernorm = layer_kwargs['layernorm']
             layer_kwargs.pop('layernorm')
         else :
-            default_layernorm = True
+            default_layernorm = cfg.LAYERNORM
 
         NetworkMLP.__remove_layer_norm(layer_kwargs_dict, 0)
         NetworkMLP.__remove_layer_norm(layer_kwargs_dict, Nlayers)

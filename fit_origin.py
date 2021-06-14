@@ -15,9 +15,12 @@ import cfg
 torch.set_num_threads(4)
 
 model = NetworkOrigin().to_device()
-optimizer = torch.optim.Adam(model.parameters())
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 loss_fn = TrainingLoss()
 training_loader = DataLoader(DataModes.TRAINING, 0, load_TNG=False, origin=Origin.CM)
+scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=1e-1,
+                                                steps_per_epoch=len(training_loader),
+                                                epochs=10)
 
 model.train()
 
@@ -61,4 +64,6 @@ for epoch in range(1000) :
 
         optimizer.step()
 
-        print('loss = %f'%loss.item())
+        scheduler.step()
+
+        print('loss = %f vs guess = %f'%(loss.item(), loss_fn(cm, target).item()))

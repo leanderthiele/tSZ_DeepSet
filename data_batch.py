@@ -87,6 +87,7 @@ class DataBatch :
 
         self.DM_coords -= origin
         self.TNG_coords -= origin
+        # FIXME need to impose periodic bcs here
         self.TNG_radii = torch.linalg.norm(self.TNG_coords, axis=-1, keepdims=True)
 
         self.has_origin = True

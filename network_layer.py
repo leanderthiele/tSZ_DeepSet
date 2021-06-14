@@ -39,6 +39,7 @@ class NetworkLayer(nn.Module) :
         """
     #{{{
         if isinstance(x, list) :
+            assert not self.x_is_latent # this can only happen for the variable size initial inputs
             return torch.cat([self(xi,
                                    u[ii, ...].unsqueeze(0) if u is not None else u,
                                    basis[ii, ...].unsqueeze(0) if basis is not None else basis)
@@ -56,7 +57,7 @@ class NetworkLayer(nn.Module) :
 
         if self.x_is_latent :
             # compute the mutual dot products
-            dots = torch.sqrt( torch.einsum('bid,bjd->bij', x, x) )
+            dots = torch.einsum('bid,bjd->bij', x, x)
             scalars = torch.cat((scalars, dots), dim=-1)
         else :
             # we are in the very first layer and need to normalize the vector
