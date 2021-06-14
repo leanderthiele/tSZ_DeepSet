@@ -62,6 +62,18 @@ except FileNotFoundError :
     print('Did not find existing halo_catalog.npz, will compute.')
 
 
+def inertia(x) :
+    rsq_sum = np.einsum('ni,ni->', x, x)
+    xij_sum = np.einsum('ni,nj->ij', x, x)
+    T = rsq_sum * np.identity(3) - xij_sum
+    return T
+
+
+def ang_momentum(x, v) :
+    M = np.sum(np.cross(x, v), axis=0)
+    return M
+
+
 def get_properties(idx, sim_type) :
     """ sim_type is either DM or TNG """
     out = dict()
@@ -79,6 +91,25 @@ def get_properties(idx, sim_type) :
         out[key('CM')] = np.squeeze(grp_cat['GroupCM'][...][idx,:])
         out[key('prt_len')] = grp_cat['GroupLenType'][...][idx, PartType[sim_type]]
         out[key('prt_start')] = f['Offsets/%d/Group/SnapByType'%snap_idx][...][idx, PartType[sim_type]]
+
+    if sim_type == 'DM' :
+        out[key('inertia')] = np.empty((len(out[key('idx')]),3,3))
+        out[key('ang_momentum')] = np.empty((len(out[key('idx')]),3))
+        
+        with h5py.File(sim_files[sim_type], 'r') as f :
+            for ii in range(len(out[key('idx')])) :
+                print('Computing inertia and ang_momentum for %d'%ii)
+                # compute inertia tensor and angular momentum
+                particles = f['Snapshots/%d/PartType%d'%(snap_idx, PartType[sim_type])]
+                _s = out[key('prt_start')][ii]
+                _l = out[key('prt_len')][ii]
+                # do the intermediate summations in double precision to minimize roundoff error
+                # we also save the arrays in double precision
+                coords = particles['Coordinates'][_s : _s+_l].astype(np.float64) \
+                         - out[key('CM')][ii,:].astype(np.float64)
+                velocities = particles['Velocities'][_s : _s+_l].astype(np.float64)
+                out[key('inertia')][ii, ...] = inertia(coords)
+                out[key('ang_momentum')][ii, ...] = ang_momentum(coords, velocities)
 
     return out
 

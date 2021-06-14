@@ -75,7 +75,7 @@ def InitProc(local_rank=None) :
     if cfg.INIT_PROC_CALLED :
         
         if local_rank is not None and not cfg.SET_RANK :
-            assert rank == 0
+            assert local_rank == 0
             _set_mp_env_for_rank(local_rank)
 
         return

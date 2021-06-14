@@ -9,16 +9,21 @@ from origin import Origin
 from network_origin import NetworkOrigin
 from global_fields import GlobalFields
 from basis import Basis
+from init_proc import InitProc
 import cfg
 
 # FIXME for debugging on head node
-torch.set_num_threads(4)
+# torch.set_num_threads(4)
+
+InitProc(0)
+print(cfg.MPI_ENV_TYPE)
+print(cfg.DEVICE_IDX)
 
 model = NetworkOrigin().to_device()
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 loss_fn = TrainingLoss()
 training_loader = DataLoader(DataModes.TRAINING, 0, load_TNG=False, origin=Origin.CM)
-scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=1e-1,
+scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=1e-2,
                                                 steps_per_epoch=len(training_loader),
                                                 epochs=10)
 

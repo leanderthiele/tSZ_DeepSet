@@ -17,7 +17,7 @@ SIM_FILES = dict(DM='/tigress/lthiele/Illustris_300-1_Dark/simulation.hdf5',
 # how many particles of each type to use per halo
 # set to None if all particles are to be used
 # if an integer larger than one, not the fraction but this number is used
-PRT_FRACTION = dict(DM=0.1, TNG=0.1)
+PRT_FRACTION = dict(DM=0.01, TNG=0.1)
 
 # whether to divide the coordinates by R200c
 NORMALIZE_COORDS = True
