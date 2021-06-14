@@ -1,6 +1,7 @@
 from copy import copy
 
 from torch.utils.data import DataLoader as torch_DataLoader
+from torch.utils.data import get_worker_info as torch_get_worker_info
 
 from init_proc import InitProc
 from data_modes import DataModes
@@ -28,6 +29,12 @@ class _WorkerPool :
         """
     #{{{
         InitProc(self.local_rank)
+
+        worker_info = torch_get_worker_info()
+
+        assert isinstance(worker_info.dataset, DataSet)
+
+        worker_info.dataset.set_worker(worker_info.id)
     #}}}
 
 
