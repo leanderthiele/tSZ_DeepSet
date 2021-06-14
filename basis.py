@@ -1,4 +1,5 @@
 import numpy as np
+import numpy.linalg as LA
 
 from halo import Halo
 from fixed_len_vec import FixedLenVec
@@ -17,8 +18,18 @@ class Basis(np.ndarray, metaclass=FixedLenVec) :
     #{{{    
         assert isinstance(halo, Halo)
 
-        # FIXME
-        return None
+        ang_mom_unit = halo.ang_momentum_DM / LA.norm(halo.ang_momentum_DM)
+
+        w, v = LA.eigh(halo.inertia_DM)
+        v = v.T
+
+        projections = v @ ang_mom_unit
+
+        # choose the octant of the coordinate system where the angular momentum points
+        # this fixes the coordinate system uniquely
+        v[projections < 0] *= -1
+
+        return np.concatenate([ang_mom_unit[None,:], v], axis=0).view(type=cls)
     #}}}
 
     
@@ -28,5 +39,5 @@ class Basis(np.ndarray, metaclass=FixedLenVec) :
         should not be used directly, adapt if more features are added to the global vector
         """
     #{{{ 
-        return 0
+        return 4
     #}}}
