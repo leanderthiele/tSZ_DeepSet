@@ -21,16 +21,21 @@ class Halo :
         self.CM_DM = get_entry('CM_DM')
         self.M200c_DM = get_entry('M200c_DM')
         self.R200c_DM = get_entry('R200c_DM')
-        self.P200c_DM = self.__P200c(self.M200c_DM, self.R200c_DM)
+        self.P200c_DM = Halo.__P200c(self.M200c_DM, self.R200c_DM)
+        self.V200c_DM = Halo.__V200c(self.M200c_DM, self.R200c_DM)
         self.prt_start_DM = get_entry('prt_start_DM')
         self.prt_len_DM = get_entry('prt_len_DM')
+
+        self.inertia_DM = get_entry('inertia_DM')
+        self.ang_momentum_DM = get_entry('ang_momentum_DM')
 
         self.idx_TNG = get_entry('idx_TNG')
         self.pos_TNG = get_entry('pos_TNG')
         self.CM_TNG = get_entry('CM_TNG')
         self.M200c_TNG = get_entry('M200c_TNG')
         self.R200c_TNG = get_entry('R200c_TNG')
-        self.P200c_TNG = self.__P200c(self.M200c_TNG, self.R200c_TNG)
+        self.P200c_TNG = Halo.__P200c(self.M200c_TNG, self.R200c_TNG)
+        self.V200c_TNG = Halo.__V200c(self.M200c_TNG, self.R200c_TNG)
         self.prt_start_TNG = get_entry('prt_start_TNG')
         self.prt_len_TNG = get_entry('prt_len_TNG')
 
@@ -39,16 +44,22 @@ class Halo :
     #}}}
 
 
-    def __P200c(self, M200c, R200c) :
+    @staticmethod
+    def __P200c(M200c, R200c) :
         """
         computes the (thermal!) P200c in Illustris code units
         TODO so far, this is only at z=0
         """
     #{{{
-        rho_crit = 2.775e-8 # critical density at z=0 in Illustris code units
-        G = 4.30091e4 # Newton's constant in Illustris code units
-        Ob = 0.0486
-        Om = 0.3089
+        return 100 * cfg.G_NEWTON  * cfg.RHO_CRIT * cfg.OMEGA_B * M200c / cfg.OMEGA_M / R200c
+    #}}}
 
-        return 100 * G  * rho_crit * Ob * M200c / Om / R200c
+
+    @staticmethod
+    def __V200c(M200c, R200c) :
+        """
+        computes the characteristic velocity in Illustris code units
+        """
+    #{{{
+        return np.sqrt(cfg.G_NEWTON * M200c / R200c)
     #}}}

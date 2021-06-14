@@ -30,6 +30,10 @@ class DataSet(torch_DataSet) :
 
         self.data_items = []
 
+        # FIXME for distributed training, we only want to load a subset
+        #       of the data from disk as we know we will not access any others!
+        #       This could save a lot of memory
+
         # load all the data from disk
         for idx in self.sample_indices :
             h = Halo(self.halo_catalog, idx)

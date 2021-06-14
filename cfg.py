@@ -18,6 +18,16 @@ SIM_FILES = dict(DM='/tigress/lthiele/Illustris_300-1_Dark/simulation.hdf5',
 # by hardcoding this here
 BOX_SIZE = 205000.0
 
+# the DM simulation particle mass
+UNIT_MASS = 0.00472716
+
+# some constants in simulation units
+RHO_CRIT = 2.775e-8 # critical density at z=0 in Illustris code units
+G_NEWTON = 4.30091e4 # Newton's constant in Illustris code units
+OMEGA_B = 0.0486
+OMEGA_M = 0.3089
+
+
 # the .npz files where we store the particle information
 # '%d' is placeholder for the halo index (in the Illustris catalogs)
 STORAGE_FILES = dict(DM='/scratch/gpfs/lthiele/tSZ_DeepSet_halos/DM_%d.npz',
