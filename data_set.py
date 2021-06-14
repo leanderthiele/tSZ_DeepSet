@@ -62,8 +62,8 @@ class DataSet(torch_DataSet) :
         idx ... global index over the entire halo catalog (used for this mode)
         """
     #{{{ 
-        indices = dict(DM=self.__get_indices(h, 'DM'),
-                       TNG=self.__get_indices(h, 'TNG'))
+        indices = dict(DM=self.__get_indices(self.data_items[idx].halo, 'DM'),
+                       TNG=self.__get_indices(self.data_items[idx].halo, 'TNG'))
 
         return self.data_items[idx].sample_particles(indices)
     #}}}
