@@ -33,6 +33,9 @@ class Halo :
         self.P200c_TNG = self.__P200c(self.M200c_TNG, self.R200c_TNG)
         self.prt_start_TNG = get_entry('prt_start_TNG')
         self.prt_len_TNG = get_entry('prt_len_TNG')
+
+        self.storage_DM = cfg.STORAGE_FILES['DM']%self.idx_DM
+        self.storage_TNG = cfg.STORAGE_FILES['TNG']%self.idx_TNG
     #}}}
 
 

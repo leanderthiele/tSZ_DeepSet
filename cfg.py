@@ -14,6 +14,11 @@ HALO_CATALOG = 'halo_catalog.npz'
 SIM_FILES = dict(DM='/tigress/lthiele/Illustris_300-1_Dark/simulation.hdf5',
                  TNG='/tigress/lthiele/Illustris_300-1_TNG/simulation.hdf5')
 
+# the .npz files where we store the particle information
+# '%d' is placeholder for the halo index (in the Illustris catalogs)
+STORAGE_FILES = dict(DM='/scratch/gpfs/lthiele/tSZ_DeepSet_halos/DM_%d.npz',
+                     TNG='/scratch/gpfs/lthiele/tSZ_DeepSet_halos/TNG_%d.npz')
+
 # how many particles of each type to use per halo
 # set to None if all particles are to be used
 # if an integer larger than one, not the fraction but this number is used

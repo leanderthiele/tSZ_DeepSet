@@ -20,6 +20,8 @@ The output file contains the fields:
     R200c_DM
     prt_start_DM
     prt_len_DM
+    inertia_DM
+    ang_momentum_DM
 
 [TNG simulation]
     idx_TNG

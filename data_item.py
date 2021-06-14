@@ -105,7 +105,7 @@ class DataItem :
             x = self.__read_prt_field(particles, 'ElectronAbundance', 'TNG')
             d = self.__read_prt_field(particles, 'Density', 'TNG')
 
-        # compute the electron pressure
+        # compute the thermal pressure
         XH = 0.76
         gamma = 5.0/3.0
         Pth = 2.0 * (1+XH) / (1 + 3*XH + 4*XH*x) * (gamma - 1) * d * e
