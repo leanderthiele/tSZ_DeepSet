@@ -28,10 +28,7 @@ class DataModes(Enum) :
     #}}}
 
 
-    def sample_indices(self) :
-        """
-        returns the indices in the halo catalog that are used for this data mode
-        """
+    def Nsamples(self) :
     #{{{
         with np.load(cfg.HALO_CATALOG) as f :
             Nsamples_tot = len(f['idx_DM'])
@@ -41,6 +38,33 @@ class DataModes(Enum) :
         except KeyError : # we have hit the one that is not specified
             Nsamples = Nsamples_tot - sum(int(round(Nsamples_tot * v)) for v in cfg.SAMPLE_FRACTIONS.values())
 
-        return np.random.default_rng(cfg.CONSISTENT_SEED).choice(np.arange(Nsamples_tot),
-                                                                 size=Nsamples, replace=False)
+        return Nsamples_tot, Nsamples
+    #}}}
+
+
+    def sample_indices(self) :
+        """
+        returns the indices in the halo catalog that are used for this data mode
+        """
+    #{{{
+        Ntot, Ntraining = DataModes.TRAINING.Nsamples()
+        _, Nvalidation = DataModes.VALIDATION.Nsamples()
+        _, Ntesting = DataModes.TESTING.Nsamples()
+
+        assert Ntot == Ntraining + Nvalidation + Ntesting
+
+        if self is DataModes.TRAINING :
+            s = 0
+            l = Ntraining
+        elif self is DataModes.VALIDATION :
+            s = Ntraining
+            l = Nvalidation
+        elif self is DataModes.TESTING :
+            s = Ntraining + Nvalidation
+            l = Ntesting
+
+        arr = np.arange(Ntot)
+        np.random.default_rng(cfg.CONSISTENT_SEED).shuffle(arr)
+
+        return arr[s : s+l]
     #}}}
