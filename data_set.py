@@ -1,13 +1,14 @@
 import numpy as np
 
+import torch
+from torch.utils.data.dataset import Dataset as torch_DataSet
+from torch.utils.data import get_worker_info as torch_get_worker_info
+
 from data_modes import DataModes
 from data_item import DataItem
 from halo import Halo
 from origin import Origin
 import cfg
-
-import torch
-from torch.utils.data.dataset import Dataset as torch_DataSet
 
 class DataSet(torch_DataSet) :
     """
@@ -26,7 +27,8 @@ class DataSet(torch_DataSet) :
         self.sample_indices = mode.sample_indices()
 
         self.halo_catalog = dict(np.load(cfg.HALO_CATALOG))
-        self.rng = np.random.default_rng(seed)
+        
+        self.rngs = [np.random.default_rng(seed+ii) for ii in range(max(1, cfg.DATALOADER_ARGS['num_workers']))]
 
         self.data_items = []
 
@@ -98,7 +100,11 @@ class DataSet(torch_DataSet) :
                    if isinstance(cfg.PRT_FRACTION[ptype], float) \
                    else cfg.PRT_FRACTION[ptype]
 
+        # figure out which RNG to use
+        worker_info = torch_get_worker_info()
+        worker_id = 0 if worker_info is None else worker_info.id
+
         # here we allow the possibility for duplicate entries
         # in practice, this should not be an issue and will make the code faster
-        return self.rng.integers(Nprt, size=Nindices)
+        return self.rngs[worker_id].integers(Nprt, size=Nindices)
     #}}}

@@ -41,7 +41,7 @@ CONSISTENT_SEED = 137
 # arguments passed to the torch DataLoader constructor
 DATALOADER_ARGS = dict(batch_size=1,
                        shuffle=True,
-                       num_workers=1,
+                       num_workers=4,
                        pin_memory=True,
                        prefetch_factor=1)
 
