@@ -14,6 +14,10 @@ HALO_CATALOG = 'halo_catalog.npz'
 SIM_FILES = dict(DM='/tigress/lthiele/Illustris_300-1_Dark/simulation.hdf5',
                  TNG='/tigress/lthiele/Illustris_300-1_TNG/simulation.hdf5')
 
+# the simulation box size -- avoid repeated and perhaps concurrent hdf5 reads
+# by hardcoding this here
+BOX_SIZE = 205000.0
+
 # the .npz files where we store the particle information
 # '%d' is placeholder for the halo index (in the Illustris catalogs)
 STORAGE_FILES = dict(DM='/scratch/gpfs/lthiele/tSZ_DeepSet_halos/DM_%d.npz',

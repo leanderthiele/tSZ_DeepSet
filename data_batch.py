@@ -89,7 +89,13 @@ class DataBatch :
     #{{{
         self.DM_coords -= origin
         self.TNG_coords -= origin
-        # FIXME need to impose periodic bcs here
+
+        # NOTE technically speaking it would be necessary to impose periodic boundary conditions
+        #      again here.
+        #      However, the new origin is likely very close to the old one, so this is practically
+        #      speaking never necessary.
+        #      The good thing about this is that everything stays differentiable!
+
         if compute_TNG_radii :
             self.TNG_radii = torch.linalg.norm(self.TNG_coords, axis=-1, keepdims=True)
             self.has_TNG_radii = True

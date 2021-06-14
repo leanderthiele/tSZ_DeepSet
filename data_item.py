@@ -42,8 +42,6 @@ class DataItem :
         assert origin in [Origin.CM, Origin.POS, ]
         self.origin = origin
 
-        self.BoxSize = self.__get_BoxSize()
-
         if load_DM :
             self.DM_coords = self.__get_DM()
 
@@ -56,15 +54,6 @@ class DataItem :
     #}}}
 
 
-    def __get_BoxSize(self) :
-    #{{{
-        with h5py.File(cfg.SIM_FILES['DM'], 'r') as f :
-            BoxSize = f['Parameters'].attrs['BoxSize']
-
-        return BoxSize
-    #}}}
-
-
     def __get_DM(self) :
         """
         returns the properties for the network input 
@@ -72,11 +61,9 @@ class DataItem :
     #{{{
         select = self.__select('DM')
 
-        # FIXME parallel hdf5
         # load the particle coordinates from file
-        with h5py.File(cfg.SIM_FILES['DM'], 'r') as f :
-            particles = f['Snapshots/%d/PartType%d'%(cfg.SNAP_IDX, cfg.PART_TYPES['DM'])]
-            coords = self.__read_prt_field(particles, 'Coordinates', 'DM')
+        with np.load(self.halo.storage_DM) as f :
+            coords = f['coords'][select]
 
         # remove the origin if required
         if self.origin is Origin.CM :
@@ -85,7 +72,7 @@ class DataItem :
             coords -= self.halo.pos_DM
 
         # take periodic boundary conditions into account
-        coords = self.__periodicize(coords)
+        coords = DataItem.__periodicize(coords)
 
         # if required, divide by R200c
         if cfg.NORMALIZE_COORDS :
@@ -102,18 +89,11 @@ class DataItem :
     #{{{
         select = self.__select('TNG')
 
-        # FIXME parallel hdf5
-        with h5py.File(cfg.SIM_FILES['TNG'], 'r') as f :
-            particles = f['Snapshots/%d/PartType%d'%(cfg.SNAP_IDX, cfg.PART_TYPES['TNG'])]
-            coords = self.__read_prt_field(particles, 'Coordinates', 'TNG')
-            e = self.__read_prt_field(particles, 'InternalEnergy', 'TNG')
-            x = self.__read_prt_field(particles, 'ElectronAbundance', 'TNG')
-            d = self.__read_prt_field(particles, 'Density', 'TNG')
-
-        # compute the thermal pressure
-        XH = 0.76
-        gamma = 5.0/3.0
-        Pth = 2.0 * (1+XH) / (1 + 3*XH + 4*XH*x) * (gamma - 1) * d * e
+        # load particle coordinates and thermal pressure at their position
+        # from file
+        with np.load(self.halo.storage_TNG) as f :
+            coords = f['coords'][select]
+            Pth = f['Pth'][select]
 
         # remove the origin if required 
         if self.origin is Origin.CM :
@@ -122,7 +102,7 @@ class DataItem :
             coords -= self.halo.pos_DM
 
         # take periodic boundary conditions into account
-        coords = self.__periodicize(coords)
+        coords = DataItem.__periodicize(coords)
 
         # if required, divide by R200c
         if cfg.NORMALIZE_COORDS :
@@ -135,13 +115,14 @@ class DataItem :
     #}}}
 
 
-    def __periodicize(self, x) :
+    @staticmethod
+    def __periodicize(x) :
         """
         remaps the array x into the interval [-BoxSize/2, +BoxSize/2] with periodic boundary conditions
         """
     #{{{
-        x[x >  0.5*self.BoxSize] -= self.BoxSize
-        x[x < -0.5*self.BoxSize] += self.BoxSize
+        x[x >  0.5*cfg.BOX_SIZE] -= cfg.BOX_SIZE
+        x[x < -0.5*cfg.BOX_SIZE] += cfg.BOX_SIZE
 
         return x
     #}}}
@@ -156,17 +137,4 @@ class DataItem :
         assert ptype in ['DM', 'TNG']
         indices = None if (self.indices is None or ptype not in self.indices) else self.indices[ptype]
         return indices if indices is not None else slice(None)
-    #}}}
-
-
-    def __read_prt_field(self, group, name, ptype) :
-        """
-        returns a numpy array of the field <name> in the <group> for the given <ptype>
-        """
-    #{{{
-        assert ptype in ['DM', 'TNG']
-        prt_start = self.halo.prt_start_DM if ptype=='DM' else self.halo.prt_start_TNG
-        prt_len = self.halo.prt_len_DM if ptype=='DM' else self.halo.prt_len_TNG
-
-        return group[name][prt_start : prt_start+prt_len][self.__select(ptype)].astype(np.float32)
     #}}}
