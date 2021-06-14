@@ -48,13 +48,6 @@ class NetworkLayer(nn.Module) :
         # we know that the last dimension is the real space one
         scalars = torch.linalg.norm(x, dim=-1, keepdim=True)
 
-        # concatenate with the basis projections if required
-        if basis is not None :
-            basis_projections = torch.einsum('bid,bnd->bin', x, basis)
-            scalars = torch.cat((scalars, basis_projections), dim=-1)
-        else :
-            assert len(Basis) == 0
-
         if self.x_is_latent :
             # compute the mutual dot products
             dots = torch.einsum('bid,bjd->bij', x, x)
@@ -62,6 +55,13 @@ class NetworkLayer(nn.Module) :
         else :
             # we are in the very first layer and need to normalize the vector
             x /= scalars
+
+        # concatenate with the basis projections if required
+        if basis is not None :
+            basis_projections = torch.einsum('bid,bnd->bin', x, basis)
+            scalars = torch.cat((scalars, basis_projections), dim=-1)
+        else :
+            assert len(Basis) == 0
 
         # concatenate with the global vector if requested
         if u is not None :

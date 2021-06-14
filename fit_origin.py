@@ -23,19 +23,20 @@ model = NetworkOrigin().to_device()
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 loss_fn = TrainingLoss()
 training_loader = DataLoader(mode=DataModes.TRAINING, seed=0, load_TNG=False, origin=Origin.CM)
+validation_loader = DataLoader(mode=DataModes.VALIDATION, seed=0, load_TNG=False, origin=Origin.CM)
 scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=1e-2,
                                                 steps_per_epoch=len(training_loader),
-                                                epochs=10)
+                                                epochs=500)
 
-model.train()
 
 for epoch in range(1000) :
 
     print('epoch %d'%epoch)
 
+    print('TRAINING')
+    model.train()
+
     for t, data in enumerate(training_loader) :
-    
-        print('sample %d / %d'%(t, len(training_loader)))
 
         assert isinstance(data, DataBatch)
 
@@ -71,4 +72,31 @@ for epoch in range(1000) :
 
         scheduler.step()
 
-        print('loss = %f vs guess = %f'%(loss.item(), loss_fn(cm, target).item()))
+        print('training loss = %f vs guess = %f'%(loss.item(), loss_fn(cm, target).item()))
+
+    print('VALIDATION')
+    model.eval()
+
+    for t, data in enumerate(validation_loader) :
+        
+        data = data.to_device()
+
+        prediction = model(data.DM_coords,
+                           u=data.u if len(GlobalFields) != 0 else None,
+                           basis=data.basis if len(Basis) != 0 else None)
+
+        prediction = prediction.squeeze(dim=1)
+
+        cm = data.CM_DM
+        if cfg.NORMALIZE_COORDS :
+            cm /= data.R200c.unsqueeze(-1)
+
+        prediction += cm
+
+        target = data.pos_TNG
+        if cfg.NORMALIZE_COORDS :
+            target /= data.R200c.unsqueeze(-1)
+
+        loss = loss_fn(prediction, target)
+
+        print('validation loss = %f vs guess = %f'%(loss.item(), loss_fn(cm, target).item()))
