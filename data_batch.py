@@ -125,6 +125,8 @@ class DataBatch :
                     continue
                 elif isinstance(v, bool) :
                     continue
+                elif isinstance(v, DataModes) :
+                    continue
                 elif isinstance(v, torch.Tensor) :
                     setattr(self, k, v.to(cfg.DEVICE_IDX))
                 elif isinstance(v, list) and isinstance(v[0], torch.Tensor) :

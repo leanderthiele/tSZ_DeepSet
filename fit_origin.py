@@ -20,7 +20,7 @@ print(cfg.MPI_ENV_TYPE)
 print(cfg.DEVICE_IDX)
 
 model = NetworkOrigin().to_device()
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-4)
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 loss_fn = TrainingLoss()
 training_loader = DataLoader(mode=DataModes.TRAINING, load_TNG=False, origin=Origin.CM)
 validation_loader = DataLoader(mode=DataModes.VALIDATION, load_TNG=False, origin=Origin.CM)
