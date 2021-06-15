@@ -34,6 +34,9 @@ class GlobalFields(np.ndarray, metaclass=FixedLenVec) :
         # note that the eigenvectors returned by eigh are already normalized
         angles = np.arccos(v @ halo.ang_momentum_DM / ang_mom_norm)
 
+        # compute the central CM magnitudes
+        central_CM_norm = LA.norm(halo.central_CM, axis=-1)
+
         # map to the 0, pi/2 interval -- mods out the symmetry under parity
         # (np.arccos returns in the interval [0, pi])
         for ii in range(3) :
@@ -44,8 +47,9 @@ class GlobalFields(np.ndarray, metaclass=FixedLenVec) :
             ang_mom_norm *= cfg.UNIT_MASS / (halo.R200c_DM * halo.V200c_DM * halo.M200c_DM)
             w *= cfg.UNIT_MASS / (halo.R200c_DM**2 * halo.M200c_DM)
 
-        out = np.array([logM, ang_mom_norm, *w, *angles]).view(type=cls)
+        out = np.array([logM, ang_mom_norm, *w, *angles, *central_CM_norm]).view(type=cls)
 
+        # add noise if requested
         if rng is not None and cfg.GLOBALS_NOISE is not None :
 
             assert np.all(halo.dglobals > 0)
@@ -71,5 +75,5 @@ class GlobalFields(np.ndarray, metaclass=FixedLenVec) :
         should not be used directly, adapt if more features are added to the global vector
         """
     #{{{
-        return 8
+        return 11
     #}}}

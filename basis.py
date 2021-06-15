@@ -31,7 +31,10 @@ class Basis(np.ndarray, metaclass=FixedLenVec) :
         # this fixes the coordinate system uniquely
         v[projections < 0] *= -1
 
-        return np.concatenate([ang_mom_unit[None,:], v], axis=0).view(type=cls)
+        # central CM unit vectors
+        central_CM_unit = halo.central_CM / LA.norm(halo.central_CM, axis=-1)
+
+        return np.concatenate([ang_mom_unit[None,:], v, central_CM_unit], axis=0).view(type=cls)
     #}}}
 
     
@@ -41,5 +44,5 @@ class Basis(np.ndarray, metaclass=FixedLenVec) :
         should not be used directly, adapt if more features are added to the global vector
         """
     #{{{ 
-        return 4
+        return 7
     #}}}
