@@ -33,6 +33,14 @@ class DataSet(torch_DataSet) :
 
         for h in self.halo_catalog :
             self.data_items.append(DataItem(h, mode, **data_item_kwargs))
+
+        if self.mode is not DataModes.TRAINING :
+            # for validation and testing, we want consistent particle sampling
+            self.rng = np.random.default_rng(cfg.CONSISTENT_SEED)
+            for ii in range(len(self.data_items)) :
+                indices = dict(DM=self.__get_indices(self.data_items[ii].halo, 'DM'),
+                               TNG=self.__get_indices(self.data_items[ii].halo, 'TNG'))
+                self.data_items[ii] = self.data_items[ii].sample_particles(indices)
     #}}}
 
 
@@ -41,7 +49,8 @@ class DataSet(torch_DataSet) :
         to be called from worker_init_fn to initialize the random number generator for this worker
         """
     #{{{
-        self.rng = np.random.default_rng(seed % 2**32)
+        if self.mode is DataModes.TRAINING :
+            self.rng = np.random.default_rng(seed % 2**32)
     #}}}
 
 
@@ -70,10 +79,13 @@ class DataSet(torch_DataSet) :
         idx ... global index over the entire halo catalog (used for this mode)
         """
     #{{{ 
-        indices = dict(DM=self.__get_indices(self.data_items[idx].halo, 'DM'),
-                       TNG=self.__get_indices(self.data_items[idx].halo, 'TNG'))
+        if self.mode is DataModes.TRAINING :
+            indices = dict(DM=self.__get_indices(self.data_items[idx].halo, 'DM'),
+                           TNG=self.__get_indices(self.data_items[idx].halo, 'TNG'))
 
-        return self.data_items[idx].sample_particles(indices)
+            return self.data_items[idx].sample_particles(indices)
+        else :
+            return self.data_items[idx]
     #}}}
 
 
