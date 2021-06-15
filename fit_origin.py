@@ -1,3 +1,5 @@
+import os.path
+
 import torch
 import torch.nn as nn
 
@@ -25,10 +27,10 @@ training_loader = DataLoader(mode=DataModes.TRAINING, load_TNG=False)
 validation_loader = DataLoader(mode=DataModes.VALIDATION, load_TNG=False)
 scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=1e-2,
                                                 steps_per_epoch=len(training_loader),
-                                                epochs=2000)
+                                                epochs=1000)
 
 
-for epoch in range(2000) :
+for epoch in range(1000) :
 
     print('epoch %d'%epoch)
 
@@ -72,6 +74,8 @@ for epoch in range(2000) :
         scheduler.step()
 
         print('training loss = %f vs guess = %f'%(loss.item(), loss_fn(cm, target).item()))
+
+    torch.save(model.state_dict(), os.path.join(cfg.RESULTS_PATH, 'origin.pt'))
 
     print('VALIDATION')
     model.eval()

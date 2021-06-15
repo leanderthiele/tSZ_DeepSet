@@ -103,8 +103,8 @@ class DataSet(torch_DataSet) :
 
         Nprt = halo.prt_len_DM if ptype == 'DM' else halo.prt_len_TNG
         Nindices = int(cfg.PRT_FRACTION[ptype] * Nprt) \
-                   if isinstance(cfg.PRT_FRACTION[ptype], float) \
-                   else cfg.PRT_FRACTION[ptype]
+                   if isinstance(cfg.PRT_FRACTION[ptype], float) and cfg.PRT_FRACTION[ptype]<=1 \
+                   else int(cfg.PRT_FRACTION[ptype])
 
         # here we allow the possibility for duplicate entries
         # in practice, this should not be an issue and will make the code faster

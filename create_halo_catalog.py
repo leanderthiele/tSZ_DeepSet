@@ -38,30 +38,31 @@ The output file contains the fields:
 The prt_* fields in the TNG case refer to the gas particles.
 """
 
+# whether to create the compute-intensive inertia and angular momentum fields
+DO_LONG = False
+
 import numpy as np
-from matplotlib import pyplot as plt
 import h5py
+
+import cfg
 
 # lower mass cutoff -- in code units, i.e. 1e10 Msun/h
 # this refers to the DM-only mass
-M200c_min = 1e4
-
-# specify the redshift here
-snap_idx = 99
-
-PartType = dict(DM = 1, TNG = 0)
+M200c_min = 5e3
 
 sim_files = dict(DM = '/tigress/lthiele/Illustris_300-1_Dark/simulation.hdf5',
                  TNG = '/tigress/lthiele/Illustris_300-1_TNG/simulation.hdf5')
 
+out_file = cfg.HALO_CATALOG if DO_LONG else 'short_'+cfg.HALO_CATALOG
+
 try :
-    with np.load('halo_catalog.npz') as f :
+    with np.load(out_file) as f :
         if abs(f['M200c_min']/M200c_min - 1) < 1e-5 \
-           and f['snap_idx'] == snap_idx :
-            print('Consistent file halo_catalog.npz already exists. Aborting.')
+           and f['snap_idx'] == cfg.SNAP_IDX :
+            print('Consistent file %s already exists. Aborting.'%out_file)
             exit()
 except FileNotFoundError :
-    print('Did not find existing halo_catalog.npz, will compute.')
+    print('Did not find existing %s, will compute.'%out_file)
 
 
 def inertia(x) :
@@ -83,7 +84,7 @@ def get_properties(idx, sim_type) :
     key = lambda s : '%s_%s'%(s, sim_type)
 
     with h5py.File(sim_files[sim_type], 'r') as f :
-        grp_cat = f['Groups/%d/Group'%snap_idx]
+        grp_cat = f['Groups/%d/Group'%cfg.SNAP_IDX]
         out[key('idx')] = idx
         out[key('M200c')] = grp_cat['Group_M_Crit200'][...][idx]
         out[key('R200c')] = grp_cat['Group_R_Crit200'][...][idx]
@@ -91,10 +92,10 @@ def get_properties(idx, sim_type) :
         #      of unit length which we need to remove
         out[key('pos')] = np.squeeze(grp_cat['GroupPos'][...][idx,:])
         out[key('CM')] = np.squeeze(grp_cat['GroupCM'][...][idx,:])
-        out[key('prt_len')] = grp_cat['GroupLenType'][...][idx, PartType[sim_type]]
-        out[key('prt_start')] = f['Offsets/%d/Group/SnapByType'%snap_idx][...][idx, PartType[sim_type]]
+        out[key('prt_len')] = grp_cat['GroupLenType'][...][idx, cfg.PART_TYPES[sim_type]]
+        out[key('prt_start')] = f['Offsets/%d/Group/SnapByType'%cfg.SNAP_IDX][...][idx, cfg.PART_TYPES[sim_type]]
 
-    if sim_type == 'DM' :
+    if sim_type == 'DM' and DO_LONG :
         out[key('inertia')] = np.empty((len(out[key('idx')]),3,3))
         out[key('ang_momentum')] = np.empty((len(out[key('idx')]),3))
         
@@ -102,7 +103,7 @@ def get_properties(idx, sim_type) :
             for ii in range(len(out[key('idx')])) :
                 print('Computing inertia and ang_momentum for %d'%ii)
                 # compute inertia tensor and angular momentum
-                particles = f['Snapshots/%d/PartType%d'%(snap_idx, PartType[sim_type])]
+                particles = f['Snapshots/%d/PartType%d'%(cfg.SNAP_IDX, cfg.PART_TYPES[sim_type])]
                 _s = out[key('prt_start')][ii]
                 _l = out[key('prt_len')][ii]
                 # do the intermediate summations in double precision to minimize roundoff error
@@ -129,12 +130,12 @@ def match_halos(pos_DM, M200c_DM, R200c_DM, pos_type='CM', plot_dist_hist=False)
     assert pos_type in ['CM', 'Pos']
     with h5py.File(sim_files['TNG'], 'r') as f :
         boxsize = f['Parameters'].attrs['BoxSize']
-        catalog = f['Groups/%d/Group'%snap_idx]
+        catalog = f['Groups/%d/Group'%cfg.SNAP_IDX]
         pos_TNG = catalog['Group%s'%pos_type][...]
         M200c_TNG = catalog['Group_M_Crit200'][...]
 
     # first we filter out all the low-mass junk
-    idx_high_mass = (M200c_TNG > 0.5 * M200c_min).nonzero()[0]
+    idx_high_mass = (M200c_TNG > 0.2 * M200c_min).nonzero()[0]
     pos_TNG = np.squeeze(pos_TNG[idx_high_mass, :])
     M200c_TNG = M200c_TNG[idx_high_mass]
 
@@ -147,17 +148,13 @@ def match_halos(pos_DM, M200c_DM, R200c_DM, pos_type='CM', plot_dist_hist=False)
     idx_dist_min = np.argmin(dist, axis=1)
     
     dist_ratio = dist[np.arange(pos_DM.shape[0]), idx_dist_min]/R200c_DM
-    # FIXME for debugging purposes
-    if plot_dist_hist :
-        plt.hist(dist_ratio)
-        plt.show()
 
     return idx_high_mass[idx_dist_min], dist_ratio
     
 
 
 with h5py.File(sim_files['DM'], 'r') as f :
-    catalog = f['Groups/%d/Group'%snap_idx]
+    catalog = f['Groups/%d/Group'%cfg.SNAP_IDX]
     M200c_DM = catalog['Group_M_Crit200'][...]
     idx_DM = (M200c_DM > M200c_min).nonzero()[0]
 
@@ -170,5 +167,5 @@ idx_TNG, dist_ratio = match_halos(DM_data['CM_DM'], DM_data['M200c_DM'],
 
 TNG_data = get_properties(idx_TNG, 'TNG')
 
-np.savez('halo_catalog.npz', M200c_min=M200c_min, snap_idx=snap_idx, dist_ratio=dist_ratio,
+np.savez(out_file, M200c_min=M200c_min, snap_idx=cfg.SNAP_IDX, dist_ratio=dist_ratio,
          **DM_data, **TNG_data)

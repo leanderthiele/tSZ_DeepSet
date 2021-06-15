@@ -27,7 +27,6 @@ G_NEWTON = 4.30091e4 # Newton's constant in Illustris code units
 OMEGA_B = 0.0486
 OMEGA_M = 0.3089
 
-
 # the .npz files where we store the particle information
 # '%d' is placeholder for the halo index (in the Illustris catalogs)
 STORAGE_FILES = dict(DM='/scratch/gpfs/lthiele/tSZ_DeepSet_halos/DM_%d.npz',
@@ -35,7 +34,10 @@ STORAGE_FILES = dict(DM='/scratch/gpfs/lthiele/tSZ_DeepSet_halos/DM_%d.npz',
 
 # how many particles of each type to use per halo
 # set to None if all particles are to be used
-# if an integer larger than one, not the fraction but this number is used
+# if an integer or float larger than one, not the fraction but this number is used
+# NOTE that if the absolute number is given, it is not a bug to choose it larger than
+# the number of particles in some low-mass halos. This will result in duplicate entries
+# in the particle list for those halos, which should be ok.
 PRT_FRACTION = dict(DM=0.01, TNG=0.1)
 
 # whether to divide the coordinates by R200c
@@ -54,7 +56,7 @@ CONSISTENT_SEED = 137
 # amount of noise added to the globals
 # 1 means that confusion with other halos is theoretically impossible
 # set to None if no noise desired
-GLOBALS_NOISE = 1.0
+GLOBALS_NOISE = 5.0
 
 # arguments passed to the torch DataLoader constructor
 DATALOADER_ARGS = dict(batch_size=1,
