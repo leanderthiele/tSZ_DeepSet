@@ -34,7 +34,7 @@ class _WorkerPool :
 
         assert isinstance(worker_info.dataset, DataSet)
 
-        worker_info.dataset.set_worker(worker_info.id)
+        worker_info.dataset.set_worker(worker_info.seed)
     #}}}
 
 

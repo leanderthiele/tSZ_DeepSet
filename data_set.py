@@ -14,16 +14,14 @@ class DataSet(torch_DataSet) :
     torch-compatible representation of the simulation data
     """
 
-    def __init__(self, mode, seed, **data_item_kwargs) :
+    def __init__(self, mode, **data_item_kwargs) :
         """
         mode ... one of training, validation, testing
-        seed ... to choose the particle indices
         """
     #{{{    
         assert isinstance(mode, DataModes)
 
         self.mode = mode
-        self.seed = seed
         self.sample_indices = mode.sample_indices()
 
         self.halo_catalog = dict(np.load(cfg.HALO_CATALOG))
@@ -41,13 +39,13 @@ class DataSet(torch_DataSet) :
     #}}}
 
 
-    def set_worker(self, worker_id) :
+    def set_worker(self, seed) :
         """
         to be called from worker_init_fn to initialize the random number generator for this worker
         """
     #{{{
-        self.worker_id = worker_id
-        self.rng = np.random.default_rng(self.seed + worker_id)
+        print('Calling set_worker with ', seed)
+        self.rng = np.random.default_rng(seed % 2**32)
     #}}}
 
 
