@@ -7,6 +7,7 @@ import torch.nn as nn
 
 from torchsummary import summary
 
+from mpi_env_types import MPIEnvTypes
 from data_modes import DataModes
 from data_loader import DataLoader
 from training_loss import TrainingLoss
@@ -17,16 +18,15 @@ from basis import Basis
 from init_proc import InitProc
 import cfg
 
-# FIXME for debugging on head node
-# torch.set_num_threads(4)
-
 InitProc(0)
-print(cfg.MPI_ENV_TYPE)
-print(cfg.DEVICE_IDX)
+
+# if we are on the head node, restrict number of threads so we don't disturb other users
+if cfg.MPI_ENV_TYPE is MPIEnvTypes.NOGPU :
+    torch.set_num_threads(5)
 
 model = NetworkOrigin()
 
-# FIXME give a summary for debugging
+# give a summary for debugging
 summary(model, [(352,3), (len(GlobalFields),), (len(Basis),3)], device='cpu')
 
 model = model.to_device()
@@ -127,7 +127,7 @@ for epoch in range(500) :
 
         validation_loss = loss.item()
         guess_loss = loss_fn(cm, target).item()
-        print('validation loss = %f vs guess = %f %s %s'%(validation_loss, guess_loss, '***' if guess_loss>0.1 else '', '+++' if validation_loss>0.1 else ''))
+        print('validation loss = %f vs guess = %f %s %s'%(validation_loss, guess_loss, '***' if guess_loss>0.1 else '   ', '+++' if validation_loss>0.1 else '   '))
 
         this_validation_loss[t, 0] = validation_loss
         this_validation_loss[t, 1] = guess_loss

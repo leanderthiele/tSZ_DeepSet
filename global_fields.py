@@ -76,5 +76,5 @@ class GlobalFields(np.ndarray, metaclass=FixedLenVec) :
         should not be used directly, adapt if more features are added to the global vector
         """
     #{{{
-        return 11
+        return 0
     #}}}
