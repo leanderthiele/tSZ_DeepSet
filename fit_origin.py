@@ -34,14 +34,19 @@ training_loader = DataLoader(mode=DataModes.TRAINING, load_TNG=False)
 validation_loader = DataLoader(mode=DataModes.VALIDATION, load_TNG=False)
 scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=1e-2,
                                                 steps_per_epoch=len(training_loader),
-                                                epochs=2000)
+                                                epochs=500)
 
-for epoch in range(2000) :
+training_loss_arr = []
+validation_loss_arr = []
+
+for epoch in range(500) :
 
     print('epoch %d'%epoch)
 
     print('TRAINING')
     model.train()
+
+    this_training_loss = np.empty((len(training_loader), 2))
 
     for t, data in enumerate(training_loader) :
 
@@ -82,12 +87,19 @@ for epoch in range(2000) :
         training_loss = loss.item()
         guess_loss = loss_fn(cm, target).item()
         print('training loss = %f vs guess = %f %s %s'%(training_loss, guess_loss, '***' if guess_loss>0.1 else '   ', '+++' if training_loss>0.1 else '   '))
+
+        this_training_loss[t, 0] = training_loss
+        this_training_loss[t, 1] = guess_loss
+
+    training_loss_arr.append(this_training_loss)
     
     # FIXME
     # torch.save(model.state_dict(), os.path.join(cfg.RESULTS_PATH, 'origin.pt'))
 
     print('VALIDATION')
     model.eval()
+
+    this_validation_loss = np.empty((len(validation_loader), 2))
 
     for t, data in enumerate(validation_loader) :
         
@@ -114,3 +126,12 @@ for epoch in range(2000) :
         validation_loss = loss.item()
         guess_loss = loss_fn(cm, target).item()
         print('validation loss = %f vs guess = %f %s %s'%(validation_loss, guess_loss, '***' if guess_loss>0.1 else '', '+++' if validation_loss>0.1 else ''))
+
+        this_validation_loss[t, 0] = validation_loss
+        this_validation_loss[t, 1] = guess_loss
+
+    validation_loss_arr.append(this_validation_loss)
+
+    np.savez(os.path.join(cfg.RESULTS_PATH, 'loss_origin.npz'),
+             training=np.array(training_loss_arr),
+             validation=np.array(validation_loss_arr))

@@ -20,8 +20,10 @@ The output file contains the fields:
     R200c_DM
     prt_start_DM
     prt_len_DM
-    inertia_DM
-    ang_momentum_DM
+
+    inertia_DM [3,3]
+    ang_momentum_DM [3]
+    central_CM [N, 3] -- vectors w.r.t. cfg.ORIGIN
 
 [TNG simulation]
     idx_TNG
@@ -39,7 +41,8 @@ The prt_* fields in the TNG case refer to the gas particles.
 """
 
 # whether to create the compute-intensive inertia and angular momentum fields
-DO_LONG = False
+# (set to false for some quick output that cannot be used for training)
+DO_LONG = True
 
 import numpy as np
 import h5py
@@ -130,7 +133,7 @@ def get_properties(idx, sim_type) :
 
                 for jj in range(len(central_CM_radii)) :
                     out[key('central_CM')][ii,jj,:] = central_CM(r_pos, coords_centered,
-                                                                 central_CM_radii[jj] * out[key('R200c')])
+                                                                 central_CM_radii[jj] * out[key('R200c')][ii])
 
                 out[key('inertia')][ii, ...] = inertia(coords_centered)
                 out[key('ang_momentum')][ii, ...] = ang_momentum(coords_centered, velocities)

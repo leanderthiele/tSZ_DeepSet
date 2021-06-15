@@ -5,7 +5,7 @@ import h5py
 from halo import Halo
 import cfg
 
-halo_catalog = dict(np.load('halo_catalog.npz'))
+halo_catalog = dict(np.load(cfg.HALO_CATALOG))
 
 for ii in range(len(halo_catalog['idx_DM'])) :
     
