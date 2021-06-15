@@ -50,8 +50,8 @@ import cfg
 # this refers to the DM-only mass
 M200c_min = 5e3
 
-sim_files = dict(DM = '/tigress/lthiele/Illustris_300-1_Dark/simulation.hdf5',
-                 TNG = '/tigress/lthiele/Illustris_300-1_TNG/simulation.hdf5')
+# for which radii around pos, in units of R200c, we want to compute the CMs
+central_CM_radii = [0.1, 0.3, 1.0]
 
 out_file = cfg.HALO_CATALOG if DO_LONG else 'short_'+cfg.HALO_CATALOG
 
@@ -77,13 +77,18 @@ def ang_momentum(x, v) :
     return M
 
 
+def central_CM(r, x, rmax) :
+    xc = x[r < rmax]
+    return np.sum(xc, axis=0) / xc.shape[0]
+
+
 def get_properties(idx, sim_type) :
     """ sim_type is either DM or TNG """
     out = dict()
 
     key = lambda s : '%s_%s'%(s, sim_type)
 
-    with h5py.File(sim_files[sim_type], 'r') as f :
+    with h5py.File(cfg.SIM_FILES[sim_type], 'r') as f :
         grp_cat = f['Groups/%d/Group'%cfg.SNAP_IDX]
         out[key('idx')] = idx
         out[key('M200c')] = grp_cat['Group_M_Crit200'][...][idx]
@@ -96,23 +101,39 @@ def get_properties(idx, sim_type) :
         out[key('prt_start')] = f['Offsets/%d/Group/SnapByType'%cfg.SNAP_IDX][...][idx, cfg.PART_TYPES[sim_type]]
 
     if sim_type == 'DM' and DO_LONG :
-        out[key('inertia')] = np.empty((len(out[key('idx')]),3,3))
-        out[key('ang_momentum')] = np.empty((len(out[key('idx')]),3))
+        out[key('inertia')] = np.empty((len(out[key('idx')]), 3, 3))
+        out[key('ang_momentum')] = np.empty((len(out[key('idx')]), 3))
+        out[key('central_CM')] = np.empty((len(out[key('idx')]), len(central_CM_radii), 3))
         
-        with h5py.File(sim_files[sim_type], 'r') as f :
+        with h5py.File(cfg.SIM_FILES[sim_type], 'r') as f :
             for ii in range(len(out[key('idx')])) :
-                print('Computing inertia and ang_momentum for %d'%ii)
+                print('Computing inertia, ang_momentum, central_CM for %d'%ii)
                 # compute inertia tensor and angular momentum
                 particles = f['Snapshots/%d/PartType%d'%(cfg.SNAP_IDX, cfg.PART_TYPES[sim_type])]
                 _s = out[key('prt_start')][ii]
                 _l = out[key('prt_len')][ii]
+
                 # do the intermediate summations in double precision to minimize roundoff error
                 # we also save the arrays in double precision
-                coords = particles['Coordinates'][_s : _s+_l].astype(np.float64) \
-                         - out[key('CM')][ii,:].astype(np.float64)
+                coords = particles['Coordinates'][_s : _s+_l].astype(np.float64)
                 velocities = particles['Velocities'][_s : _s+_l].astype(np.float64)
-                out[key('inertia')][ii, ...] = inertia(coords)
-                out[key('ang_momentum')][ii, ...] = ang_momentum(coords, velocities)
+
+                coords_pos = coords - out[key('pos')][ii,:].astype(np.float64)
+                coords_pos[coords_pos > +0.5*cfg.BOX_SIZE] -= cfg.BOX_SIZE
+                coords_pos[coords_pos < -0.5*cfg.BOX_SIZE] += cfg.BOX_SIZE
+                r_pos = np.linalg.norm(coords_pos, axis=-1)
+                del coords_pos
+
+                coords_centered = coords - out[key(cfg.ORIGIN)][ii,:].astype(np.float64)
+                coords_centered[coords_centered > +0.5*cfg.BOX_SIZE] -= cfg.BOX_SIZE
+                coords_centered[coords_centered < -0.5*cfg.BOX_SIZE] += cfg.BOX_SIZE
+
+                for jj in range(len(central_CM_radii)) :
+                    out[key('central_CM')][ii,jj,:] = central_CM(r_pos, coords_centered,
+                                                                 central_CM_radii[jj] * out[key('R200c')])
+
+                out[key('inertia')][ii, ...] = inertia(coords_centered)
+                out[key('ang_momentum')][ii, ...] = ang_momentum(coords_centered, velocities)
 
     return out
 
@@ -128,7 +149,7 @@ def match_halos(pos_DM, M200c_DM, R200c_DM, pos_type='CM', plot_dist_hist=False)
     (this is a useful cross-check to see if all halos have been matched)
     """
     assert pos_type in ['CM', 'Pos']
-    with h5py.File(sim_files['TNG'], 'r') as f :
+    with h5py.File(cfg.SIM_FILES['TNG'], 'r') as f :
         boxsize = f['Parameters'].attrs['BoxSize']
         catalog = f['Groups/%d/Group'%cfg.SNAP_IDX]
         pos_TNG = catalog['Group%s'%pos_type][...]
@@ -153,7 +174,7 @@ def match_halos(pos_DM, M200c_DM, R200c_DM, pos_type='CM', plot_dist_hist=False)
     
 
 
-with h5py.File(sim_files['DM'], 'r') as f :
+with h5py.File(cfg.SIM_FILES['DM'], 'r') as f :
     catalog = f['Groups/%d/Group'%cfg.SNAP_IDX]
     M200c_DM = catalog['Group_M_Crit200'][...]
     idx_DM = (M200c_DM > M200c_min).nonzero()[0]
