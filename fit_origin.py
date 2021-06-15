@@ -3,6 +3,8 @@ import os.path
 import torch
 import torch.nn as nn
 
+from torchsummary import summary
+
 from data_modes import DataModes
 from data_loader import DataLoader
 from training_loss import TrainingLoss
@@ -20,17 +22,21 @@ InitProc(0)
 print(cfg.MPI_ENV_TYPE)
 print(cfg.DEVICE_IDX)
 
-model = NetworkOrigin().to_device()
+model = NetworkOrigin()
+
+# FIXME give a summary for debugging
+summary(model, [(352,3), (len(GlobalFields),), (len(Basis),3)], device='cpu')
+
+model = model.to_device()
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 loss_fn = TrainingLoss()
 training_loader = DataLoader(mode=DataModes.TRAINING, load_TNG=False)
 validation_loader = DataLoader(mode=DataModes.VALIDATION, load_TNG=False)
 scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=1e-2,
                                                 steps_per_epoch=len(training_loader),
-                                                epochs=1000)
+                                                epochs=2000)
 
-
-for epoch in range(1000) :
+for epoch in range(2000) :
 
     print('epoch %d'%epoch)
 
@@ -75,9 +81,10 @@ for epoch in range(1000) :
 
         training_loss = loss.item()
         guess_loss = loss_fn(cm, target).item()
-        print('training loss = %f vs guess = %f %s %s'%(training_loss, guess_loss, '***' if guess_loss>0.1 else '', '+++' if training_loss>0.1 else ''))
-
-    torch.save(model.state_dict(), os.path.join(cfg.RESULTS_PATH, 'origin.pt'))
+        print('training loss = %f vs guess = %f %s %s'%(training_loss, guess_loss, '***' if guess_loss>0.1 else '   ', '+++' if training_loss>0.1 else '   '))
+    
+    # FIXME
+    # torch.save(model.state_dict(), os.path.join(cfg.RESULTS_PATH, 'origin.pt'))
 
     print('VALIDATION')
     model.eval()
