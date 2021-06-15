@@ -32,7 +32,7 @@ class Basis(np.ndarray, metaclass=FixedLenVec) :
         v[projections < 0] *= -1
 
         # central CM unit vectors
-        central_CM_unit = halo.central_CM / LA.norm(halo.central_CM, axis=-1)
+        central_CM_unit = halo.central_CM_DM / LA.norm(halo.central_CM_DM, axis=-1, keepdims=True)
 
         return np.concatenate([ang_mom_unit[None,:], v, central_CM_unit], axis=0).view(type=cls)
     #}}}

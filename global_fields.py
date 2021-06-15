@@ -35,7 +35,7 @@ class GlobalFields(np.ndarray, metaclass=FixedLenVec) :
         angles = np.arccos(v @ halo.ang_momentum_DM / ang_mom_norm)
 
         # compute the central CM magnitudes
-        central_CM_norm = LA.norm(halo.central_CM, axis=-1)
+        central_CM_norm = LA.norm(halo.central_CM_DM, axis=-1)
 
         # map to the 0, pi/2 interval -- mods out the symmetry under parity
         # (np.arccos returns in the interval [0, pi])
@@ -46,6 +46,7 @@ class GlobalFields(np.ndarray, metaclass=FixedLenVec) :
         if cfg.NORMALIZE_COORDS :
             ang_mom_norm *= cfg.UNIT_MASS / (halo.R200c_DM * halo.V200c_DM * halo.M200c_DM)
             w *= cfg.UNIT_MASS / (halo.R200c_DM**2 * halo.M200c_DM)
+            central_CM_norm /= halo.R200c_DM
 
         out = np.array([logM, ang_mom_norm, *w, *angles, *central_CM_norm]).view(type=cls)
 
