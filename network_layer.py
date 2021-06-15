@@ -17,7 +17,7 @@ class NetworkLayer(nn.Module) :
         Nk_in  ... number of feature vectors coming in
                    (set to non-positive for the initial layer that takes the positions)
         Nk_out ... number of neurons going out
-        Nbasis ... number of basis vectors that will be passed
+        MLP_kwargs ... kwargs that will be passed forward to the NetworkMLP constructor
         """
     #{{{
         super().__init__()
