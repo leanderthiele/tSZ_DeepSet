@@ -127,13 +127,19 @@ def get_properties(idx, sim_type) :
                 r_pos = np.linalg.norm(coords_pos, axis=-1)
                 del coords_pos
 
+                coords_CM = coords - out[key('CM')][ii,:].astype(np.float64)
+                coords_CM[coords_CM > +0.5*cfg.BOX_SIZE] -= cfg.BOX_SIZE
+                coords_CM[coords_CM < -0.5*cfg.BOX_SIZE] += cfg.BOX_SIZE
+
+                for jj in range(len(central_CM_radii)) :
+                    out[key('central_CM')][ii,jj,:] = central_CM(r_pos, coords_CM,
+                                                                 central_CM_radii[jj] * out[key('R200c')][ii])
+                del coords_CM
+                del r_pos
+
                 coords_centered = coords - out[key(cfg.ORIGIN)][ii,:].astype(np.float64)
                 coords_centered[coords_centered > +0.5*cfg.BOX_SIZE] -= cfg.BOX_SIZE
                 coords_centered[coords_centered < -0.5*cfg.BOX_SIZE] += cfg.BOX_SIZE
-
-                for jj in range(len(central_CM_radii)) :
-                    out[key('central_CM')][ii,jj,:] = central_CM(r_pos, coords_centered,
-                                                                 central_CM_radii[jj] * out[key('R200c')][ii])
 
                 out[key('inertia')][ii, ...] = inertia(coords_centered)
                 out[key('ang_momentum')][ii, ...] = ang_momentum(coords_centered, velocities)
