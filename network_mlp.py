@@ -11,17 +11,29 @@ class _MLPLayer(nn.Sequential) :
     a single layer perceptron, used as building blocks to build the MLPs
     """
 
-    def __init__(self, Nin, Nout, bias=True, layernorm=cfg.LAYERNORM, activation=True) :
+    def __init__(self, Nin, Nout, input_is_hidden,
+                       bias=True, layernorm=cfg.LAYERNORM,
+                       activation=True, dropout=cfg.DROPOUT) :
+        """
+        set dropout to None if not desired
+        """
     #{{{ 
-        super().__init__(nn.LayerNorm(Nin) if layernorm else nn.Identity(),
-                         torch.nn.Linear(Nin, Nout, bias=bias),
-                         torch.nn.LeakyReLU() if activation else nn.Identity())
+        # NOTE apparently the ordering here is not that well explored, but I found at least
+        #      one source that says a Google network has dropout after layer normalization
 
-        nn.init.kaiming_uniform_(self[1].weight,
-                                 a=self[2].negative_slope if activation else math.sqrt(5)
+        super().__init__(nn.LayerNorm(Nin) if layernorm and input_is_hidden else nn.Identity(),
+                         nn.Dropout(p=dropout) if input_is_hidden and dropout is not None \
+                         else nn.Dropout(p=cfg.VISIBLE_DROPOUT) if dropout is not None \
+                         else nn.Identity(),
+                         nn.Linear(Nin, Nout, bias=bias),
+                         nn.LeakyReLU() if activation else nn.Identity())
+
+        # NOTE be careful about the indexing here if the sequential order is changed
+        nn.init.kaiming_uniform_(self[2].weight,
+                                 a=self[3].negative_slope if activation else math.sqrt(5)
                                 )
         if bias :
-            nn.init.ones_(self[1].bias)
+            nn.init.ones_(self[2].bias)
     #}}}
 
 
@@ -49,23 +61,9 @@ class NetworkMLP(nn.Sequential) :
                               in layer_kwargs_dict
         """
     #{{{
-        if 'layernorm' in layer_kwargs :
-            default_layernorm = layer_kwargs['layernorm']
-            layer_kwargs.pop('layernorm')
-        else :
-            default_layernorm = cfg.LAYERNORM
-
-        NetworkMLP.__remove_layer_norm(layer_kwargs_dict, 0)
-        NetworkMLP.__remove_layer_norm(layer_kwargs_dict, MLP_Nlayers)
-        NetworkMLP.__remove_layer_norm(layer_kwargs_dict, 'first')
-        NetworkMLP.__remove_layer_norm(layer_kwargs_dict, 'last')
-
         super().__init__(*[_MLPLayer(Nin if ii==0 else MLP_Nhidden,
                                      Nout if ii==MLP_Nlayers else MLP_Nhidden,
-                                     # only apply layer normalization to the hidden states
-                                     layernorm=False if ii==0 or ii==MLP_Nlayers \
-                                               else layer_kwargs_dict[str(ii)]['layernorm'] if str(ii) in layer_kwargs_dict \
-                                               else default_layernorm,
+                                     ii != 0,
                                      **(layer_kwargs_dict[str(ii)] if str(ii) in layer_kwargs_dict \
                                         else layer_kwargs_dict['first'] if 'first' in layer_kwargs_dict and ii==0 \
                                         else layer_kwargs_dict['last'] if 'last' in layer_kwargs_dict and ii==MLP_Nlayers \
@@ -75,7 +73,7 @@ class NetworkMLP(nn.Sequential) :
 
 
     @staticmethod
-    def __remove_layer_norm(d, key) :
+    def __remove_entry(d, key, entry) :
         """
         helper function to remove layer norm from the layer_kwargs_dict at specific keys
         """
@@ -83,6 +81,6 @@ class NetworkMLP(nn.Sequential) :
         if isinstance(key, int) :
             key = str(key)
 
-        if key in d and 'layernorm' in d[key] :
-            d[key].pop('layernorm')
+        if key in d and entry in d[key] :
+            d[key].pop(entry)
     #}}}

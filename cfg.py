@@ -69,6 +69,12 @@ MLP_DEFAULT_NHIDDEN = 128
 # whether to apply layer normalization in the hidden layers
 LAYERNORM = True
 
+# dropout rate (for the hidden neurons) -- set to None if not wanted
+DROPOUT = 0.5
+
+# dropout rate (for the visible neurons) -- set to None if not wanted
+VISIBLE_DROPOUT = 0.2
+
 # default number of hidden layers in the encoder
 ENCODER_DEFAULT_NLAYERS = 4
 
