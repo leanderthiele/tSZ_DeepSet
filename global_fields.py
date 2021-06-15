@@ -12,9 +12,14 @@ class GlobalFields(np.ndarray, metaclass=FixedLenVec) :
     bundles the global scalar features of the halo we want to use into a numpy array
     """
 
-    def __new__(cls, halo) :
+    def __new__(cls, halo, rng=None) :
         """
         constructing ndarray's is a bit tricky, so we do it this way
+        halo ... the halo for which the global values are to be extracted
+        rng  ... if passed, should be a numpy random number generator instance.
+                 Using halo.dglobals as characteristic scale, this will be used
+                 to add some noise to the global features and hopefully mitigate
+                 overfitting.
         """
     #{{{
         assert isinstance(halo, Halo)
@@ -39,7 +44,17 @@ class GlobalFields(np.ndarray, metaclass=FixedLenVec) :
             ang_mom_norm *= cfg.UNIT_MASS / (halo.R200c_DM * halo.V200c_DM * halo.M200c_DM)
             w *= cfg.UNIT_MASS / (halo.R200c_DM**2 * halo.M200c_DM)
 
-        return np.array([logM, ang_mom_norm, *w, *angles]).view(type=cls)
+        out = np.array([logM, ang_mom_norm, *w, *angles]).view(type=cls)
+
+        if rng is not None and cfg.GLOBALS_NOISE is not None :
+
+            # generate numbers in [-1, +1]
+            r = 2 * rng.random(len(out)) - 1
+
+            # add to the output with appropriate weights
+            out += r * cfg.NOISE * halo.dglobals
+
+        return out
     #}}}
 
 

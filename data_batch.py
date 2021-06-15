@@ -37,7 +37,8 @@ class DataBatch :
         assert all(self.has_TNG_radii == d.has_TNG_radii for d in data_items)
 
         astensor = lambda x : torch.tensor(x, dtype=torch.float32, requires_grad=False)
-        lengths_equal = lambda s : all(getattr(data_items[0], s).shape[0] == getattr(d, s).shape[0] for d in data_items)
+        lengths_equal = lambda s : all(getattr(data_items[0], s).shape[0] == getattr(d, s).shape[0] \
+                                       for d in data_items)
         stack_to_tensor = lambda s : astensor(np.stack([getattr(d, s) for d in data_items], axis=0))
         list_tensors = lambda s : [astensor(getattr(d, s)).unsqueeze(0) for d in data_items]
         batch = lambda s : stack_to_tensor(s) if lengths_equal(s) else list_tensors(s)
@@ -53,7 +54,8 @@ class DataBatch :
 
         # the globals if provided
         if len(GlobalFields) != 0 :
-            self.u = astensor(np.stack([GlobalFields(d.halo) for d in data_items], axis=0))
+            self.u = astensor(np.stack([GlobalFields(d.halo, rng=np.random.default_rng(d.hash % 2**32)) \
+                                        for d in data_items], axis=0))
 
         # the basis vectors if provided
         if len(Basis) != 0 :

@@ -29,6 +29,9 @@ class Halo :
         self.inertia_DM = get_entry('inertia_DM')
         self.ang_momentum_DM = get_entry('ang_momentum_DM')
 
+        # for noise generation, we want to have some idea of the distance to the `closest' halo
+        # (with respect to the fields we pass as globals)
+
         self.idx_TNG = get_entry('idx_TNG')
         self.pos_TNG = get_entry('pos_TNG')
         self.CM_TNG = get_entry('CM_TNG')

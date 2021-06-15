@@ -5,7 +5,7 @@ from torch.utils.data.dataset import Dataset as torch_DataSet
 
 from data_modes import DataModes
 from data_item import DataItem
-from halo import Halo
+from halo_catalog import HaloCatalog
 from origin import Origin
 import cfg
 
@@ -22,9 +22,8 @@ class DataSet(torch_DataSet) :
         assert isinstance(mode, DataModes)
 
         self.mode = mode
-        self.sample_indices = mode.sample_indices()
 
-        self.halo_catalog = dict(np.load(cfg.HALO_CATALOG))
+        self.halo_catalog = HaloCatalog(mode.sample_indices())
 
         self.data_items = []
 
@@ -32,9 +31,7 @@ class DataSet(torch_DataSet) :
         #       of the data from disk as we know we will not access any others!
         #       This could save a lot of memory
 
-        # load all the data from disk
-        for idx in self.sample_indices :
-            h = Halo(self.halo_catalog, idx)
+        for h in self.halo_catalog :
             self.data_items.append(DataItem(h, **data_item_kwargs))
     #}}}
 
@@ -86,7 +83,7 @@ class DataSet(torch_DataSet) :
         operates on the entire halo catalog (used for this mode)
         """
     #{{{
-        return len(self.sample_indices)
+        return len(self.data_items)
     #}}}
 
 

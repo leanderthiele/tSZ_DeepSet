@@ -48,6 +48,11 @@ SAMPLE_FRACTIONS = dict(validation=0.2,
 # seed that we use whenever we need something to be consistent between runs
 CONSISTENT_SEED = 137
 
+# amount of noise added to the globals
+# 1 means that confusion with other halos is theoretically impossible
+# set to None if no noise desired
+GLOBALS_NOISE = 1.0
+
 # arguments passed to the torch DataLoader constructor
 DATALOADER_ARGS = dict(batch_size=1,
                        shuffle=True,

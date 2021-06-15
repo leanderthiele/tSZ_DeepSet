@@ -1,5 +1,4 @@
 import numpy as np
-import h5py
 
 from origin import Origin
 import cfg
@@ -150,6 +149,12 @@ class DataItem :
 
             if self.has_TNG_radii :
                 out.TNG_radii = self.TNG_radii[indices['TNG']]
+
+        # give this instance some unique hash depending on the random indices passed
+        # NOTE this hash is not necessarily positive, as the sums may well overflow
+        out.hash = ( np.sum(indices['DM']) if self.has_DM else 0 ) \
+                   + ( np.sum(indices['TNG']) if self.has_TNG else 0 ) \
+                   + self.halo.idx_DM
 
         return out
     #}}}
