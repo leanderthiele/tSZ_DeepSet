@@ -4,7 +4,6 @@ import torch
 
 from data_modes import DataModes
 from data_item import DataItem
-from origin import Origin
 from global_fields import GlobalFields
 from basis import Basis
 import cfg

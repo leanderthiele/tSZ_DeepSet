@@ -1,6 +1,5 @@
 import numpy as np
 
-from origin import Origin
 import cfg
 
 
@@ -18,13 +17,12 @@ class DataItem :
 
     def __init__(self, halo, mode,
                        load_DM=True, load_TNG=True,
-                       origin=Origin.CM, compute_TNG_radii=False) :
+                       compute_TNG_radii=False) :
         """
         halo     ... a Halo instance for the current halo
         mode     ... the mode this item was loaded in
         load_DM  ... whether to load the dark matter particles
         load_TNG ... whether to load the TNG particles
-        origin   ... definition of the origin of our coordinate system, either CM or POS
         compute_TNG_radii ... whether the radial positions of the TNG particles are to be computed
         
         (we do not want to open the halo catalog file for each construction,
@@ -37,9 +35,6 @@ class DataItem :
         self.has_DM = load_DM
         self.has_TNG = load_TNG
         self.has_TNG_radii = compute_TNG_radii
-
-        assert origin in [Origin.CM, Origin.POS, ]
-        self.origin = origin
 
         if load_DM :
             self.DM_coords = self.__get_DM()
@@ -62,10 +57,10 @@ class DataItem :
         with np.load(self.halo.storage_DM) as f :
             coords = f['coords']
 
-        # remove the origin if required
-        if self.origin is Origin.CM :
+        # remove the origin
+        if cfg.ORIGIN == 'CM' :
             coords -= self.halo.CM_DM
-        elif self.origin is Origin.POS :
+        elif cfg.ORIGIN == 'pos' :
             coords -= self.halo.pos_DM
 
         # take periodic boundary conditions into account
@@ -90,10 +85,10 @@ class DataItem :
             coords = f['coords']
             Pth = f['Pth']
 
-        # remove the origin if required 
-        if self.origin is Origin.CM :
+        # remove the origin
+        if cfg.ORIGIN == 'CM' :
             coords -= self.halo.CM_DM
-        elif self.origin is Origin.POS :
+        elif cfg.ORIGIN == 'pos' :
             coords -= self.halo.pos_DM
 
         # take periodic boundary conditions into account
@@ -135,7 +130,6 @@ class DataItem :
         out = DataItem(self.halo, self.mode, load_DM=False, load_TNG=False)
 
         # copy our fields
-        out.origin = self.origin
         out.has_DM = self.has_DM
         out.has_TNG = self.has_TNG
         out.has_TNG_radii = self.has_TNG_radii

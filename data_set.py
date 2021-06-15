@@ -7,7 +7,6 @@ from data_modes import DataModes
 from data_item import DataItem
 from halo import Halo
 from halo_catalog import HaloCatalog
-from origin import Origin
 import cfg
 
 class DataSet(torch_DataSet) :

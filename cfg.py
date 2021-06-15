@@ -41,6 +41,9 @@ PRT_FRACTION = dict(DM=0.01, TNG=0.1)
 # whether to divide the coordinates by R200c
 NORMALIZE_COORDS = True
 
+# what dark matter group field to use as origin, either 'CM' or 'pos'
+ORIGIN = 'CM'
+
 # fraction of samples to use for each mode -- training is inferred
 SAMPLE_FRACTIONS = dict(validation=0.2,
                         testing=0.1)

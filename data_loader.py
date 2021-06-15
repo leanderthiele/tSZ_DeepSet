@@ -7,7 +7,6 @@ from init_proc import InitProc
 from data_modes import DataModes
 from data_set import DataSet
 from data_batch import DataBatch
-from origin import Origin
 import cfg
 
 
