@@ -9,6 +9,8 @@ class Basis(np.ndarray, metaclass=FixedLenVec) :
     """
     a wrapper around the numpy.ndarray, constructible from a Halo instance
     bundles the global vectorial features of the halo we want to use into a numpy array
+    It is a principled idea to return the unit vectors only, the magnitudes can be passed
+    through the global fields.
     """
 
     def __new__(cls, halo) :

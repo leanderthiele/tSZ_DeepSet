@@ -20,16 +20,16 @@ print(cfg.MPI_ENV_TYPE)
 print(cfg.DEVICE_IDX)
 
 model = NetworkOrigin().to_device()
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-4)
 loss_fn = TrainingLoss()
 training_loader = DataLoader(mode=DataModes.TRAINING, seed=0, load_TNG=False, origin=Origin.CM)
 validation_loader = DataLoader(mode=DataModes.VALIDATION, seed=0, load_TNG=False, origin=Origin.CM)
 scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=1e-2,
                                                 steps_per_epoch=len(training_loader),
-                                                epochs=500)
+                                                epochs=2000)
 
 
-for epoch in range(1000) :
+for epoch in range(2000) :
 
     print('epoch %d'%epoch)
 
