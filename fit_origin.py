@@ -73,8 +73,9 @@ for epoch in range(1000) :
 
         scheduler.step()
 
-        guess_loss = loss_fn(cm, target).item(
-        print('training loss = %f vs guess = %f %s'%(loss.item(), guess_loss, '***' if guess_loss>0.1 else '')))
+        training_loss = loss.item()
+        guess_loss = loss_fn(cm, target).item()
+        print('training loss = %f vs guess = %f %s %s'%(training_loss, guess_loss, '***' if guess_loss>0.1 else '', '+++' if training_loss>0.1 else ''))
 
     torch.save(model.state_dict(), os.path.join(cfg.RESULTS_PATH, 'origin.pt'))
 
@@ -103,5 +104,6 @@ for epoch in range(1000) :
 
         loss = loss_fn(prediction, target)
 
+        validation_loss = loss.item()
         guess_loss = loss_fn(cm, target).item()
-        print('validation loss = %f vs guess = %f %s'%(loss.item(), guess_loss, '***' if guess_loss>0.1 else ''))
+        print('validation loss = %f vs guess = %f %s %s'%(validation_loss, guess_loss, '***' if guess_loss>0.1 else '', '+++' if validation_loss>0.1 else ''))
