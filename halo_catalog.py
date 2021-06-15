@@ -1,47 +1,51 @@
 import numpy as np
 
+from data_modes import DataModes
 from halo import Halo
 from global_fields import GlobalFields
 import cfg
 
 class HaloCatalog :
 
-    def __init__(self, indices) :
+    def __init__(self, mode) :
         """
-        halo_catalog ... a dict with the fields of halo_catalog.npz and some additional ones
-        indices      ... the indices to pass to the Halo constructors
+        mode ... the mode for this halo catalog
         """
     #{{{
+        assert isinstance(mode, DataModes)
+
         halo_catalog = dict(np.load(cfg.HALO_CATALOG))
 
         self.halos = []
         
-        if len(GlobalFields) != 0 :
-            # these simply hold a numpy array with the global features
-            # of each halo
-            u = []
+        indices = mode.sample_indices()
 
         for idx in indices :
             self.halos.append(Halo(halo_catalog, idx))
-            if len(GlobalFields) != 0 :
-                u.append(GlobalFields(self.halos[-1]))
-                u = np.array(u)
 
-        if len(GlobalFields) != 0 :
-            dglobals = np.empty((len(self.halos), len(GlobalFields)))
+        # if we are training and there are global fields, need to populate the dglobals
+        # member variable for the noise generation
+        if len(GlobalFields) != 0 and mode is DataModes.TRAINING and cfg.GLOBALS_NOISE is not None :
+
+            u = np.array([GlobalFields(h) for h in self.halos])
             
             # ok, this is probably not efficient but who cares, these arrays are small
             # and we do this O(1) times
             for ii in range(len(self.halos)) :
                 
-                dglobals = np.empty(len(GlobalFields))
+                # some distributions are two-sided, so let's take two values here
+                dglobals = np.empty((len(GlobalFields), 2))
 
                 for jj in range(len(GlobalFields)) :
-                    sorted_diffs = np.sort(np.fabs(u[:,jj] - u[ii,jj]))
-                    assert sorted_diffs[0] < 1e-5
-                    dglobals[jj] = sorted_diffs[1]
 
-               self.halos[ii].dglobals = dglobals 
+                    diffs = np.delete(u[:,jj], ii) - u[ii,jj]
+                    neg_diffs = - diffs[diffs<0]
+                    pos_diffs = diffs[diffs>0]
+                    
+                    dglobals[jj, 0] = np.min(neg_diffs) if len(neg_diffs)>0 else np.min(pos_diffs)
+                    dglobals[jj, 1] = np.min(pos_diffs) if len(pos_diffs)>0 else np.min(neg_diffs)
+
+                self.halos[ii].dglobals = dglobals 
     #}}}
 
     

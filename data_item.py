@@ -16,11 +16,12 @@ class DataItem :
         TNG_radii    ... the radial coordinates of the gas particles (with the last dimension length 1)
     """
 
-    def __init__(self, halo,
+    def __init__(self, halo, mode,
                        load_DM=True, load_TNG=True,
                        origin=Origin.CM, compute_TNG_radii=False) :
         """
         halo     ... a Halo instance for the current halo
+        mode     ... the mode this item was loaded in
         load_DM  ... whether to load the dark matter particles
         load_TNG ... whether to load the TNG particles
         origin   ... definition of the origin of our coordinate system, either CM or POS
@@ -31,6 +32,7 @@ class DataItem :
         """
     #{{{
         self.halo = halo
+        self.mode = mode
 
         self.has_DM = load_DM
         self.has_TNG = load_TNG
@@ -130,7 +132,7 @@ class DataItem :
         """
     #{{{
         # construct a new DataItem without any data
-        out = DataItem(self.halo, load_DM=False, load_TNG=False)
+        out = DataItem(self.halo, self.mode, load_DM=False, load_TNG=False)
 
         # copy our fields
         out.origin = self.origin

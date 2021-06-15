@@ -2,6 +2,7 @@ import numpy as np
 
 import torch
 
+from data_modes import DataModes
 from data_item import DataItem
 from origin import Origin
 from global_fields import GlobalFields
@@ -35,6 +36,8 @@ class DataBatch :
         assert all(self.has_TNG == d.has_TNG for d in data_items)
         self.has_TNG_radii = data_items[0].has_TNG_radii
         assert all(self.has_TNG_radii == d.has_TNG_radii for d in data_items)
+        self.mode = data_items[0].mode
+        assert all(self.mode is d.mode for d in data_items)
 
         astensor = lambda x : torch.tensor(x, dtype=torch.float32, requires_grad=False)
         lengths_equal = lambda s : all(getattr(data_items[0], s).shape[0] == getattr(d, s).shape[0] \
@@ -54,7 +57,9 @@ class DataBatch :
 
         # the globals if provided
         if len(GlobalFields) != 0 :
-            self.u = astensor(np.stack([GlobalFields(d.halo, rng=np.random.default_rng(d.hash % 2**32)) \
+            self.u = astensor(np.stack([GlobalFields(d.halo, \
+                                                     rng=np.random.default_rng(d.hash % 2**32) \
+                                                         if self.mode is DataModes.TRAINING else None) \
                                         for d in data_items], axis=0))
 
         # the basis vectors if provided

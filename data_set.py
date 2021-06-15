@@ -5,6 +5,7 @@ from torch.utils.data.dataset import Dataset as torch_DataSet
 
 from data_modes import DataModes
 from data_item import DataItem
+from halo import Halo
 from halo_catalog import HaloCatalog
 from origin import Origin
 import cfg
@@ -23,7 +24,7 @@ class DataSet(torch_DataSet) :
 
         self.mode = mode
 
-        self.halo_catalog = HaloCatalog(mode.sample_indices())
+        self.halo_catalog = HaloCatalog(mode)
 
         self.data_items = []
 
@@ -32,7 +33,7 @@ class DataSet(torch_DataSet) :
         #       This could save a lot of memory
 
         for h in self.halo_catalog :
-            self.data_items.append(DataItem(h, **data_item_kwargs))
+            self.data_items.append(DataItem(h, mode, **data_item_kwargs))
     #}}}
 
 
@@ -41,7 +42,6 @@ class DataSet(torch_DataSet) :
         to be called from worker_init_fn to initialize the random number generator for this worker
         """
     #{{{
-        print('Calling set_worker with ', seed)
         self.rng = np.random.default_rng(seed % 2**32)
     #}}}
 

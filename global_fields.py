@@ -48,11 +48,18 @@ class GlobalFields(np.ndarray, metaclass=FixedLenVec) :
 
         if rng is not None and cfg.GLOBALS_NOISE is not None :
 
-            # generate numbers in [-1, +1]
-            r = 2 * rng.random(len(out)) - 1
+            assert np.all(halo.dglobals > 0)
 
-            # add to the output with appropriate weights
-            out += r * cfg.NOISE * halo.dglobals
+            for ii in range(len(out)) :
+
+                # generate Gaussian random number of unit variance and zero mean
+                r = rng.normal()
+
+                # rescale by the dglobals entry
+                r *= halo.dglobals[ii,0] if r<0 else halo.dglobals[ii,1]
+
+                # add to the output with appropriate weight
+                out[ii] += r * cfg.GLOBALS_NOISE
 
         return out
     #}}}
