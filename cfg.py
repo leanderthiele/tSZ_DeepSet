@@ -78,7 +78,7 @@ BASIS_USE = dict(none=False,
 # specifies standard deviation of the Gaussians from which rotation angles will be drawn (in degrees)
 # [currently, we keep the basis vectors normed]
 # so to None if no noise is desired
-BASIS_NOISE = 10.0
+BASIS_NOISE = 20.0
 
 # arguments passed to the torch DataLoader constructor
 DATALOADER_ARGS = dict(batch_size=8,
@@ -97,10 +97,10 @@ MLP_DEFAULT_NHIDDEN = 128
 LAYERNORM = True
 
 # dropout rate (for the hidden neurons) -- set to None if not wanted
-DROPOUT = 0.5
+DROPOUT = None
 
 # dropout rate (for the visible neurons) -- set to None if not wanted
-VISIBLE_DROPOUT = 0.2
+VISIBLE_DROPOUT = None
 
 # default number of hidden layers in the encoder
 ENCODER_DEFAULT_NLAYERS = 4
