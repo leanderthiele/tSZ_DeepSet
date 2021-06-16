@@ -42,13 +42,14 @@ class DataLoader(torch_DataLoader) :
     a torch-compatible data loader
     """
     
-    def __init__(self, **data_set_kwargs) :
+    def __init__(self, mode, **data_set_kwargs) :
     #{{{
-        self.dataset = DataSet(**data_set_kwargs)
+        self.dataset = DataSet(mode, **data_set_kwargs)
         self.worker_pool = _WorkerPool()
 
         super().__init__(self.dataset,
                          collate_fn=DataBatch,
                          worker_init_fn=self.worker_pool.init_worker,
+                         shuffle=mode is DataModes.TRAINING,
                          **cfg.DATALOADER_ARGS)
     #}}}

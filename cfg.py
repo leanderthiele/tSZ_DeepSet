@@ -47,6 +47,8 @@ NORMALIZE_COORDS = True
 ORIGIN = 'CM'
 
 # fraction of samples to use for each mode -- training is inferred
+# NOTE with Mmin=5e13, we have 439 samples in total, of which 10% are ~44
+#      which is very nicely divisibly by batch size 4
 SAMPLE_FRACTIONS = dict(validation=0.2,
                         testing=0.1)
 
@@ -60,7 +62,6 @@ GLOBALS_NOISE = 5.0
 
 # arguments passed to the torch DataLoader constructor
 DATALOADER_ARGS = dict(batch_size=4,
-                       shuffle=True,
                        num_workers=4,
                        pin_memory=True,
                        prefetch_factor=1,

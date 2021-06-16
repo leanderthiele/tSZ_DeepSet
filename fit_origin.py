@@ -36,14 +36,14 @@ training_loader = DataLoader(mode=DataModes.TRAINING, load_TNG=False)
 validation_loader = DataLoader(mode=DataModes.VALIDATION, load_TNG=False)
 scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=1e-2,
                                                 steps_per_epoch=len(training_loader),
-                                                epochs=500)
+                                                epochs=2000)
 
 training_loss_arr = []
 validation_loss_arr = []
 
-for epoch in range(500) :
+for epoch in range(2000) :
 
-    print('epoch %d'%epoch)
+    print('epoch %d, lr = %f'%(epoch, optimizer.param_groups[0]['lr']))
 
     print('TRAINING')
     model.train()
@@ -105,7 +105,7 @@ for epoch in range(500) :
     this_validation_loss = np.empty((len(validation_loader)*bs, 2))
 
     for t, data in enumerate(validation_loader) :
-        
+
         data = data.to_device()
 
         prediction = model(data.DM_coords,
