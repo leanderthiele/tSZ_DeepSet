@@ -23,7 +23,8 @@ The output file contains the fields:
 
     inertia_DM [3,3]
     ang_momentum_DM [3]
-    central_CM [N, 3] -- vectors w.r.t. cfg.ORIGIN
+    central_CM_DM [N, 3] -- vectors w.r.t. cfg.ORIGIN
+    vel_dispersion_DM [3, 3]
 
 [TNG simulation]
     idx_TNG
@@ -143,6 +144,10 @@ def get_properties(idx, sim_type) :
 
                 out[key('inertia')][ii, ...] = inertia(coords_centered)
                 out[key('ang_momentum')][ii, ...] = ang_momentum(coords_centered, velocities)
+                del coords_centered
+
+                velocities -= np.mean(velocities, axis=0)
+                out[key('vel_dispersion')] = inertia(velocities)
 
     return out
 

@@ -27,26 +27,37 @@ class GlobalFields(np.ndarray, metaclass=FixedLenVec) :
         logM = np.log(halo.M200c_DM)
         ang_mom_norm = LA.norm(halo.ang_momentum_DM)
 
-        w, v = LA.eigh(halo.inertia_DM)
-        v = v.T # get into better format -- v[i, :] is the ith eigenvector
+        # diagonalize inertia tensor
+        eigval_inertia, eigvec_inertia = LA.eigh(halo.inertia_DM)
+        eigvec_inertia = eigvec_inertia.T # get into better format -- v[i, :] is the ith eigenvector
 
         # compute the angles between angular momentum and inertia axes
         # note that the eigenvectors returned by eigh are already normalized
-        angles = np.arccos(v @ halo.ang_momentum_DM / ang_mom_norm)
+        inertia_dot_ang_mom = eigvec_inertia @ halo.ang_momentum_DM / ang_mom_norm
+
+        # diagonalize velocity dispersion tensor
+        eigval_vel_dispersion, eigvec_vel_dispersion = LA.eigh(halo.vel_dispersion)
+        eigvec_vel_dispersion = eigvec_vel_dispersion.T
+
+        # compute the angles between angular momentum and velocity dispersion axes
+        vel_dispersion_dot_ang_mom = eigvec_vel_dispersion @ halo.ang_momentum_DM / ang_mom_norm
+
+        # compute angles between inertia and velocity dispersion eigenvectors
+        vel_dispersion_dot_inertia = np.einsum('id,jd->ij', eigvec_inertia, eigvec_vel_dispersion).flatten()
 
         # compute the central CM magnitudes
         central_CM_norm = LA.norm(halo.central_CM_DM, axis=-1)
 
-        # map to the 0, pi/2 interval -- mods out the symmetry under parity
-        # (np.arccos returns in the interval [0, pi])
-        for ii in range(3) :
-            if angles[ii] > 0.5*np.pi :
-                angles[ii] = np.pi - angles[ii]
+        # fix the parity symmetry
+        inertia_dot_ang_mom[inertia_dot_ang_mom < 0] *= -1
+        vel_dispersion_dot_ang_mom[vel_dispersion_dot_ang_mom < 0] *= -1
+        vel_dispersion_dot_inertia[vel_dispersion_dot_inertia < 0] *= -1
 
         if cfg.NORMALIZE_COORDS :
             ang_mom_norm *= cfg.UNIT_MASS / (halo.R200c_DM * halo.V200c_DM * halo.M200c_DM)
-            w *= cfg.UNIT_MASS / (halo.R200c_DM**2 * halo.M200c_DM)
+            eigval_inertia *= cfg.UNIT_MASS / (halo.R200c_DM**2 * halo.M200c_DM)
             central_CM_norm /= halo.R200c_DM
+            eigval_vel_dispersion *= cfg.UNIT_MASS / (halo.V200c_DM**2 * halo.M200c_DM)
 
         out = []
 
@@ -55,11 +66,17 @@ class GlobalFields(np.ndarray, metaclass=FixedLenVec) :
         if cfg.GLOBALS_USE['ang_mom'] :
             out.append(ang_mom_norm)
         if cfg.GLOBALS_USE['inertia'] :
-            out.extend(w)
+            out.extend(eigval_inertia)
         if cfg.GLOBALS_USE['inertia_dot_ang_mom'] :
-            out.extend(angles)
+            out.extend(inertia_dot_ang_mom)
         if cfg.GLOBALS_USE['central_CM'] :
             out.extend(central_CM_norm)
+        if cfg.GLOBALS_USE['vel_dispersion'] :
+            out.extend(eigval_vel_dispersion)
+        if cfg.GLOBALS_USE['vel_dispersion_dot_ang_mom'] :
+            out.extend(vel_dispersion_dot_ang_mom)
+        if cfg.GLOBALS_USE['vel_dispersion_dot_inertia'] :
+            out.extend(vel_dispersion_dot_inertia)
 
         out = np.array(out)
 
@@ -93,5 +110,8 @@ class GlobalFields(np.ndarray, metaclass=FixedLenVec) :
                                                 + cfg.GLOBALS_USE['ang_mom']
                                                 + 3 * cfg.GLOBALS_USE['inertia']
                                                 + 3 * cfg.GLOBALS_USE['inertia_dot_ang_mom'] 
+                                                + 3 * cfg.GLOBALS_USE['vel_dispersion']
+                                                + 3 * cfg.GLOBALS_USE['vel_dispersion_dot_ang_mom']
+                                                + 9 * cfg.GLOBALS_USE['vel_dispersion_dot_inertia']
                                                 + 3 * cfg.GLOBALS_USE['central_CM']) # TODO the last 3 is not robust
     #}}}

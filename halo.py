@@ -29,6 +29,7 @@ class Halo :
         self.inertia_DM = get_entry('inertia_DM')
         self.ang_momentum_DM = get_entry('ang_momentum_DM')
         self.central_CM_DM = get_entry('central_CM_DM')
+        self.vel_dispersion = get_entry('vel_dispersion_DM')
 
         self.idx_TNG = get_entry('idx_TNG')
         self.pos_TNG = get_entry('pos_TNG')

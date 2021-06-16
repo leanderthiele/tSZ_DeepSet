@@ -42,6 +42,8 @@ class Basis(np.ndarray, metaclass=FixedLenVec) :
             out.extend(v)
         if cfg.BASIS_USE['central_CM'] :
             out.extend(halo.central_CM_DM)
+        if cfg.BASIS_USE['vel_dispersion'] :
+            out.extend(halo.vel_dispersion)
 
         out = np.array(out)
 
@@ -83,5 +85,6 @@ class Basis(np.ndarray, metaclass=FixedLenVec) :
     #{{{ 
         return (not cfg.BASIS_USE['none']) * (cfg.BASIS_USE['ang_mom']
                                               + 3 * cfg.BASIS_USE['inertia']
+                                              + 3 * cfg.BASIS_USE['vel_dispersion']
                                               + 3 * cfg.BASIS_USE['central_CM']) # TODO the last 3 is not robust
     #}}}

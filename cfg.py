@@ -57,11 +57,15 @@ CONSISTENT_SEED = 137
 
 # which globals to use -- set `none' to true if no globals are to be used
 GLOBALS_USE = dict(none=True,
+                   #-------#
                    logM=True,
                    ang_mom=True,
                    inertia=True,
                    inertia_dot_ang_mom=True,
-                   central_CM=True)
+                   central_CM=True,
+                   vel_dispersion=True,
+                   vel_dispersion_dot_ang_mom=True,
+                   vel_dispersion_dot_inertia=True)
 
 # amount of noise added to the globals
 # 1 means that confusion with other halos is almost impossible
@@ -70,9 +74,11 @@ GLOBALS_NOISE = 5.0
 
 # which basis vectors to use -- set `none' to true if no basis vectors are to be used
 BASIS_USE = dict(none=False,
+                 #--------#
                  ang_mom=True,
                  inertia=True,
-                 central_CM=True)
+                 central_CM=True,
+                 vel_dispersion=True)
 
 # amount of noise added to the vectors
 # specifies standard deviation of the Gaussians from which rotation angles will be drawn (in degrees)
