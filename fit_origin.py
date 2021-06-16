@@ -48,7 +48,8 @@ for epoch in range(500) :
     print('TRAINING')
     model.train()
 
-    this_training_loss = np.empty((len(training_loader), 2))
+    bs = cfg.DATALOADER_ARGS['batch_size']
+    this_training_loss = np.empty((len(training_loader)*bs, 2))
 
     for t, data in enumerate(training_loader) :
 
@@ -86,12 +87,12 @@ for epoch in range(500) :
 
         scheduler.step()
 
-        training_loss = loss.item()
-        guess_loss = loss_fn(cm, target).item()
-        print('training loss = %f vs guess = %f %s %s'%(training_loss, guess_loss, '***' if guess_loss>0.1 else '   ', '+++' if training_loss>0.1 else '   '))
+        # do this separately so we have it for each halo
+        training_loss = torch.linalg.norm(prediction-target, dim=-1).detach().numpy()
+        guess_loss = torch.linalg.norm(cm-target, dim=-1).detach().numpy()
 
-        this_training_loss[t, 0] = training_loss
-        this_training_loss[t, 1] = guess_loss
+        this_training_loss[t*bs : (t+1)*bs, 0] = training_loss
+        this_training_loss[t*bs : (t+1)*bs, 1] = guess_loss
 
     training_loss_arr.append(this_training_loss)
     
@@ -101,7 +102,7 @@ for epoch in range(500) :
     print('VALIDATION')
     model.eval()
 
-    this_validation_loss = np.empty((len(validation_loader), 2))
+    this_validation_loss = np.empty((len(validation_loader)*bs, 2))
 
     for t, data in enumerate(validation_loader) :
         
@@ -123,14 +124,11 @@ for epoch in range(500) :
         if cfg.NORMALIZE_COORDS :
             target /= data.R200c.unsqueeze(-1)
 
-        loss = loss_fn(prediction, target)
+        validation_loss = torch.linalg.norm(prediction-target, dim=-1).detach().numpy()
+        guess_loss = torch.linalg.norm(cm-target, dim=-1).detach().numpy()
 
-        validation_loss = loss.item()
-        guess_loss = loss_fn(cm, target).item()
-        print('validation loss = %f vs guess = %f %s %s'%(validation_loss, guess_loss, '***' if guess_loss>0.1 else '   ', '+++' if validation_loss>0.1 else '   '))
-
-        this_validation_loss[t, 0] = validation_loss
-        this_validation_loss[t, 1] = guess_loss
+        this_validation_loss[t*bs : (t+1)*bs, 0] = validation_loss
+        this_validation_loss[t*bs : (t+1)*bs, 1] = guess_loss
 
     validation_loss_arr.append(this_validation_loss)
 

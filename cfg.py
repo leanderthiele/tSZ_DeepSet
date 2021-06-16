@@ -59,11 +59,12 @@ CONSISTENT_SEED = 137
 GLOBALS_NOISE = 5.0
 
 # arguments passed to the torch DataLoader constructor
-DATALOADER_ARGS = dict(batch_size=1,
+DATALOADER_ARGS = dict(batch_size=4,
                        shuffle=True,
                        num_workers=4,
                        pin_memory=True,
-                       prefetch_factor=1)
+                       prefetch_factor=1,
+                       drop_last=True)
 
 # default number of hidden layers for the MLPs
 MLP_DEFAULT_NLAYERS = 4
