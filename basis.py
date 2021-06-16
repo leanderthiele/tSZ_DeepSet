@@ -60,13 +60,10 @@ class Basis(np.ndarray, metaclass=FixedLenVec) :
 
                 # find the rotation matrix that takes the z axis to the vector we want to perturb
                 # [this is analogous to https://stackoverflow.com/questions/45142959]
-                v = np.array([-out[ii,1], out[ii,0], 0])
-                c = out[ii,2]
-                s = out[ii,0]**2 + out[ii,1]**2
                 k = np.array([[0,          0,         out[ii,0]],
                               [0,          0,         out[ii,1]],
                               [-out[ii,0], -out[ii,1],0        ]])
-                R = np.identity(3) + k + (1-c) / s**2 * k @ k
+                R = np.identity(3) + k + (1-out[ii,2]) / (out[ii,0]**2+out[ii,1]**2) * k @ k
 
                 assert np.allclose(R @ np.array([0,0,1]), out[ii])
 
@@ -85,6 +82,6 @@ class Basis(np.ndarray, metaclass=FixedLenVec) :
         """
     #{{{ 
         return (not cfg.BASIS_USE['none']) * (cfg.BASIS_USE['ang_mom']
-                                              * 3 * cfg.BASIS_USE['inertia']
-                                              * 3 * cfg.BASIS_USE['central_CM']) # TODO the last 3 is not robust
+                                              + 3 * cfg.BASIS_USE['inertia']
+                                              + 3 * cfg.BASIS_USE['central_CM']) # TODO the last 3 is not robust
     #}}}

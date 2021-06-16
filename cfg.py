@@ -56,7 +56,7 @@ SAMPLE_FRACTIONS = dict(validation=0.2,
 CONSISTENT_SEED = 137
 
 # which globals to use -- set `none' to true if no globals are to be used
-GLOBALS_USE = dict(none=False,
+GLOBALS_USE = dict(none=True,
                    logM=True,
                    ang_mom=True,
                    inertia=True,

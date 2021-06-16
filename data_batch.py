@@ -55,7 +55,7 @@ class DataBatch :
                 self.TNG_radii = batch('TNG_radii')
 
         # get a random number generator if noise is required
-        rng = np.random.default_rng(d.hash % 2**32) if self.mode is DataModes.TRAINING else None
+        rng = np.random.default_rng(sum(d.hash for d in data_items) % 2**32) if self.mode is DataModes.TRAINING else None
 
         # the globals if provided
         if len(GlobalFields) != 0 :
