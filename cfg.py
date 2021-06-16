@@ -65,7 +65,7 @@ DATALOADER_ARGS = dict(batch_size=4,
                        num_workers=4,
                        pin_memory=True,
                        prefetch_factor=1,
-                       drop_last=True)
+                       drop_last=False)
 
 # default number of hidden layers for the MLPs
 MLP_DEFAULT_NLAYERS = 4

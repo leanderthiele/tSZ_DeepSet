@@ -12,6 +12,11 @@ import cfg
 class DataSet(torch_DataSet) :
     """
     torch-compatible representation of the simulation data
+    In training mode, in order to always be able to sync between distributed
+    processes and so that batches are completely filled,
+    the data set potentially returns duplicate samples.
+    On the other hand, in validation and testing mode this does not happen
+    and different processes will in general see different lengths of the training set
     """
 
     def __init__(self, mode, **data_item_kwargs) :
@@ -25,22 +30,27 @@ class DataSet(torch_DataSet) :
 
         self.halo_catalog = HaloCatalog(mode)
 
-        self.data_items = []
+        # total number of objects across all processes
+        self.len_all = len(self.halo_catalog)
 
-        # FIXME for distributed training, we only want to load a subset
-        #       of the data from disk as we know we will not access any others!
-        #       This could save a lot of memory
+        # now slice the object we use for this process
+        self.halo_catalog = self.halo_catalog[cfg.RANK::cfg.WORLD_SIZE]
 
-        for h in self.halo_catalog :
-            self.data_items.append(DataItem(h, mode, **data_item_kwargs))
+        self.data_items = [DataItem(h, mode, **data_item_kwargs) for h in self.halo_catalog]
 
         if self.mode is not DataModes.TRAINING :
+
             # for validation and testing, we want consistent particle sampling
             self.rng = np.random.default_rng(cfg.CONSISTENT_SEED)
+
             for ii in range(len(self.data_items)) :
                 indices = dict(DM=self.__get_indices(self.data_items[ii].halo, 'DM'),
                                TNG=self.__get_indices(self.data_items[ii].halo, 'TNG'))
                 self.data_items[ii] = self.data_items[ii].sample_particles(indices)
+        
+        if self.mode is DataModes.TRAINING :
+            # check that our hack works
+            assert len(self) % cfg.DATALOADER_ARGS['batch_size'] == 0
     #}}}
 
 
@@ -57,29 +67,19 @@ class DataSet(torch_DataSet) :
     def __getitem__(self, idx) :
         """
         idx ... local index within the samples this rank operates on
+                (in training mode, can be larger than the maximum index that can be applied to our halo
+                 catalog since we sometimes use samples twice if their total number is not
+                 divisible by the WORLD_SIZE)
         """
     #{{{
-        return self.__getitem_all((idx * cfg.WORLD_SIZE + cfg.RANK) % self.__len_all())
-    #}}}
-
-
-    def __len__(self) :
-        """
-        returns number of samples this rank operates on
-        (if the world size does not divide the available number of samples,
-         we round up and some camples will be used twice)
-        """
-    #{{{
-        return int(np.ceil(self.__len_all() / cfg.WORLD_SIZE))
-    #}}}
-
-
-    def __getitem_all(self, idx) :
-        """
-        idx ... global index over the entire halo catalog (used for this mode)
-        """
-    #{{{ 
         if self.mode is DataModes.TRAINING :
+
+            if idx >= len(self.data_items) :
+                # we have hit some duplicate sample -- we take a random one now
+                # in order to avoid always having the same duplicate samples in the training set
+                # NOTE that at this point we have an rng available
+                idx = self.rng.integers(len(self.data_items))
+
             indices = dict(DM=self.__get_indices(self.data_items[idx].halo, 'DM'),
                            TNG=self.__get_indices(self.data_items[idx].halo, 'TNG'))
 
@@ -89,12 +89,20 @@ class DataSet(torch_DataSet) :
     #}}}
 
 
-    def __len_all(self) :
+    def __len__(self) :
         """
-        operates on the entire halo catalog (used for this mode)
+        returns number of samples this rank operates on
+        (in training mode, if the world size does not divide the available number of samples,
+         we round up and some samples will be used twice)
         """
     #{{{
-        return len(self.data_items)
+        if self.mode is DataModes.TRAINING :
+            n = int(np.ceil(self.len_all / cfg.WORLD_SIZE))
+            # return the next larger integer that is divisible by the batch size
+            bs = cfg.DATALOADER_ARGS['batch_size']
+            return n + bs - n % bs
+        else :
+            return len(self.data_items)
     #}}}
 
 

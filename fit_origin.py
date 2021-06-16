@@ -39,7 +39,9 @@ scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=1e-2,
                                                 epochs=2000)
 
 training_loss_arr = []
+training_guess_loss_arr = []
 validation_loss_arr = []
+validation_guess_loss_arr = []
 
 for epoch in range(2000) :
 
@@ -49,7 +51,8 @@ for epoch in range(2000) :
     model.train()
 
     bs = cfg.DATALOADER_ARGS['batch_size']
-    this_training_loss = np.empty((len(training_loader)*bs, 2))
+    this_training_loss = []
+    this_training_guess_loss = []
 
     for t, data in enumerate(training_loader) :
 
@@ -91,10 +94,11 @@ for epoch in range(2000) :
         training_loss = torch.linalg.norm(prediction-target, dim=-1).cpu().detach().numpy()
         guess_loss = torch.linalg.norm(cm-target, dim=-1).cpu().detach().numpy()
 
-        this_training_loss[t*bs : (t+1)*bs, 0] = training_loss
-        this_training_loss[t*bs : (t+1)*bs, 1] = guess_loss
+        this_training_loss.extend(training_loss)
+        this_training_guess_loss.extend(guess_loss)
 
-    training_loss_arr.append(this_training_loss)
+    training_loss_arr.append(np.array(this_training_loss))
+    training_guess_loss_arr.append(np.array(this_training_guess_loss))
     
     # FIXME
     # torch.save(model.state_dict(), os.path.join(cfg.RESULTS_PATH, 'origin.pt'))
@@ -102,7 +106,8 @@ for epoch in range(2000) :
     print('VALIDATION')
     model.eval()
 
-    this_validation_loss = np.empty((len(validation_loader)*bs, 2))
+    this_validation_loss = []
+    this_validation_guess_loss = []
 
     for t, data in enumerate(validation_loader) :
 
@@ -127,11 +132,14 @@ for epoch in range(2000) :
         validation_loss = torch.linalg.norm(prediction-target, dim=-1).cpu().detach().numpy()
         guess_loss = torch.linalg.norm(cm-target, dim=-1).cpu().detach().numpy()
 
-        this_validation_loss[t*bs : (t+1)*bs, 0] = validation_loss
-        this_validation_loss[t*bs : (t+1)*bs, 1] = guess_loss
+        this_validation_loss.extend(validation_loss)
+        this_validation_guess_loss.extend(guess_loss)
 
-    validation_loss_arr.append(this_validation_loss)
+    validation_loss_arr.append(np.array(this_validation_loss))
+    validation_guess_loss_arr.append(np.array(this_validation_guess_loss))
 
     np.savez(os.path.join(cfg.RESULTS_PATH, 'loss_origin.npz'),
              training=np.array(training_loss_arr),
-             validation=np.array(validation_loss_arr))
+             training_guess=np.array(training_guess_loss_arr),
+             validation=np.array(validation_loss_arr),
+             validation_guess=np.array(validation_guess_loss_arr))

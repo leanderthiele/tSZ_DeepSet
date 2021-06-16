@@ -34,11 +34,10 @@ class DataModes(Enum) :
             Nsamples_tot = len(f['idx_DM'])
         
         try :
-            Nsamples = DataModes.__round_to_bs_divisible(int(round(Nsamples_tot * cfg.SAMPLE_FRACTIONS[str(self)])))
+            Nsamples = int(round(Nsamples_tot * cfg.SAMPLE_FRACTIONS[str(self)]))
         except KeyError : # we have hit the one that is not specified
             Nsamples = Nsamples_tot \
-                       - sum(DataModes.__round_to_bs_divisible(int(round(Nsamples_tot * v))) \
-                             for v in cfg.SAMPLE_FRACTIONS.values())
+                       - sum(int(round(Nsamples_tot * v)) for v in cfg.SAMPLE_FRACTIONS.values())
 
         return Nsamples_tot, Nsamples
     #}}}
@@ -69,20 +68,4 @@ class DataModes(Enum) :
         np.random.default_rng(cfg.CONSISTENT_SEED).shuffle(arr)
 
         return arr[s : s+l]
-    #}}}
-
-
-    @staticmethod
-    def __round_to_bs_divisible(N) :
-        """
-        returns the number closest to N that is divisible by the batch size
-        """
-    #{{{
-        bs = cfg.DATALOADER_ARGS['batch_size']
-        n1 = N - N % bs
-        n2 = N + bs - N % bs
-        if N-n1 > n2-N :
-            return n2
-        else :
-            return n1
     #}}}
