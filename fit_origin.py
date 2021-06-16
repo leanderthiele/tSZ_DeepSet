@@ -88,8 +88,8 @@ for epoch in range(2000) :
         scheduler.step()
 
         # do this separately so we have it for each halo
-        training_loss = torch.linalg.norm(prediction-target, dim=-1).detach().numpy()
-        guess_loss = torch.linalg.norm(cm-target, dim=-1).detach().numpy()
+        training_loss = torch.linalg.norm(prediction-target, dim=-1).cpu().detach().numpy()
+        guess_loss = torch.linalg.norm(cm-target, dim=-1).cpu().detach().numpy()
 
         this_training_loss[t*bs : (t+1)*bs, 0] = training_loss
         this_training_loss[t*bs : (t+1)*bs, 1] = guess_loss
@@ -124,8 +124,8 @@ for epoch in range(2000) :
         if cfg.NORMALIZE_COORDS :
             target /= data.R200c.unsqueeze(-1)
 
-        validation_loss = torch.linalg.norm(prediction-target, dim=-1).detach().numpy()
-        guess_loss = torch.linalg.norm(cm-target, dim=-1).detach().numpy()
+        validation_loss = torch.linalg.norm(prediction-target, dim=-1).cpu().detach().numpy()
+        guess_loss = torch.linalg.norm(cm-target, dim=-1).cpu().detach().numpy()
 
         this_validation_loss[t*bs : (t+1)*bs, 0] = validation_loss
         this_validation_loss[t*bs : (t+1)*bs, 1] = guess_loss
