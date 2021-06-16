@@ -118,7 +118,6 @@ class DataBatch :
     #{{{
         if cfg.DEVICE_IDX is not None :
 
-            # TODO is this correct -- is torch.Tensor the base class?
             for k, v in self.__dict__.items() :
                 if k.startswith('__') :
                     continue
