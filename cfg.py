@@ -55,10 +55,30 @@ SAMPLE_FRACTIONS = dict(validation=0.2,
 # seed that we use whenever we need something to be consistent between runs
 CONSISTENT_SEED = 137
 
+# which globals to use -- set `none' to true if no globals are to be used
+GLOBALS_USE = dict(none=False,
+                   logM=True,
+                   ang_mom=True,
+                   inertia=True,
+                   inertia_dot_ang_mom=True,
+                   central_CM=True)
+
 # amount of noise added to the globals
 # 1 means that confusion with other halos is almost impossible
 # set to None if no noise desired
 GLOBALS_NOISE = 5.0
+
+# which basis vectors to use -- set `none' to true if no basis vectors are to be used
+BASIS_USE = dict(none=False,
+                 ang_mom=True,
+                 inertia=True,
+                 central_CM=True)
+
+# amount of noise added to the vectors
+# specifies standard deviation of the Gaussians from which rotation angles will be drawn (in degrees)
+# [currently, we keep the basis vectors normed]
+# so to None if no noise is desired
+BASIS_NOISE = 10.0
 
 # arguments passed to the torch DataLoader constructor
 DATALOADER_ARGS = dict(batch_size=8,

@@ -48,7 +48,20 @@ class GlobalFields(np.ndarray, metaclass=FixedLenVec) :
             w *= cfg.UNIT_MASS / (halo.R200c_DM**2 * halo.M200c_DM)
             central_CM_norm /= halo.R200c_DM
 
-        out = np.array([logM, ang_mom_norm, *w, *angles, *central_CM_norm]).view(type=cls)
+        out = []
+
+        if cfg.GLOBALS_USE['logM'] :
+            out.append(logM)
+        if cfg.GLOBALS_USE['ang_mom'] :
+            out.append(ang_mom_norm)
+        if cfg.GLOBALS_USE['inertia'] :
+            out.extend(w)
+        if cfg.GLOBALS_USE['inertia_dot_ang_mom'] :
+            out.extend(angles)
+        if cfg.GLOBALS_USE['central_CM'] :
+            out.extend(central_CM_norm)
+
+        out = np.array(out)
 
         # add noise if requested
         if rng is not None and cfg.GLOBALS_NOISE is not None :
@@ -66,15 +79,19 @@ class GlobalFields(np.ndarray, metaclass=FixedLenVec) :
                 # add to the output with appropriate weight
                 out[ii] += r * cfg.GLOBALS_NOISE
 
-        return out
+        return out.view(type=cls)
     #}}}
 
 
     @classmethod
     def _length(cls) :
         """
-        should not be used directly, adapt if more features are added to the global vector
+        should not be used directly
         """
     #{{{
-        return 0
+        return (not cfg.GLOBALS_USE['none']) * (cfg.GLOBALS_USE['logM']
+                                                + cfg.GLOBALS_USE['ang_mom']
+                                                + 3 * cfg.GLOBALS_USE['inertia']
+                                                + 3 * cfg.GLOBALS_USE['inertia_dot_ang_mom'] 
+                                                + 3 * cfg.GLOBALS_USE['central_CM']) # TODO the last 3 is not robust
     #}}}
