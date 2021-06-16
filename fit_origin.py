@@ -27,7 +27,7 @@ if cfg.MPI_ENV_TYPE is MPIEnvTypes.NOGPU :
 model = NetworkOrigin()
 
 # give a summary for debugging
-summary(model, [(352,3), (len(GlobalFields),), (len(Basis),3)], device='cpu')
+summary(model, [(137,3), (len(GlobalFields),), (len(Basis),3)], device='cpu')
 
 model = model.to_device()
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
@@ -40,8 +40,11 @@ scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=1e-2,
 
 training_loss_arr = []
 training_guess_loss_arr = []
+training_logM_arr = []
+
 validation_loss_arr = []
 validation_guess_loss_arr = []
+validation_logM_arr = []
 
 for epoch in range(2000) :
 
@@ -53,6 +56,7 @@ for epoch in range(2000) :
     bs = cfg.DATALOADER_ARGS['batch_size']
     this_training_loss = []
     this_training_guess_loss = []
+    this_trainig_logM = []
 
     for t, data in enumerate(training_loader) :
 
@@ -96,9 +100,11 @@ for epoch in range(2000) :
 
         this_training_loss.extend(training_loss)
         this_training_guess_loss.extend(guess_loss)
+        this_trainig_logM.extend(np.log(data.M200c.cpu().detach().numpy()))
 
     training_loss_arr.append(np.array(this_training_loss))
     training_guess_loss_arr.append(np.array(this_training_guess_loss))
+    training_logM_arr.append(np.array(this_trainig_logM))
     
     # FIXME
     # torch.save(model.state_dict(), os.path.join(cfg.RESULTS_PATH, 'origin.pt'))
@@ -108,6 +114,7 @@ for epoch in range(2000) :
 
     this_validation_loss = []
     this_validation_guess_loss = []
+    this_validation_logM = []
 
     for t, data in enumerate(validation_loader) :
 
@@ -134,12 +141,16 @@ for epoch in range(2000) :
 
         this_validation_loss.extend(validation_loss)
         this_validation_guess_loss.extend(guess_loss)
+        this_validation_logM.extend(np.log(data.M200c.cpu().detach().numpy()))
 
     validation_loss_arr.append(np.array(this_validation_loss))
     validation_guess_loss_arr.append(np.array(this_validation_guess_loss))
+    validation_logM_arr.append(np.array(this_validation_logM))
 
     np.savez(os.path.join(cfg.RESULTS_PATH, 'loss_origin.npz'),
              training=np.array(training_loss_arr),
              training_guess=np.array(training_guess_loss_arr),
+             training_logM=np.array(training_logM_arr),
              validation=np.array(validation_loss_arr),
-             validation_guess=np.array(validation_guess_loss_arr))
+             validation_guess=np.array(validation_guess_loss_arr),
+             validation_logM=np.array(validation_logM_arr))

@@ -12,11 +12,12 @@ class NetworkLayer(nn.Module) :
     one block of the network, transforms a set of vectors into another set of vectors
     """
 
-    def __init__(self, k_in, k_out, **MLP_kwargs) :
+    def __init__(self, k_in, k_out, basis_passed=True, **MLP_kwargs) :
         """
         Nk_in  ... number of feature vectors coming in
                    (set to non-positive for the initial layer that takes the positions)
         Nk_out ... number of neurons going out
+        basis_passed ... whether the basis will be passed
         MLP_kwargs ... kwargs that will be passed forward to the NetworkMLP constructor
         """
     #{{{
@@ -25,7 +26,8 @@ class NetworkLayer(nn.Module) :
         # whether the forward method takes some latent vectors or actual particle positions
         # (in the latter case, we do not compute all the mutual dot products)
         self.x_is_latent = k_in > 0
-        self.mlp = NetworkMLP(1 + len(GlobalFields) + len(Basis) + self.x_is_latent * k_in, k_out, **MLP_kwargs)
+        self.mlp = NetworkMLP(1 + len(GlobalFields) + basis_passed * len(Basis)
+                              + self.x_is_latent * k_in, k_out, **MLP_kwargs)
     #}}}
 
 
@@ -55,8 +57,6 @@ class NetworkLayer(nn.Module) :
         if basis is not None :
             basis_projections = torch.einsum('bid,bnd->bin', x, basis) / norms
             scalars = torch.cat((scalars, basis_projections), dim=-1)
-        else :
-            assert len(Basis) == 0
 
         if self.x_is_latent :
             # compute the mutual dot products
