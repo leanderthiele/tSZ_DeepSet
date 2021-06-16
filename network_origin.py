@@ -11,7 +11,7 @@ class NetworkOrigin(NetworkEncoder) :
     def __init__(self) :
     #{{{
         super().__init__(1, # predict exactly one vector
-                         Nlayers=4,
+                         Nlayers=0,
                          # do not have an activation function before the final output
                          # since we generally want to map to the entire real line
                          MLP_kwargs_dict=dict(last=dict(layer_kwargs_dict=dict(last={'activation' : False,
