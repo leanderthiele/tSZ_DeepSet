@@ -54,7 +54,7 @@ SAMPLE_FRACTIONS = dict(validation=0.2,
 CONSISTENT_SEED = 137
 
 # amount of noise added to the globals
-# 1 means that confusion with other halos is theoretically impossible
+# 1 means that confusion with other halos is almost impossible
 # set to None if no noise desired
 GLOBALS_NOISE = 5.0
 
