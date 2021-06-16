@@ -61,7 +61,7 @@ CONSISTENT_SEED = 137
 GLOBALS_NOISE = 5.0
 
 # arguments passed to the torch DataLoader constructor
-DATALOADER_ARGS = dict(batch_size=4,
+DATALOADER_ARGS = dict(batch_size=8,
                        num_workers=4,
                        pin_memory=True,
                        prefetch_factor=1,
