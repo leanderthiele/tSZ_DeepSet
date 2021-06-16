@@ -54,16 +54,16 @@ class DataBatch :
             if self.has_TNG_radii :
                 self.TNG_radii = batch('TNG_radii')
 
+        # get a random number generator if noise is required
+        rng = np.random.default_rng(d.hash % 2**32) if self.mode is DataModes.TRAINING else None
+
         # the globals if provided
         if len(GlobalFields) != 0 :
-            self.u = astensor(np.stack([GlobalFields(d.halo, \
-                                                     rng=np.random.default_rng(d.hash % 2**32) \
-                                                         if self.mode is DataModes.TRAINING else None) \
-                                        for d in data_items], axis=0))
+            self.u = astensor(np.stack([GlobalFields(d.halo, rng=rng) for d in data_items], axis=0))
 
         # the basis vectors if provided
         if len(Basis) != 0 :
-            self.basis = astensor(np.stack([Basis(d.halo) for d in data_items], axis=0))
+            self.basis = astensor(np.stack([Basis(d.halo, rng=rng) for d in data_items], axis=0))
 
         # halo properties for the SphericalModel
         halo_to_tensor = lambda s : astensor(np.array([getattr(d.halo, s) for d in data_items]))
@@ -103,7 +103,7 @@ class DataBatch :
         #      The good thing about this is that everything stays differentiable!
 
         if compute_TNG_radii :
-            self.TNG_radii = torch.linalg.norm(self.TNG_coords, axis=-1, keepdims=True)
+            self.TNG_radii = torch.linalg.norm(self.TNG_coords, dim=-1, keepdim=True)
             self.has_TNG_radii = True
 
         return self
