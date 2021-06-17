@@ -30,27 +30,24 @@ class DataModes(Enum) :
 
     def Nsamples(self) :
     #{{{
-        with np.load(cfg.HALO_CATALOG) as f :
-            Nsamples_tot = len(f['idx_DM'])
-        
         try :
-            Nsamples = int(round(Nsamples_tot * cfg.SAMPLE_FRACTIONS[str(self)]))
+            Nsamples = int(round(Ntot * cfg.SAMPLE_FRACTIONS[str(self)]))
         except KeyError : # we have hit the one that is not specified
-            Nsamples = Nsamples_tot \
-                       - sum(int(round(Nsamples_tot * v)) for v in cfg.SAMPLE_FRACTIONS.values())
+            Nsamples = Ntot - sum(int(round(Ntot * v)) for v in cfg.SAMPLE_FRACTIONS.values())
 
-        return Nsamples_tot, Nsamples
+        return Nsamples
     #}}}
 
 
-    def sample_indices(self) :
+    def sample_indices(self, Ntot) :
         """
         returns the indices in the halo catalog that are used for this data mode
+        Ntot ... total numbers of samples, of which we choose a certain number
         """
     #{{{
-        Ntot, Ntraining = DataModes.TRAINING.Nsamples()
-        _, Nvalidation = DataModes.VALIDATION.Nsamples()
-        _, Ntesting = DataModes.TESTING.Nsamples()
+        Ntraining = DataModes.TRAINING.Nsamples(Ntot)
+        Nvalidation = DataModes.VALIDATION.Nsamples(Ntot)
+        Ntesting = DataModes.TESTING.Nsamples(Ntot)
 
         assert Ntot == Ntraining + Nvalidation + Ntesting
 

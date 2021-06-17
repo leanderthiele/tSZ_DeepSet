@@ -15,14 +15,10 @@ class HaloCatalog(list) :
         assert isinstance(mode, DataModes)
 
         halo_catalog = dict(np.load(cfg.HALO_CATALOG))
+        Ntot = len(halo_catalog['idx_DM'])
 
-        halos = []
+        halos = [Halo(halo_catalog, ii) for ii in mode.sample_indices(Ntot)]
         
-        indices = mode.sample_indices()
-
-        for idx in indices :
-            halos.append(Halo(halo_catalog, idx))
-
         # if we are training and there are global fields, need to populate the dglobals
         # member variable for the noise generation
         if len(GlobalFields) != 0 and mode is DataModes.TRAINING and cfg.GLOBALS_NOISE is not None :
