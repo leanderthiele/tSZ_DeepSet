@@ -108,10 +108,11 @@ def get_properties(idx, sim_type) :
         out[key('inertia')] = np.empty((len(out[key('idx')]), 3, 3))
         out[key('ang_momentum')] = np.empty((len(out[key('idx')]), 3))
         out[key('central_CM')] = np.empty((len(out[key('idx')]), len(central_CM_radii), 3))
+        out[key('vel_dispersion')] = np.empty((len(out[key('idx')]), 3, 3))
         
         with h5py.File(cfg.SIM_FILES[sim_type], 'r') as f :
             for ii in range(len(out[key('idx')])) :
-                print('Computing inertia, ang_momentum, central_CM for %d'%ii)
+                print('Computing inertia, ang_momentum, central_CM, vel_dispersion for %d'%ii)
                 # compute inertia tensor and angular momentum
                 particles = f['Snapshots/%d/PartType%d'%(cfg.SNAP_IDX, cfg.PART_TYPES[sim_type])]
                 _s = out[key('prt_start')][ii]
@@ -121,6 +122,7 @@ def get_properties(idx, sim_type) :
                 # we also save the arrays in double precision
                 coords = particles['Coordinates'][_s : _s+_l].astype(np.float64)
                 velocities = particles['Velocities'][_s : _s+_l].astype(np.float64)
+                velocities -= np.mean(velocities, axis=0)
 
                 coords_pos = coords - out[key('pos')][ii,:].astype(np.float64)
                 coords_pos[coords_pos > +0.5*cfg.BOX_SIZE] -= cfg.BOX_SIZE
@@ -146,8 +148,7 @@ def get_properties(idx, sim_type) :
                 out[key('ang_momentum')][ii, ...] = ang_momentum(coords_centered, velocities)
                 del coords_centered
 
-                velocities -= np.mean(velocities, axis=0)
-                out[key('vel_dispersion')] = inertia(velocities)
+                out[key('vel_dispersion')][ii, ...] = inertia(velocities)
 
     return out
 
