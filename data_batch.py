@@ -91,8 +91,11 @@ class DataBatch :
                     initially)
         compute_TNG_radii ... whether the radial positions of the TNG particles
                               (with respect to the new origin)
+
         """
     #{{{
+        # NOTE it is possible that we have to allocate new tensors here since otherwise we are doing
+        #      and in-place operation
         self.DM_coords -= origin
         self.TNG_coords -= origin
 
