@@ -15,6 +15,7 @@ class NetworkEncoder(nn.Module) :
                        Nlayers=cfg.ENCODER_DEFAULT_NLAYERS,
                        Nhidden=cfg.ENCODER_DEFAULT_NHIDDEN,
                        basis_max_layer=cfg.ENCODER_DEFAULT_BASIS_MAXLAYER,
+                       globals_max_layer=cfg.ENCODER_DEFAULT_GLOBALS_MAXLAYER,
                        MLP_kwargs_dict=dict(),
                        **MLP_kwargs) :
         """
@@ -39,6 +40,7 @@ class NetworkEncoder(nn.Module) :
         super().__init__()
 
         self.basis_max_layer = basis_max_layer
+        self.globals_max_layer = globals_max_layer
 
         self.layers = nn.ModuleList(
             [NetworkLayer(0 if ii==0 \
@@ -52,6 +54,7 @@ class NetworkEncoder(nn.Module) :
                           else Nhidden['last'] if 'last' in Nhidden and ii==Nlayers-1 \
                           else cfg.ENCODER_DEFAULT_NHIDDEN,
                           basis_passed=ii <= self.basis_max_layer,
+                          globals_passed=ii <= self.globals_max_layer,
                           **(MLP_kwargs_dict[str(ii)] if str(ii) in MLP_kwargs_dict \
                              else MLP_kwargs_dict['first'] if 'first' in MLP_kwargs_dict and ii==0 \
                              else MLP_kwargs_dict['last'] if 'last' in MLP_kwargs_dict and ii==Nlayers \
@@ -70,7 +73,9 @@ class NetworkEncoder(nn.Module) :
         """
     #{{{
         for ii, l in enumerate(self.layers) :
-            x = l(x, u=u, basis=basis if ii <= self.basis_max_layer else None)
+            x = l(x,
+                  u=u if ii <= self.globals_max_layer else None,
+                  basis=basis if ii <= self.basis_max_layer else None)
 
         return x
     #}}}

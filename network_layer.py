@@ -12,12 +12,13 @@ class NetworkLayer(nn.Module) :
     one block of the network, transforms a set of vectors into another set of vectors
     """
 
-    def __init__(self, k_in, k_out, basis_passed=True, **MLP_kwargs) :
+    def __init__(self, k_in, k_out, basis_passed=True, globals_passed=True, **MLP_kwargs) :
         """
         Nk_in  ... number of feature vectors coming in
                    (set to non-positive for the initial layer that takes the positions)
         Nk_out ... number of neurons going out
         basis_passed ... whether the basis will be passed
+        globals_passed ... whether the globals will be passed
         MLP_kwargs ... kwargs that will be passed forward to the NetworkMLP constructor
         """
     #{{{
@@ -26,8 +27,10 @@ class NetworkLayer(nn.Module) :
         # whether the forward method takes some latent vectors or actual particle positions
         # (in the latter case, we do not compute all the mutual dot products)
         self.x_is_latent = k_in > 0
-        self.mlp = NetworkMLP(1 + len(GlobalFields) + basis_passed * len(Basis)
-                              + self.x_is_latent * k_in, k_out, **MLP_kwargs)
+        self.mlp = NetworkMLP(1 + globals_passed * len(GlobalFields)
+                                + basis_passed * len(Basis)
+                                + self.x_is_latent * k_in,
+                              k_out, **MLP_kwargs)
     #}}}
 
 

@@ -118,6 +118,9 @@ ENCODER_DEFAULT_NHIDDEN = 128
 # until which layer the encoder should pass the basis
 ENCODER_DEFAULT_BASIS_MAXLAYER = 0
 
+# until which layer the encoder should pass the globals
+ENCODER_DEFAULT_GLOBALS_MAXLAYER = 0
+
 # default number of latent features in the space separating encoder and decoder
 NETWORK_DEFAULT_NLATENT = 128
 
