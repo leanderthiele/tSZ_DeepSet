@@ -28,7 +28,7 @@ class DataModes(Enum) :
     #}}}
 
 
-    def Nsamples(self) :
+    def Nsamples(self, Ntot) :
     #{{{
         try :
             Nsamples = int(round(Ntot * cfg.SAMPLE_FRACTIONS[str(self)]))

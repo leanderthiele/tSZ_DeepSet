@@ -73,7 +73,7 @@ GLOBALS_USE = dict(none=True,
 GLOBALS_NOISE = 5.0
 
 # which basis vectors to use -- set `none' to true if no basis vectors are to be used
-BASIS_USE = dict(none=False,
+BASIS_USE = dict(none=True,
                  #--------#
                  ang_mom=True,
                  inertia=True,
