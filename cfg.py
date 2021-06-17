@@ -56,7 +56,7 @@ SAMPLE_FRACTIONS = dict(validation=0.2,
 CONSISTENT_SEED = 137
 
 # which globals to use -- set `none' to true if no globals are to be used
-GLOBALS_USE = dict(none=True,
+GLOBALS_USE = dict(none=False,
                    #-------#
                    logM=True,
                    ang_mom=True,
@@ -73,7 +73,7 @@ GLOBALS_USE = dict(none=True,
 GLOBALS_NOISE = 5.0
 
 # which basis vectors to use -- set `none' to true if no basis vectors are to be used
-BASIS_USE = dict(none=True,
+BASIS_USE = dict(none=False,
                  #--------#
                  ang_mom=True,
                  inertia=True,
