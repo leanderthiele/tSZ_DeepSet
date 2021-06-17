@@ -20,6 +20,9 @@ class HaloCatalog(list) :
         halos = [Halo(halo_catalog, ii) for ii in mode.sample_indices(Ntot)]
 
         # figure out the zero mean, unit variance normalization
+        # we expect at this point that the halos do not have these fields
+        # (although in practice it wouldn't be a problem, it would still be unexpected)
+        assert all(not hasattr(h, 'u_avg') and not hasattr(h, 'u_std') for h in halos)
         train_halos = halos if mode is DataModes.TRAINING else HaloCatalog(DataModes.TRAINING)
         u = np.array([GlobalFields(h) for h in train_halos])
         u_avg = np.mean(u, axis=0)

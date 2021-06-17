@@ -57,7 +57,7 @@ for epoch in range(500) :
     this_training_loss = []
     this_training_guess_loss = []
     this_trainig_logM = []
-
+    
     for t, data in enumerate(training_loader) :
 
         assert isinstance(data, DataBatch)

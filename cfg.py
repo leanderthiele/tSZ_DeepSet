@@ -59,13 +59,13 @@ CONSISTENT_SEED = 137
 GLOBALS_USE = dict(none=False,
                    #-------#
                    logM=True,
-                   ang_mom=True,
+                   ang_mom=False,
                    inertia=True,
-                   inertia_dot_ang_mom=True,
+                   inertia_dot_ang_mom=False,
                    central_CM=True,
-                   vel_dispersion=True,
-                   vel_dispersion_dot_ang_mom=True,
-                   vel_dispersion_dot_inertia=True)
+                   vel_dispersion=False,
+                   vel_dispersion_dot_ang_mom=False,
+                   vel_dispersion_dot_inertia=False)
 
 # amount of noise added to the globals
 # 1 means that confusion with other halos is almost impossible
@@ -75,15 +75,15 @@ GLOBALS_NOISE = 5.0
 # which basis vectors to use -- set `none' to true if no basis vectors are to be used
 BASIS_USE = dict(none=False,
                  #--------#
-                 ang_mom=True,
+                 ang_mom=False,
                  inertia=True,
                  central_CM=True,
-                 vel_dispersion=True)
+                 vel_dispersion=False)
 
 # amount of noise added to the vectors
 # specifies standard deviation of the Gaussians from which rotation angles will be drawn (in degrees)
 # [currently, we keep the basis vectors normed]
-# so to None if no noise is desired
+# set to None if no noise is desired
 BASIS_NOISE = 20.0
 
 # arguments passed to the torch DataLoader constructor
