@@ -96,6 +96,11 @@ class GlobalFields(np.ndarray, metaclass=FixedLenVec) :
                 # add to the output with appropriate weight
                 out[ii] += r * cfg.GLOBALS_NOISE
 
+        # if halo has u_avg and u_std fields populated, normalize the output
+        # (NOTE that the order is important here, we only normalize *after* adding the noise)
+        if hasattr(halo, 'u_avg') and hasattr(halo, 'u_std') :
+            out = (out - halo.u_avg) / halo.u_std
+
         return out.view(type=cls)
     #}}}
 

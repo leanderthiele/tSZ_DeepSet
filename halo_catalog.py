@@ -18,12 +18,21 @@ class HaloCatalog(list) :
         Ntot = len(halo_catalog['idx_DM'])
 
         halos = [Halo(halo_catalog, ii) for ii in mode.sample_indices(Ntot)]
+
+        # figure out the zero mean, unit variance normalization
+        train_halos = halos if mode is DataModes.TRAINING else HaloCatalog(DataModes.TRAINING)
+        u = np.array([GlobalFields(h) for h in train_halos])
+        u_avg = np.mean(u, axis=0)
+        u_std = np.std(u, axis=0)
+
+        # add these (small) arrays to the halos as member variables
+        for h in halos :
+            h.u_avg = u_avg
+            h.u_std = u_std
         
         # if we are training and there are global fields, need to populate the dglobals
         # member variable for the noise generation
         if len(GlobalFields) != 0 and mode is DataModes.TRAINING and cfg.GLOBALS_NOISE is not None :
-
-            u = np.array([GlobalFields(h) for h in halos])
             
             # ok, this is probably not efficient but who cares, these arrays are small
             # and we do this O(1) times
