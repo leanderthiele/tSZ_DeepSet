@@ -73,13 +73,7 @@ for epoch in range(500) :
         # remove the singleton feature channel dimension
         prediction = prediction.squeeze(dim=1)
 
-        cm = data.CM_DM
-        if cfg.NORMALIZE_COORDS :
-            cm /= data.R200c.unsqueeze(-1)
-
-        prediction += cm
-
-        target = data.pos_TNG
+        target = data.pos_TNG - data.CM_DM
         if cfg.NORMALIZE_COORDS :
             target /= data.R200c.unsqueeze(-1)
 
@@ -96,7 +90,7 @@ for epoch in range(500) :
 
         # do this separately so we have it for each halo
         training_loss = torch.linalg.norm(prediction-target, dim=-1).cpu().detach().numpy()
-        guess_loss = torch.linalg.norm(cm-target, dim=-1).cpu().detach().numpy()
+        guess_loss = torch.linalg.norm(target, dim=-1).cpu().detach().numpy()
 
         this_training_loss.extend(training_loss)
         this_training_guess_loss.extend(guess_loss)
@@ -126,18 +120,12 @@ for epoch in range(500) :
 
         prediction = prediction.squeeze(dim=1)
 
-        cm = data.CM_DM
-        if cfg.NORMALIZE_COORDS :
-            cm /= data.R200c.unsqueeze(-1)
-
-        prediction += cm
-
-        target = data.pos_TNG
+        target = data.pos_TNG - data.CM_DM
         if cfg.NORMALIZE_COORDS :
             target /= data.R200c.unsqueeze(-1)
 
         validation_loss = torch.linalg.norm(prediction-target, dim=-1).cpu().detach().numpy()
-        guess_loss = torch.linalg.norm(cm-target, dim=-1).cpu().detach().numpy()
+        guess_loss = torch.linalg.norm(target, dim=-1).cpu().detach().numpy()
 
         this_validation_loss.extend(validation_loss)
         this_validation_guess_loss.extend(guess_loss)
