@@ -7,9 +7,10 @@ import cfg
 
 class HaloCatalog(list) :
 
-    def __init__(self, mode) :
+    def __init__(self, mode, compute_dglobals=True) :
         """
         mode ... the mode for this halo catalog
+        compute_dglobals ... whether dglobals should be added to the halos for noise generation
         """
     #{{{
         assert isinstance(mode, DataModes)
@@ -23,7 +24,8 @@ class HaloCatalog(list) :
         # we expect at this point that the halos do not have these fields
         # (although in practice it wouldn't be a problem, it would still be unexpected)
         assert all(not hasattr(h, 'u_avg') and not hasattr(h, 'u_std') for h in halos)
-        train_halos = halos if mode is DataModes.TRAINING else HaloCatalog(DataModes.TRAINING)
+        train_halos = halos if mode is DataModes.TRAINING \
+                      else HaloCatalog(DataModes.TRAINING, compute_dglobals=False)
         u = np.array([GlobalFields(h) for h in train_halos])
         u_avg = np.mean(u, axis=0)
         u_std = np.std(u, axis=0)
