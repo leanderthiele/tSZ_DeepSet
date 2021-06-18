@@ -49,7 +49,6 @@ for epoch in range(EPOCHS) :
     for t, data in enumerate(training_loader) :
 
         assert isinstance(data, DataBatch)
-        print('sample %d'%t)
 
         optimizer.zero_grad()
         data = data.to_device()
@@ -68,8 +67,6 @@ for epoch in range(EPOCHS) :
 
         optimizer.step()
         scheduler.step()
-
-        print('loss = %f'%loss.item())
 
 
     # put the losses for this epoch in the global arrays
