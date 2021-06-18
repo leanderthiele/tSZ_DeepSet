@@ -39,6 +39,7 @@ scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=3,
 # store all the losses here
 training_loss_arr = []
 training_guess_loss_arr = []
+training_logM_arr = []
 
 
 for epoch in range(EPOCHS) :
@@ -48,6 +49,7 @@ for epoch in range(EPOCHS) :
 
     this_training_loss_arr = []
     this_training_guess_loss_arr = []
+    this_training_logM_arr = []
 
     for t, data in enumerate(training_loader) :
 
@@ -66,6 +68,7 @@ for epoch in range(EPOCHS) :
 
         this_training_loss_arr.extend([l.item() for l in loss_list])
         this_training_guess_loss_arr.extend([l.item() for l in loss_list_guess])
+        this_training_logM_arr.extend(np.log(data.M200c.cpu().detach().numpy()))
 
         loss.backward()
         
@@ -79,9 +82,11 @@ for epoch in range(EPOCHS) :
     # put the losses for this epoch in the global arrays
     training_loss_arr.append(this_training_loss_arr)
     training_guess_loss_arr.append(this_training_guess_loss_arr)
+    training_logM_arr.append(this_training_logM_arr)
 
 
     # save all the losses so far to file 
     np.savez(os.path.join(cfg.RESULTS_PATH, 'loss.npz'),
              training=np.array(training_loss_arr),
-             training_guess=np.array(training_guess_loss_arr))
+             training_guess=np.array(training_guess_loss_arr),
+             training_logM=np.array(training_logM_arr))

@@ -14,6 +14,7 @@ with np.load('loss.npz') as f :
     print('max epoch = %d'%(epochs-1))
     t = f['training'][epoch,:]
     tg = f['training_guess'][epoch,:]
+    tlogm = f['training_logM'][epoch,:]
     tmean = np.mean(f['training'], axis=-1)
     tgmean = np.mean(f['training_guess'], axis=-1)
 
@@ -23,7 +24,7 @@ vmax = 11.534
 
 fig, ax = plt.subplots(ncols=2)
 
-ax[0].scatter(tg, t, label='training')
+ax[0].scatter(tg, t, label='training', s=3+20*(tlogm-vmin)/(vmax-vmin))
 ax[0].plot([0,3], [0,3], linestyle='dashed', color='black')
 ax[0].set_yscale('log')
 ax[0].set_xscale('log')
