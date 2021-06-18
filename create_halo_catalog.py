@@ -43,7 +43,7 @@ The prt_* fields in the TNG case refer to the gas particles.
 
 # whether to create the compute-intensive inertia and angular momentum fields
 # (set to false for some quick output that cannot be used for training)
-DO_LONG = True
+DO_LONG = False
 
 import numpy as np
 import h5py
@@ -52,7 +52,7 @@ import cfg
 
 # lower mass cutoff -- in code units, i.e. 1e10 Msun/h
 # this refers to the DM-only mass
-M200c_min = 5e3
+M200c_min = 1e3
 
 # for which radii around pos, in units of R200c, we want to compute the CMs
 central_CM_radii = [0.1, 0.3, 1.0]

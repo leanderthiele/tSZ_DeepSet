@@ -63,7 +63,7 @@ GLOBALS_USE = dict(none=False,
                    inertia=True,
                    inertia_dot_ang_mom=False,
                    central_CM=True,
-                   vel_dispersion=False,
+                   vel_dispersion=True,
                    vel_dispersion_dot_ang_mom=False,
                    vel_dispersion_dot_inertia=False)
 

@@ -30,7 +30,7 @@ model = NetworkOrigin()
 summary(model, [(137,3), (len(GlobalFields),), (len(Basis),3)], device='cpu')
 
 model = model.to_device()
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-4)
 loss_fn = TrainingLoss()
 training_loader = DataLoader(mode=DataModes.TRAINING, load_TNG=False)
 validation_loader = DataLoader(mode=DataModes.VALIDATION, load_TNG=False)
@@ -65,6 +65,11 @@ for epoch in range(500) :
         optimizer.zero_grad()
 
         data = data.to_device()
+
+        # uncomment add some noise to the model
+#        for p in model.parameters() :
+#            with torch.no_grad() :
+#                p *= 1 + torch.normal(0.0, 1e-3, p.shape).to(p.device)
 
         prediction = model(data.DM_coords,
                            u=data.u if len(GlobalFields) != 0 else None,
