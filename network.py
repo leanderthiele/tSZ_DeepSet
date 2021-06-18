@@ -9,6 +9,7 @@ from network_batt12 import NetworkBatt12
 from global_fields import GlobalFields
 from basis import Basis
 from data_batch import DataBatch
+import cfg
 
 
 class Network(nn.Module) :
@@ -78,4 +79,13 @@ class Network(nn.Module) :
             return [Network.__combine(xi, spherical[ii]) for ii, xi in enumerate(x)]
 
         return spherical + x
+    #}}}
+
+
+    def to_device(self) :
+    #{{{ 
+        if cfg.DEVICE_IDX is not None :
+            return self.to(cfg.DEVICE_IDX)
+        else :
+            return self
     #}}}
