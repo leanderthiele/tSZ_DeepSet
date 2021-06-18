@@ -46,6 +46,11 @@ NORMALIZE_COORDS = True
 # what dark matter group field to use as origin, either 'CM' or 'pos'
 ORIGIN = 'CM'
 
+# which components to include in the network architecture
+NET_ARCH = dict(origin=True,
+                deformer=True,
+                enc_dec=False)
+
 # fraction of samples to use for each mode -- training is inferred
 # NOTE with Mmin=5e13, we have 439 samples in total, of which 10% are ~44
 #      which is very nicely divisibly by batch size 4
