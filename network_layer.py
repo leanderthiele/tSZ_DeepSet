@@ -71,7 +71,7 @@ class NetworkLayer(nn.Module) :
 
         # concatenate with the global vector if requested
         if u is not None :
-            scalars = torch.cat((u.unsqueeze(1).repeat(1,scalars.shape[1],1), scalars), dim=-1)
+            scalars = torch.cat((u.unsqueeze(1).repeat(1, scalars.shape[1], 1), scalars), dim=-1)
 
         # pass through the MLP, transform scalars -> scalars
         fk = self.mlp(scalars)

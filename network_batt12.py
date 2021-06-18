@@ -4,7 +4,7 @@ import torch.nn as nn
 import cfg
 
 
-class SphericalModel(nn.Module) :
+class NetworkBatt12(nn.Module) :
     """
     implements a version of the Battaglia+2012 profile with learnable parameters.
     We use the output from this model as the baseline, the actual DeepSet
