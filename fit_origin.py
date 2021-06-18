@@ -53,7 +53,6 @@ for epoch in range(500) :
     print('TRAINING')
     model.train()
 
-    bs = cfg.DATALOADER_ARGS['batch_size']
     this_training_loss = []
     this_training_guess_loss = []
     this_trainig_logM = []
