@@ -47,8 +47,8 @@ NORMALIZE_COORDS = True
 ORIGIN = 'CM'
 
 # which components to include in the network architecture
-NET_ARCH = dict(origin=True,
-                deformer=True,
+NET_ARCH = dict(origin=False,
+                deformer=False,
                 enc_dec=False)
 
 # fraction of samples to use for each mode -- training is inferred

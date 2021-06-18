@@ -32,7 +32,7 @@ loss_fn = TrainingLoss()
 
 training_loader = DataLoader(mode=DataModes.TRAINING)
 
-scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=1e-2,
+scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=3,
                                                 steps_per_epoch=len(training_loader),
                                                 epochs=EPOCHS)
 
@@ -55,21 +55,22 @@ for epoch in range(EPOCHS) :
 
         optimizer.zero_grad()
         data = data.to_device()
-        prediction = model(data)
 
         with torch.no_grad() :
             guess = batt12(data.M200c, data.TNG_radii, R200c=data.R200c if not cfg.NORMALIZE_COORDS else None)
 
-        loss, loss_list = loss_fn(prediction, data.TNG_Pth, w=data.P200c)
-        _, loss_list_guess = loss_fn(guess, data.TNG_Pth, w=data.P200c)
+        prediction = model(data)
+
+        loss, loss_list = loss_fn(prediction, data.TNG_Pth, w=None)
+        _, loss_list_guess = loss_fn(guess, data.TNG_Pth, w=None)
 
         this_training_loss_arr.extend([l.item() for l in loss_list])
         this_training_guess_loss_arr.extend([l.item() for l in loss_list_guess])
 
         loss.backward()
         
-#        if cfg.GRADIENT_CLIP is not None :
-#            nn.utils.clip_grad_norm_(model.parameters(), max_norm=cfg.GRADIENT_CLIP)
+        if cfg.GRADIENT_CLIP is not None :
+            nn.utils.clip_grad_norm_(model.parameters(), max_norm=cfg.GRADIENT_CLIP)
 
         optimizer.step()
         scheduler.step()

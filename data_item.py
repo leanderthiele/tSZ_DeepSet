@@ -17,7 +17,7 @@ class DataItem :
 
     def __init__(self, halo, mode,
                        load_DM=True, load_TNG=True,
-                       compute_TNG_radii=False) :
+                       compute_TNG_radii=True) :
         """
         halo     ... a Halo instance for the current halo
         mode     ... the mode this item was loaded in
