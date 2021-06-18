@@ -38,7 +38,7 @@ STORAGE_FILES = dict(DM='/scratch/gpfs/lthiele/tSZ_DeepSet_halos/DM_%d.npz',
 # NOTE that if the absolute number is given, it is not a bug to choose it larger than
 # the number of particles in some low-mass halos. This will result in duplicate entries
 # in the particle list for those halos, which should be ok.
-PRT_FRACTION = dict(DM=1e4, TNG=0.1)
+PRT_FRACTION = dict(DM=1e4, TNG=1e4)
 
 # whether to divide the coordinates by R200c
 NORMALIZE_COORDS = True

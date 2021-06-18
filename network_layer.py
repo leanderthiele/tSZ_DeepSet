@@ -67,7 +67,7 @@ class NetworkLayer(nn.Module) :
             scalars = torch.cat((scalars, dots), dim=-1)
         else :
             # we are in the very first layer and need to normalize the vector
-            x /= norms
+            x = x / norms
 
         # concatenate with the global vector if requested
         if u is not None :

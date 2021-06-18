@@ -15,16 +15,17 @@ class NetworkDecoder(nn.Module) :
      locations, but they will no longer be vector valued!)
     """
 
-    def __init__(self, k_latent, k_out=1, **MLP_kwargs) :
+    def __init__(self, k_latent, k_out=1, r_passed=True, **MLP_kwargs) :
         """
         k_latent   ... the number of latent space vectors
         k_out      ... the number of features to predict at the locations
+        r_passed   ... whether the TNG radial coordinates will be passed
         MLP_kwargs ... to specify the multi-layer perceptron used here
         """
     #{{{
         super().__init__()
 
-        self.mlp = NetworkMLP(k_latent+len(GlobalFields)+len(Basis), k_out, **MLP_kwargs)
+        self.mlp = NetworkMLP(k_latent+r_passed+len(GlobalFields)+len(Basis), k_out, **MLP_kwargs)
     #}}}
 
 

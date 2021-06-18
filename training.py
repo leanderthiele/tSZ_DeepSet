@@ -31,17 +31,23 @@ scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=1e-2,
 for epoch in range(EPOCHS) :
 
     model.train()
+    print('epoch %d'%epoch)
 
     for t, data in enumerate(training_loader) :
 
-        optimizer.zero_grad()
-        data = data.to_device()
-        prediction = model(data)
-        loss = loss_fn(prediction, data.TNG_Pth)
-        loss.backward()
+        print('sample %d'%t)
+
+        with torch.autograd.set_detect_anomaly(True) :
+            optimizer.zero_grad()
+            data = data.to_device()
+            prediction = model(data)
+            loss = loss_fn(prediction, data.TNG_Pth)
+            loss.backward()
         
         if cfg.GRADIENT_CLIP is not None :
             nn.utils.clip_grad_norm_(model.parameters(), max_norm=cfg.GRADIENT_CLIP)
 
         optimizer.step()
         scheduler.step()
+
+        print('loss = %f'%loss.item())
