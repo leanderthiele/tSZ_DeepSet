@@ -50,7 +50,7 @@ class NetworkBatt12(nn.Module) :
         xc = self.__primitive(M200c, 'xc')
         beta = self.__primitive(M200c, 'beta')
 
-        r /= xc[:,None,None]
+        r = r / xc[:,None,None]
 
         return P0[:,None,None] * r.pow(-0.3) * ( 1 + r ).pow(-beta[:,None,None])
     #}}}

@@ -23,7 +23,10 @@ if cfg.MPI_ENV_TYPE is MPIEnvTypes.NOGPU :
     torch.set_num_threads(5)
 
 model = Network().to_device()
+
 batt12 = NetworkBatt12().to_device() # use this to compute the reference loss
+batt12.eval()
+
 optimizer = torch.optim.Adam(model.parameters())
 loss_fn = TrainingLoss()
 
@@ -53,7 +56,10 @@ for epoch in range(EPOCHS) :
         optimizer.zero_grad()
         data = data.to_device()
         prediction = model(data)
-        guess = batt12(data.M200c, data.TNG_radii, R200c=data.R200c if not cfg.NORMALIZE_COORDS else None)
+
+        with torch.no_grad() :
+            guess = batt12(data.M200c, data.TNG_radii, R200c=data.R200c if not cfg.NORMALIZE_COORDS else None)
+
         loss, loss_list = loss_fn(prediction, data.TNG_Pth, w=data.P200c)
         _, loss_list_guess = loss_fn(guess, data.TNG_Pth, w=data.P200c)
 
@@ -62,8 +68,8 @@ for epoch in range(EPOCHS) :
 
         loss.backward()
         
-        if cfg.GRADIENT_CLIP is not None :
-            nn.utils.clip_grad_norm_(model.parameters(), max_norm=cfg.GRADIENT_CLIP)
+#        if cfg.GRADIENT_CLIP is not None :
+#            nn.utils.clip_grad_norm_(model.parameters(), max_norm=cfg.GRADIENT_CLIP)
 
         optimizer.step()
         scheduler.step()

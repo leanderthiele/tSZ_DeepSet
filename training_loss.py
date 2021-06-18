@@ -23,6 +23,6 @@ class TrainingLoss :
         # compute the individual losses (for each element in the batch)
         l = [self.mse(x[ii], y[ii]) * (w[ii] if w is not None else 1) \
              for ii in range(len(x))]
-
-        return l, sum(l) / len(l)
+        
+        return sum(l) / len(l), l
     #}}}
