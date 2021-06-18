@@ -13,16 +13,16 @@ class TrainingLoss :
     #}}}
 
 
-    def __call__(self, x, y) :
+    def __call__(self, x, y, w=None) :
         """
         x, y ... either tensors of shape [batch, <shape>]
                  or lists of length batch and shapes <shapei>
+        w ... tensor of shape [batch] that contains some weights
         """
     #{{{
-        if isinstance(x, list) :
-            assert isinstance(y, list) and len(x) == len(y)
-            return torch.linalg.norm(torch.tensor([self(x[ii], y[ii]) for ii in range(len(x))],
-                                                   requires_grad=True)) / len(x)
+        # compute the individual losses (for each element in the batch)
+        l = [self.mse(x[ii], y[ii]) * (w[ii] if w is not None else 1) \
+             for ii in range(len(x))]
 
-        return self.mse(x, y)
+        return l, sum(l) / len(l)
     #}}}

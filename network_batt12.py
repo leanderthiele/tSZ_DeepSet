@@ -43,6 +43,7 @@ class NetworkBatt12(nn.Module) :
                     for ii, ri in enumerate(r)]
 
         if R200c is not None :
+            assert not cfg.NORMALIZE_COORDS
             r /= R200c[:,None,None]
 
         P0 = self.__primitive(M200c, 'P0')
