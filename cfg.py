@@ -38,7 +38,7 @@ STORAGE_FILES = dict(DM='/scratch/gpfs/lthiele/tSZ_DeepSet_halos/DM_%d.npz',
 # NOTE that if the absolute number is given, it is not a bug to choose it larger than
 # the number of particles in some low-mass halos. This will result in duplicate entries
 # in the particle list for those halos, which should be ok.
-PRT_FRACTION = dict(DM=1e4, TNG=1e4)
+PRT_FRACTION = dict(DM=1e4, TNG=1e5)
 
 # whether to divide the coordinates by R200c
 NORMALIZE_COORDS = True
@@ -47,7 +47,10 @@ NORMALIZE_COORDS = True
 ORIGIN = 'CM'
 
 # which components to include in the network architecture
+# if batt12 is False, the deformer setting has no consequence
+# one of batt12, enc_dec must be True
 NET_ARCH = dict(origin=False,
+                batt12=True,
                 deformer=False,
                 enc_dec=False)
 

@@ -20,6 +20,8 @@ class Network(nn.Module) :
     def __init__(self) :
     #{{{
         super().__init__()
+
+        assert cfg.NET_ARCH['enc_dec'] or cfg.NET_ARCH['batt12']
         
         if cfg.NET_ARCH['enc_dec'] :
             k_latent = cfg.NETWORK_DEFAULT_NLATENT
@@ -33,10 +35,10 @@ class Network(nn.Module) :
         if cfg.NET_ARCH['origin'] :
             self.origin = NetworkOrigin()
 
-        if cfg.NET_ARCH['deformer'] :
-            self.deformer = NetworkDeformer()
-        
-        self.batt12 = NetworkBatt12()
+        if cfg.NET_ARCH['batt12'] :
+            self.batt12 = NetworkBatt12()
+            if cfg.NET_ARCH['deformer'] :
+                self.deformer = NetworkDeformer()
     #}}}
 
     
@@ -61,39 +63,43 @@ class Network(nn.Module) :
             # decode at the TNG particle positions
             x = self.decoder(x, batch.TNG_coords, r=batch.TNG_radii, u=u, basis=basis)
 
-        if cfg.NET_ARCH['deformer'] :
-            # now deform the TNG positions -- TODO experiment with the order of the two statements
-            batch.TNG_radii = self.deformer(batch.TNG_coords, batch.TNG_radii, u=u, basis=basis)
+        if cfg.NET_ARCH['batt12'] :
+            if cfg.NET_ARCH['deformer'] :
+                # now deform the TNG positions -- TODO experiment with the order
+                # relative to the decoder evaluation
+                batch.TNG_radii = self.deformer(batch.TNG_coords, batch.TNG_radii, u=u, basis=basis)
 
-        # now evaluate the (modified) Battaglia+2012 model at the deformed radial coordinates
-        spherical = self.batt12(batch.M200c, batch.TNG_radii,
-                                R200c=batch.R200c if not cfg.NORMALIZE_COORDS else None)
+            # now evaluate the (modified) Battaglia+2012 model at the deformed radial coordinates
+            b12 = self.batt12(batch.M200c, batch.TNG_radii,
+                              R200c=batch.R200c if not cfg.NORMALIZE_COORDS else None)
 
-        if cfg.NET_ARCH['enc_dec'] :
-            x = Network.__combine(x, spherical)
+        if cfg.NET_ARCH['enc_dec'] and not cfg.NET_ARCH['batt12'] :
+            return x
+        elif cfg.NET_ARCH['enc_dec'] and cfg.NET_ARCH['batt12'] :
+            return Network.__combine(x, b12)
+        elif not cfg.NET_ARCH['enc_dec'] and cfg.NET_ARCH['batt12'] :
+            return b12
         else :
-            x = spherical
-
-        return x
+            raise RuntimeError('Should not happen!')
     #}}}
 
 
     @staticmethod
-    def __combine(x, spherical) :
+    def __combine(x, b12) :
         """
         combines the network output with the spherically symmetric prediction
         TODO this is something we can play with, e.g. multiply vs add, different functions applied to x, etc
 
         x ... output of the network, of shape [batch, Nvecs, Nfeatures],
               or a list of length batch of shapes [1, Nvecsi, Nfeatures]
-        spherical ... the spherically symmetric simplified model of shape [batch, Nvecs, 1]
-                      or a list of length batch of shapes [1, Nvecsi, 1]
+        b12 ... the (modified) Battaglia+2012 simplified model of shape [batch, Nvecs, 1]
+                or a list of length batch of shapes [1, Nvecsi, 1]
         """
     #{{{
         if isinstance(x, list) :
-            return [Network.__combine(xi, spherical[ii]) for ii, xi in enumerate(x)]
+            return [Network.__combine(xi, b12[ii]) for ii, xi in enumerate(x)]
 
-        return spherical + x
+        return b12 + x
     #}}}
 
 
