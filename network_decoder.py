@@ -17,7 +17,7 @@ class NetworkDecoder(nn.Module) :
 
     def __init__(self, k_latent, k_out=1, r_passed=True, **MLP_kwargs) :
         """
-        k_latent   ... the number of latent space vectors
+        k_latent   ... the number of latent space vectors (can be zero, then h should be None in forward)
         k_out      ... the number of features to predict at the locations
         r_passed   ... whether the TNG radial coordinates will be passed
         MLP_kwargs ... to specify the multi-layer perceptron used here
@@ -29,11 +29,11 @@ class NetworkDecoder(nn.Module) :
     #}}}
 
 
-    def forward(self, h, x, r=None, u=None, basis=None) :
+    def forward(self, x, h=None, r=None, u=None, basis=None) :
         """
-        h ... the latent vectors, of shape [batch, latent feature, 3]
         x ... the positions where to evaluate, of shape [batch, Nvects, 3]
               or a list of length batch and shapes [1, Nvectsi, 3]
+        h ... the latent vectors, of shape [batch, latent feature, 3]
         r ... the radial positions where to evaluate, of shape [batch, Nvects, 1]
               or a list of length batch shapes [1, Nvectsi, 1]
         u ... the global vector, of shape [batch, Nglobals]
@@ -49,26 +49,34 @@ class NetworkDecoder(nn.Module) :
                          basis=basis[ii, ...].unsqueeze(0) if basis is not None else basis)
                     for ii, xi in enumerate(x)]
 
-        # compute the projections of shape [batch, Nvects, latent feature]
-        projections = torch.einsum('bvd,bld->bvl', x, h)
+        scalars = None
+
+        if h is not None :
+            # compute the projections of shape [batch, Nvects, latent feature]
+            scalars = torch.einsum('bvd,bld->bvl', x, h)
 
         # concatenate with the radial distances if needed
         if r is not None :
-            projections = torch.cat((projections, r), dim=-1)
+            scalars = torch.cat((scalars, r), dim=-1) if scalars is not None \
+                      else r.clone()
 
         # concatenate with the basis projections if needed
         if basis is not None :
             basis_projections = torch.einsum('bid,bnd->bin', x, basis)
-            projections = torch.cat((projections, basis_projections), dim=-1)
+            scalars = torch.cat((scalars, basis_projections), dim=-1) if scalars is not None \
+                          else basis_projections
         else :
             assert len(Basis) == 0
 
         # concatenate with the global vector if requested
         if u is not None :
-            projections = torch.cat((u.unsqueeze(1).repeat(1,projections.shape[1],1), projections), dim=-1)
+            u_repeated = u.unsqueeze(1).repeat(1, x.shape[1], 1)
+            scalars = torch.cat((u_repeated, scalars), dim=-1) \
+                      if scalars is not None \
+                      else u_repeated
         else :
             assert len(GlobalFields) == 0
 
         # pass through the MLP, transform scalars -> scalars
-        return self.mlp(projections)
+        return self.mlp(scalars)
     #}}}
