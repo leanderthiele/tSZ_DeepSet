@@ -48,11 +48,13 @@ ORIGIN = 'CM'
 
 # which components to include in the network architecture
 # if batt12 is False, the deformer setting has no consequence
-# one of batt12, enc_dec must be True
+# one of batt12, decoder must be True and decoder must be True if encoder is True
+# if decoder is False, encoder has no consequence
 NET_ARCH = dict(origin=False,
                 batt12=True,
                 deformer=False,
-                enc_dec=True)
+                encoder=False,
+                decoder=True)
 
 # fraction of samples to use for each mode -- training is inferred
 # NOTE with Mmin=5e13, we have 439 samples in total, of which 10% are ~44

@@ -21,16 +21,24 @@ class Network(nn.Module) :
     #{{{
         super().__init__()
 
-        assert cfg.NET_ARCH['enc_dec'] or cfg.NET_ARCH['batt12']
+        assert cfg.NET_ARCH['decoder'] or cfg.NET_ARCH['batt12']
         
-        if cfg.NET_ARCH['enc_dec'] :
-            k_latent = cfg.NETWORK_DEFAULT_NLATENT
-            self.encoder = NetworkEncoder(k_latent)
+        if cfg.NET_ARCH['decoder'] :
+            
+            if cfg.NET_ARCH['encoder'] :
+                k_latent = cfg.NETWORK_DEFAULT_NLATENT
+                self.encoder = NetworkEncoder(k_latent)
+            else :
+                k_latent = 0
+
             self.decoder = NetworkDecoder(k_latent, k_out=cfg.OUTPUT_NFEATURES,
                                           # do not have an activation function before the final output
                                           # since we generally want to map to the entire real line
                                           layer_kwargs_dict=dict(last={'activation' : False,
                                                                        'dropout' : None}))
+
+        if cfg.NET_ARCH['encoder'] :
+            assert cfg.NET_ARCH['decoder']
 
         if cfg.NET_ARCH['origin'] :
             self.origin = NetworkOrigin()
@@ -56,12 +64,15 @@ class Network(nn.Module) :
             # shift all coordinates according to this new origin
             batch = batch.add_origin(o)
 
-        if cfg.NET_ARCH['enc_dec'] :
+        if cfg.NET_ARCH['encoder'] :
             # encode the DM field
             x = self.encoder(batch.DM_coords, u=u, basis=basis)
 
+        if cfg.NET_ARCH['decoder'] :
             # decode at the TNG particle positions
-            x = self.decoder(x, batch.TNG_coords, r=batch.TNG_radii, u=u, basis=basis)
+            x = self.decoder(batch.TNG_coords,
+                             h=x if cfg.NET_ARCH['encoder'] else None,
+                             r=batch.TNG_radii, u=u, basis=basis)
 
         if cfg.NET_ARCH['batt12'] :
             if cfg.NET_ARCH['deformer'] :
@@ -73,11 +84,11 @@ class Network(nn.Module) :
             b12 = self.batt12(batch.M200c, batch.TNG_radii,
                               R200c=batch.R200c if not cfg.NORMALIZE_COORDS else None)
 
-        if cfg.NET_ARCH['enc_dec'] and not cfg.NET_ARCH['batt12'] :
-            return torch.exp(x)
-        elif cfg.NET_ARCH['enc_dec'] and cfg.NET_ARCH['batt12'] :
+        if cfg.NET_ARCH['decoder'] and not cfg.NET_ARCH['batt12'] :
+            return x
+        elif cfg.NET_ARCH['decoder'] and cfg.NET_ARCH['batt12'] :
             return Network.__combine(x, b12)
-        elif not cfg.NET_ARCH['enc_dec'] and cfg.NET_ARCH['batt12'] :
+        elif not cfg.NET_ARCH['decoder'] and cfg.NET_ARCH['batt12'] :
             return b12
         else :
             raise RuntimeError('Should not happen!')
