@@ -52,7 +52,7 @@ ORIGIN = 'CM'
 NET_ARCH = dict(origin=False,
                 batt12=True,
                 deformer=False,
-                enc_dec=False)
+                enc_dec=True)
 
 # fraction of samples to use for each mode -- training is inferred
 # NOTE with Mmin=5e13, we have 439 samples in total, of which 10% are ~44
@@ -97,7 +97,7 @@ BASIS_NOISE = 20.0
 # arguments passed to the torch DataLoader constructor
 DATALOADER_ARGS = dict(batch_size=8,
                        num_workers=4,
-                       pin_memory=True,
+                       pin_memory=True, # TODO for this to have an effect, I think the Batch class must have a pin_memory() method
                        prefetch_factor=1,
                        drop_last=False)
 

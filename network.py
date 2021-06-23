@@ -74,7 +74,7 @@ class Network(nn.Module) :
                               R200c=batch.R200c if not cfg.NORMALIZE_COORDS else None)
 
         if cfg.NET_ARCH['enc_dec'] and not cfg.NET_ARCH['batt12'] :
-            return x
+            return torch.exp(x)
         elif cfg.NET_ARCH['enc_dec'] and cfg.NET_ARCH['batt12'] :
             return Network.__combine(x, b12)
         elif not cfg.NET_ARCH['enc_dec'] and cfg.NET_ARCH['batt12'] :

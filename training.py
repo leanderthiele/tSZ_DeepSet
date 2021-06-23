@@ -21,6 +21,7 @@ InitProc(0)
 
 if cfg.MPI_ENV_TYPE is MPIEnvTypes.NOGPU :
     torch.set_num_threads(5)
+    from matplotlib import pyplot as plt
 
 model = Network().to_device()
 
@@ -32,7 +33,7 @@ loss_fn = TrainingLoss()
 
 training_loader = DataLoader(mode=DataModes.TRAINING)
 
-scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=3,
+scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=1e-1,
                                                 steps_per_epoch=len(training_loader),
                                                 epochs=EPOCHS)
 
@@ -63,7 +64,31 @@ for epoch in range(EPOCHS) :
 
         prediction = model(data)
 
-        loss, loss_list = loss_fn(prediction, data.TNG_Pth, w=None)
+        if cfg.MPI_ENV_TYPE is MPIEnvTypes.NOGPU :
+            # FIXME diagnostics on head node
+            if epoch > 0 :
+                r_npy = data.TNG_radii.cpu().detach().numpy()[0, ...].squeeze()
+                g_npy = guess.cpu().detach().numpy()[0, ...].squeeze()
+                p_npy = prediction.cpu().detach().numpy()[0, ...].squeeze()
+                t_npy = data.TNG_Pth.cpu().detach().numpy()[0, ...].squeeze()
+                plt.loglog(r_npy, t_npy, linestyle='none', marker='o', label='target')
+                plt.loglog(r_npy, g_npy, linestyle='none', marker='o', label='guess')
+                plt.loglog(r_npy, p_npy, linestyle='none', marker='o', label='prediction')
+                plt.legend()
+                plt.show()
+        else :
+            # FIXME diagnostics to file
+            if True and (epoch in [10, 30, 80] and t < 10) :
+                r_npy = data.TNG_radii.cpu().detach().numpy()[0, ...].squeeze()
+                g_npy = guess.cpu().detach().numpy()[0, ...].squeeze()
+                p_npy = prediction.cpu().detach().numpy()[0, ...].squeeze()
+                t_npy = data.TNG_Pth.cpu().detach().numpy()[0, ...].squeeze()
+                np.savez('test_%d_%d.npz'%(epoch, t),
+                         r=r_npy, g=g_npy, p=p_npy, t=t_npy)
+
+#        loss, loss_list = loss_fn(prediction, data.TNG_Pth, w=None)
+# FIXME only for debugging
+        loss, loss_list = loss_fn(prediction, guess, w=None)
         _, loss_list_guess = loss_fn(guess, data.TNG_Pth, w=None)
 
         this_training_loss_arr.extend([l.item() for l in loss_list])
@@ -77,6 +102,10 @@ for epoch in range(EPOCHS) :
 
         optimizer.step()
         scheduler.step()
+
+        # FIXME debugging -- this is o.k., parameters are being updated
+#        for p in model.parameters() :
+#            print(p)
 
 
     # put the losses for this epoch in the global arrays
