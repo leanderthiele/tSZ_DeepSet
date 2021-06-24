@@ -51,7 +51,7 @@ ORIGIN = 'CM'
 # one of batt12, decoder must be True and decoder must be True if encoder is True
 # if decoder is False, encoder has no consequence
 NET_ARCH = dict(origin=False,
-                batt12=True,
+                batt12=False,
                 deformer=False,
                 encoder=False,
                 decoder=True)

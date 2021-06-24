@@ -1,6 +1,15 @@
 import numpy as np
 from scipy.stats import median_abs_deviation
 
+PLOT = False
+
+if PLOT :
+    from matplotlib import pyplot as plt
+    from sys import argv
+    start_idx = int(argv[1])
+else :
+    start_idx = 0
+
 import h5py
 
 from halo import Halo
@@ -8,7 +17,7 @@ import cfg
 
 halo_catalog = dict(np.load(cfg.HALO_CATALOG))
 
-for ii in range(len(halo_catalog['idx_DM'])) :
+for ii in range(start_idx, len(halo_catalog['idx_DM'])) :
     
     print(ii)
 
@@ -35,45 +44,72 @@ for ii in range(len(halo_catalog['idx_DM'])) :
         d = particles['Density'][s:s+l]
         SFR = particles['StarFormationRate'][s:s+l]
 
+    # compute thermal pressure
     XH = 0.76
     gamma = 5.0/3.0
     Pth = 2.0 * (1+XH) / (1 + 3*XH + 4*XH*x) * (gamma - 1) * d * e
 
+    del e
+    del x
+    del d
+
+    # compute radial coordinates
     dcoords = coords - h.pos_TNG
     dcoords[dcoords > +0.5*BoxSize] -= BoxSize
     dcoords[dcoords < -0.5*BoxSize] += BoxSize
     r = np.linalg.norm(dcoords, axis=-1)
     del dcoords
 
+    # remove star forming particles
+    mask = SFR==0
+
+    if PLOT :
+        r_SFR = r[~mask]
+        Pth_SFR = Pth[~mask]
+
+    r = r[mask]
+    coords = coords[mask]
+    Pth = Pth[mask]
+
+    # number of particles removed due to star formation
+    N_SFR = len(mask) - np.count_nonzero(mask)
+
+    del SFR
+    del mask
+
     # compute the local standard deviations and means
     Nrbins = 100
-    sorter = np.argsort(r)
-    rsorted = r[sorter]
+    rsorted = np.sort(r)
     redges = np.zeros(Nrbins+1)
     r_per_bin = len(r) // Nrbins
     for rr in range(Nrbins) :
         redges[rr+1] = rsorted[r_per_bin * (rr+1) if rr < Nrbins-1 else -1]
 
+    del rsorted
+
     indices = np.digitize(r, redges, right=True) - 1
     assert np.all(indices >= 0)
     assert np.all(indices < Nrbins)
-
-    _, unique_counts = np.unique(indices, return_counts=True)
-    print(unique_counts)
-
-    std = np.empty(len(r))
-    avg = np.empty(len(r))
+    
+    ul = np.empty(len(r))
 
     for rr in range(Nrbins) :
-        # use MAD here to avoid outlier effects
-        std[indices==rr] = median_abs_deviation(Pth[indices==rr])
-        # use median here to avoid outlier effects
-        avg[indices==rr] = np.median(Pth[indices==rr])
+        ul[indices==rr] = np.percentile(Pth[indices==rr], 98)
 
     del indices
 
-    mask = (SFR == 0) & ( np.fabs(Pth - avg) < 10*std )
-    print('removed ', 100 * (len(mask) - np.count_nonzero(mask)) / len(mask), ' percent')
+    mask = (Pth<2*ul) | (r<0.01*h.R200c_DM)
+    print('removed ', 100 * (len(mask) - np.count_nonzero(mask) + N_SFR) / l, ' percent')
+
+    if PLOT :
+        plt.scatter(r[mask], Pth[mask], c='black', s=0.1, label='kept')
+        plt.scatter(r[~mask], Pth[~mask], c='cyan', s=0.1, label='discarded as outliers')
+        plt.scatter(r_SFR, Pth_SFR, c='magenta', s=0.1, label='discarded due to SFR')
+        plt.xscale('log')
+        plt.yscale('log')
+        plt.legend(loc='lower left')
+        plt.show()
+
     coords = coords[mask]
     Pth = Pth[mask]
 
