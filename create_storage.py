@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.stats import median_abs_deviation
 
 import h5py
 
@@ -46,7 +47,8 @@ for ii in range(len(halo_catalog['idx_DM'])) :
 
     # compute the local standard deviations and means
     Nrbins = 100
-    redges = np.linspace(0.0, np.max(r), num=Nrbins+1)
+    p = 2 # controls distribution of bins
+    redges = np.linspace(0.0, np.max(r).pow(p), num=Nrbins+1).pow(1/p)
     indices = np.digitize(r, redges, right=True) - 1
     assert np.all(indices >= 0)
     assert np.all(indices < Nrbins)
@@ -58,7 +60,8 @@ for ii in range(len(halo_catalog['idx_DM'])) :
     avg = np.empty(len(r))
 
     for rr in range(Nrbins) :
-        std[indices==rr] = np.std(Pth[indices==rr])
+        # use MAD here to avoid outlier effects
+        std[indices==rr] = median_abs_deviation(Pth[indices==rr])
         # use median here to avoid outlier effects
         avg[indices==rr] = np.median(Pth[indices==rr])
 
