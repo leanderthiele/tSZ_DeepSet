@@ -47,8 +47,13 @@ for ii in range(len(halo_catalog['idx_DM'])) :
 
     # compute the local standard deviations and means
     Nrbins = 100
-    p = 0.5 # controls distribution of radial bins
-    redges = np.linspace(0.0, np.max(r)**p, num=Nrbins+1)**(1/p)
+    sorter = np.argsort(r)
+    rsorted = r[sorter]
+    redges = np.zeros(Nrbins+1)
+    r_per_bin = len(r) // Nrbins
+    for rr in range(Nrbins) :
+        redges[rr+1] = rsorted[r_per_bin * rr if rr < Nrbins-1 else -1]
+
     indices = np.digitize(r, redges, right=True) - 1
     assert np.all(indices >= 0)
     assert np.all(indices < Nrbins)
