@@ -47,10 +47,9 @@ for ii in range(len(halo_catalog['idx_DM'])) :
     # compute the local standard deviations and means
     Nrbins = 100
     redges = np.linspace(0.0, np.max(r), num=Nrbins+1)
-    indices = np.full(len(r), -1, dtype=int)
-    for rr in range(Nrbins) :
-        indices[(r>redges[rr]) & (r<=redges[rr+1])] = rr
+    indices = np.digitize(r, redges, right=True) - 1
     assert np.all(indices >= 0)
+    assert np.all(indices < Nrbins)
 
     _, unique_counts = np.unique(indices, return_counts=True)
     print(unique_counts)
@@ -60,7 +59,8 @@ for ii in range(len(halo_catalog['idx_DM'])) :
 
     for rr in range(Nrbins) :
         std[indices==rr] = np.std(Pth[indices==rr])
-        avg[indices==rr] = np.mean(Pth[indices==rr])
+        # use median here to avoid outlier effects
+        avg[indices==rr] = np.median(Pth[indices==rr])
 
     del indices
 
