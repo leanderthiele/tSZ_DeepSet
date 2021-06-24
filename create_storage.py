@@ -52,7 +52,7 @@ for ii in range(len(halo_catalog['idx_DM'])) :
     redges = np.zeros(Nrbins+1)
     r_per_bin = len(r) // Nrbins
     for rr in range(Nrbins) :
-        redges[rr+1] = rsorted[r_per_bin * rr if rr < Nrbins-1 else -1]
+        redges[rr+1] = rsorted[r_per_bin * (rr+1) if rr < Nrbins-1 else -1]
 
     indices = np.digitize(r, redges, right=True) - 1
     assert np.all(indices >= 0)
