@@ -64,7 +64,8 @@ for ii in range(len(halo_catalog['idx_DM'])) :
 
     del indices
 
-    mask = (SFR > 0) | ( (Pth - avg)**2 > 10*std )
+    mask = (SFR == 0) & ( (Pth - avg)**2 < 10*std )
+    print(np.count_nonzero(mask) / len(mask))
     coords = coords[mask]
     Pth = Pth[mask]
 
