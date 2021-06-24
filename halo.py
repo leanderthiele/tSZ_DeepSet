@@ -43,6 +43,11 @@ class Halo :
 
         self.storage_DM = cfg.STORAGE_FILES['DM']%self.idx_DM
         self.storage_TNG = cfg.STORAGE_FILES['TNG']%self.idx_TNG
+
+        if 'Nprt_DM' in halo_catalog :
+            self.Nprt_DM = get_entry('Nprt_DM')
+        if 'Nprt_TNG' in halo_catalog :
+            self.Nprt_TNG = get_entry('Nprt_TNG')
     #}}}
 
 

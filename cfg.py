@@ -51,10 +51,10 @@ ORIGIN = 'CM'
 # one of batt12, decoder must be True and decoder must be True if encoder is True
 # if decoder is False, encoder has no consequence
 NET_ARCH = dict(origin=False,
-                batt12=False,
+                batt12=True,
                 deformer=False,
                 encoder=False,
-                decoder=True)
+                decoder=False)
 
 # fraction of samples to use for each mode -- training is inferred
 # NOTE with Mmin=5e13, we have 439 samples in total, of which 10% are ~44

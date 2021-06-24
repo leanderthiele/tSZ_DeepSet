@@ -109,7 +109,7 @@ class DataSet(torch_DataSet) :
     def __get_indices(self, halo, ptype) :
         """
         generates the randomly chosen index arrays that we use to choose particles
-        halo  ... the halo instance on which to work
+        halo  ... the halo to operate on
         ptype ... one of 'DM', 'TNG'
         """
     #{{{ 
@@ -121,7 +121,7 @@ class DataSet(torch_DataSet) :
            or cfg.PRT_FRACTION[ptype] is None :
             return None
 
-        Nprt = halo.prt_len_DM if ptype == 'DM' else halo.prt_len_TNG
+        Nprt = halo.Nprt_DM if ptype=='DM' else halo.Nprt_TNG
         Nindices = int(cfg.PRT_FRACTION[ptype] * Nprt) \
                    if isinstance(cfg.PRT_FRACTION[ptype], float) and cfg.PRT_FRACTION[ptype]<=1 \
                    else int(cfg.PRT_FRACTION[ptype])

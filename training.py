@@ -87,8 +87,7 @@ for epoch in range(EPOCHS) :
                          r=r_npy, g=g_npy, p=p_npy, t=t_npy)
 
 #        loss, loss_list = loss_fn(prediction, data.TNG_Pth, w=None)
-# FIXME only for debugging
-        loss, loss_list = loss_fn(prediction, guess, w=None)
+        loss, loss_list = loss_fn(prediction, data.TNG_Pth, w=None)
         _, loss_list_guess = loss_fn(guess, data.TNG_Pth, w=None)
 
         this_training_loss_arr.extend([l.item() for l in loss_list])
@@ -98,14 +97,11 @@ for epoch in range(EPOCHS) :
         loss.backward()
         
         if cfg.GRADIENT_CLIP is not None :
+            # TODO when scaling with P200c, we can consider scaling the max_norm here
             nn.utils.clip_grad_norm_(model.parameters(), max_norm=cfg.GRADIENT_CLIP)
 
         optimizer.step()
         scheduler.step()
-
-        # FIXME debugging -- this is o.k., parameters are being updated
-#        for p in model.parameters() :
-#            print(p)
 
 
     # put the losses for this epoch in the global arrays
