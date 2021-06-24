@@ -46,7 +46,7 @@ for ii in range(len(halo_catalog['idx_DM'])) :
 
     # compute the local standard deviations and means
     Nrbins = 100
-    redges = np.linspace(0.0, np.max(r), num=Nrbins)
+    redges = np.linspace(0.0, np.max(r), num=Nrbins+1)
     indices = np.full(len(r), -1, dtype=int)
     for rr in range(Nrbins) :
         indices[(r>redges[rr]) & (r<=redges[rr+1])] = rr
@@ -65,7 +65,7 @@ for ii in range(len(halo_catalog['idx_DM'])) :
     del indices
 
     mask = (SFR == 0) & ( (Pth - avg)**2 < 10*std )
-    print(np.count_nonzero(mask) / len(mask))
+    print('removed ', 100 * (len(mask) - np.count_nonzero(mask)) / len(mask), ' percent')
     coords = coords[mask]
     Pth = Pth[mask]
 
