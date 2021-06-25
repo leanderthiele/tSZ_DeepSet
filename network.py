@@ -72,7 +72,9 @@ class Network(nn.Module) :
             # decode at the TNG particle positions
             x = self.decoder(batch.TNG_coords,
                              h=x if cfg.NET_ARCH['encoder'] else None,
-                             r=batch.TNG_radii, u=u, basis=basis)
+                             r=batch.TNG_radii if self.decoder.r_passed else None,
+                             u=u if self.decoder.globals_passed else None,
+                             basis=basis if self.decoder.basis_passed else None)
 
         if cfg.NET_ARCH['batt12'] :
             if cfg.NET_ARCH['deformer'] :

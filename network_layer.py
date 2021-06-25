@@ -31,6 +31,9 @@ class NetworkLayer(nn.Module) :
                                 + basis_passed * len(Basis)
                                 + self.x_is_latent * k_in,
                               k_out, **MLP_kwargs)
+
+        self.globals_passed = globals_passed
+        self.basis_passed = basis_passed
     #}}}
 
 
@@ -58,8 +61,11 @@ class NetworkLayer(nn.Module) :
 
         # concatenate with the basis projections if required
         if basis is not None :
+            assert self.basis_passed and len(Basis) != 0
             basis_projections = torch.einsum('bid,bnd->bin', x, basis) / norms
             scalars = torch.cat((scalars, basis_projections), dim=-1)
+        else :
+            assert not self.basis_passed or len(Basis) == 0
 
         if self.x_is_latent :
             # compute the mutual dot products
@@ -71,7 +77,10 @@ class NetworkLayer(nn.Module) :
 
         # concatenate with the global vector if requested
         if u is not None :
+            assert self.globals_passed and len(GlobalFields) != 0
             scalars = torch.cat((u.unsqueeze(1).repeat(1, scalars.shape[1], 1), scalars), dim=-1)
+        else :
+            assert not self.globals_passed or len(GlobalFields) == 0
 
         # pass through the MLP, transform scalars -> scalars
         fk = self.mlp(scalars)

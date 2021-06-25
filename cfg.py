@@ -50,7 +50,7 @@ ORIGIN = 'CM'
 # if batt12 is False, the deformer setting has no consequence
 # one of batt12, decoder must be True and decoder must be True if encoder is True
 # if decoder is False, encoder has no consequence
-NET_ARCH = dict(origin=False,
+NET_ARCH = dict(origin=True,
                 batt12=True,
                 deformer=False,
                 encoder=True,
@@ -130,6 +130,15 @@ ENCODER_DEFAULT_BASIS_MAXLAYER = 0
 
 # until which layer the encoder should pass the globals
 ENCODER_DEFAULT_GLOBALS_MAXLAYER = 0
+
+# whether we pass the TNG radii to the decoder
+DECODER_DEFAULT_R_PASSED = False
+
+# whether we pass the globals to the decoder
+DECODER_DEFAULT_GLOBALS_PASSED = False
+
+# whether we pass the basis to the decoder
+DECODER_DEFAULT_BASIS_PASSED = False
 
 # default number of latent features in the space separating encoder and decoder
 NETWORK_DEFAULT_NLATENT = 128
