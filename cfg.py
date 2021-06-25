@@ -53,8 +53,8 @@ ORIGIN = 'CM'
 NET_ARCH = dict(origin=False,
                 batt12=True,
                 deformer=False,
-                encoder=False,
-                decoder=False)
+                encoder=True,
+                decoder=True)
 
 # fraction of samples to use for each mode -- training is inferred
 # NOTE with Mmin=5e13, we have 439 samples in total, of which 10% are ~44

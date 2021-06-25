@@ -15,7 +15,7 @@ from data_batch import DataBatch
 from init_proc import InitProc
 import cfg
 
-EPOCHS = 500
+EPOCHS = 2000
 
 InitProc(0)
 
@@ -32,8 +32,9 @@ optimizer = torch.optim.Adam(model.parameters())
 loss_fn = TrainingLoss()
 
 training_loader = DataLoader(mode=DataModes.TRAINING)
+validation_loader = DataLoader(mode=DataModes.VALIDATION)
 
-scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=1e-1,
+scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=1e-2,
                                                 steps_per_epoch=len(training_loader),
                                                 epochs=EPOCHS)
 
@@ -42,6 +43,9 @@ training_loss_arr = []
 training_guess_loss_arr = []
 training_logM_arr = []
 
+validation_loss_arr = []
+validation_guess_loss_arr = []
+validation_logM_arr = []
 
 for epoch in range(EPOCHS) :
 
@@ -110,8 +114,38 @@ for epoch in range(EPOCHS) :
     training_logM_arr.append(this_training_logM_arr)
 
 
+    model.eval()
+    
+    this_validation_loss_arr = []
+    this_validation_guess_loss_arr = []
+    this_validation_logM_arr = []
+
+    for t, data in enumerate(validation_loader) :
+        
+        data = data.to_device()
+
+        with torch.no_grad() :
+            guess = batt12(data.M200c, data.TNG_radii, R200c=data.R200c if not cfg.NORMALIZE_COORDS else None)
+            prediction = model(data)
+
+            _, loss_list = loss_fn(prediction, data.TNG_Pth, w=None)
+            _, loss_list_guess = loss_fn(guess, data.TNG_Pth, w=None)
+
+        this_validation_loss_arr.extend([l.item() for l in loss_list])
+        this_validation_guess_loss_arr.extend([l.item() for l in loss_list_guess])
+        this_validation_logM_arr.extend(np.log(data.M200c.cpu().detach().numpy()))
+
+    # put the validation losses in the global arrays
+    validation_loss_arr.append(this_validation_loss_arr)
+    validation_guess_loss_arr.append(this_validation_guess_loss_arr)
+    validation_logM_arr.append(this_validation_logM_arr)
+
+
     # save all the losses so far to file 
     np.savez(os.path.join(cfg.RESULTS_PATH, 'loss.npz'),
              training=np.array(training_loss_arr),
              training_guess=np.array(training_guess_loss_arr),
-             training_logM=np.array(training_logM_arr))
+             training_logM=np.array(training_logM_arr),
+             validation=np.array(validation_loss_arr),
+             validation_guess=np.array(validation_guess_loss_arr),
+             validation_logM=np.array(validation_logM_arr))

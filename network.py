@@ -110,7 +110,7 @@ class Network(nn.Module) :
         if isinstance(x, list) :
             return [Network.__combine(xi, b12[ii]) for ii, xi in enumerate(x)]
 
-        return b12 + x
+        return b12 + torch.sinh(x)
     #}}}
 
 
