@@ -99,9 +99,14 @@ while True :
     out['ang_momentum2'].append(ang_momentum(x, v))
     out['vel_dispersion'].append(inertia(v))
 
+    idx += 1
+
 # group as numpy arrays
 for k, v in out.items() :
     out[k] = np.array(v)
+
+# add number of halos to file
+out['Nobjects'] = idx
 
 # save to file
 np.savez(cfg.HALO_CATALOG, **out)

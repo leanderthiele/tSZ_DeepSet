@@ -28,7 +28,8 @@ class Halo :
         self.ang_momentum2 = get_entry('ang_momentum2')
         self.vel_dispersion = get_entry('vel_dispersion')
 
-        self.storage_DM = dict(coords=cfg.STORAGE_FILES['DM']%(halo_index, 'coords'))
+        self.storage_DM = dict(coords=cfg.STORAGE_FILES['DM']%(halo_index, 'coords'),
+                               velocities=cfg.STORAGE_FILES['DM']%(halo_index, 'velocities'))
         self.storage_TNG = dict(# these are the direct output of rockstar_halos/collect_particles.cpp
                                 coords=cfg.STORAGE_FILES['TNG']%(halo_index, 'coords'),
                                 masses=cfg.STORAGE_FILES['TNG']%(halo_index, 'masses'),

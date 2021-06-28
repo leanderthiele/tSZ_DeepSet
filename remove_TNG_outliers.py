@@ -5,7 +5,7 @@ import cfg
 
 halo_catalog = dict(np.load(cfg.HALO_CATALOG))
 
-for ii in range(len(halo_catalog['M200c'])) :
+for ii in range(halo_catalog['Nobjects']) :
 
     print(ii)
 

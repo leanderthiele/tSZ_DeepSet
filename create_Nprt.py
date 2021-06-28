@@ -5,7 +5,7 @@ import cfg
 
 halo_catalog = dict(np.load(cfg.HALO_CATALOG))
 
-Nhalos = len(halo_catalog['idx_DM'])
+Nhalos = halo_catalog['Nobjects']
 
 Nprt_DM = np.empty(Nhalos, dtype=int)
 Nprt_TNG = np.empty(Nhalos, dtype=int)
@@ -14,10 +14,16 @@ for ii in range(Nhalos) :
     
     h = Halo(halo_catalog, ii)
 
-    with np.load(h.storage_DM) as f :
-        Nprt_DM[ii] = len(f['coords'])
+    xDM = np.fromfile(h.storage_DM['coords'], dtype=np.float32)
+    Nprt_DM[ii] = len(xDM) / 3
+    vDM = np.fromfile(h.storage_DM['velocities'], dtype=np.float32)
+    assert 3 * Nprt_DM[ii] == len(vDM)
 
-    with np.load(h.storage_TNG) as f :
-        Nprt_TNG[ii] = len(f['coords'])
+    xTNG = np.fromfile(h.storage_TNG['coords_filtered'], dtype=np.float32)
+    Nprt_TNG[ii] = len(xTNG) / 3
+    m = np.fromfile(h.storage_TNG['masses_filtered'], dtype=np.float32)
+    assert Nprt_TNG[ii] == len(m)
+    Pth = np.fromfile(h.storage_TNG['Pth_filtered'], dtype=np.float32)
+    assert Nprt_TNG[ii] == len(Pth)
 
 np.savez(cfg.HALO_CATALOG, **halo_catalog, Nprt_DM=Nprt_DM, Nprt_TNG=Nprt_TNG)
