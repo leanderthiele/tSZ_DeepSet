@@ -20,6 +20,8 @@ READ_FIELDS = dict(M200c={'factor': 1e-10},
                    JX   ={'factor': 1e-7},
                    JY   ={'factor': 1e-7},
                    JZ   ={'factor': 1e-7},
+                   Xoff ={}, # already in kpc/h
+                   Voff ={}, # in km/s
                    PID  ={'dtype': int, 'filter': lambda x: x==-1, 'save': False})
 
 # some fields should be stacked into multi-dimensional arrays
