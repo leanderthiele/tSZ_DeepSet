@@ -50,9 +50,6 @@ PRT_FRACTION = dict(DM=1e4, TNG=1e5)
 # whether to divide the coordinates by R200c
 NORMALIZE_COORDS = True
 
-# what dark matter group field to use as origin, either 'CM' or 'pos'
-ORIGIN = 'CM'
-
 # which components to include in the network architecture
 # if batt12 is False, the deformer setting has no consequence
 # one of batt12, decoder must be True and decoder must be True if encoder is True
@@ -79,7 +76,6 @@ GLOBALS_USE = dict(none=False,
                    ang_mom=False,
                    inertia=True,
                    inertia_dot_ang_mom=False,
-                   central_CM=True,
                    vel_dispersion=True,
                    vel_dispersion_dot_ang_mom=False,
                    vel_dispersion_dot_inertia=False)
@@ -94,7 +90,6 @@ BASIS_USE = dict(none=False,
                  #--------#
                  ang_mom=False,
                  inertia=True,
-                 central_CM=True,
                  vel_dispersion=False)
 
 # amount of noise added to the vectors

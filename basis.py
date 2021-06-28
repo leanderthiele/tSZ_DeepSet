@@ -24,10 +24,10 @@ class Basis(np.ndarray, metaclass=FixedLenVec) :
     #{{{    
         assert isinstance(halo, Halo)
 
-        w, v = LA.eigh(halo.inertia_DM)
+        w, v = LA.eigh(halo.inertia)
         v = v.T # more intuitive
 
-        projections = v @ halo.ang_momentum_DM
+        projections = v @ halo.ang_momentum
 
         # choose the octant of the coordinate system where the angular momentum points
         # this fixes the coordinate system uniquely since the eigenvectors returned by eigh
@@ -37,11 +37,9 @@ class Basis(np.ndarray, metaclass=FixedLenVec) :
         out = []
 
         if cfg.BASIS_USE['ang_mom'] :
-            out.append(halo.ang_momentum_DM)
+            out.append(halo.ang_momentum)
         if cfg.BASIS_USE['inertia'] :
             out.extend(v)
-        if cfg.BASIS_USE['central_CM'] :
-            out.extend(halo.central_CM_DM)
         if cfg.BASIS_USE['vel_dispersion'] :
             out.extend(halo.vel_dispersion)
 
@@ -85,6 +83,5 @@ class Basis(np.ndarray, metaclass=FixedLenVec) :
     #{{{ 
         return (not cfg.BASIS_USE['none']) * (cfg.BASIS_USE['ang_mom']
                                               + 3 * cfg.BASIS_USE['inertia']
-                                              + 3 * cfg.BASIS_USE['vel_dispersion']
-                                              + 3 * cfg.BASIS_USE['central_CM']) # TODO the last 3 is not robust
+                                              + 3 * cfg.BASIS_USE['vel_dispersion'])
     #}}}

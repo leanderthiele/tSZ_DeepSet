@@ -54,21 +54,18 @@ class DataItem :
         """
     #{{{
         # load the particle coordinates from file
-        with np.load(self.halo.storage_DM) as f :
-            coords = f['coords']
+        coords = np.fromfile(self.halo.storage_DM['coords'], dtype=np.float32)
+        coords = coords.reshape((len(coords)/3, 3))
 
         # remove the origin
-        if cfg.ORIGIN == 'CM' :
-            coords -= self.halo.CM_DM
-        elif cfg.ORIGIN == 'pos' :
-            coords -= self.halo.pos_DM
+        coords -= self.halo.pos
 
         # take periodic boundary conditions into account
         coords = DataItem.__periodicize(coords)
 
         # if required, divide by R200c
         if cfg.NORMALIZE_COORDS :
-            coords /= self.halo.R200c_DM
+            coords /= self.halo.R200c
 
         return coords
     #}}}
@@ -81,25 +78,22 @@ class DataItem :
     #{{{
         # load particle coordinates and thermal pressure at their position
         # from file
-        with np.load(self.halo.storage_TNG) as f :
-            coords = f['coords']
-            Pth = f['Pth']
+        coords = np.fromfile(self.halo.storage_TNG['coords_filtered'], dtype=np.float32)
+        coords = coords.reshape((len(coords)/3, 3))
+        Pth = np.fromfile(self.halo.storage_TNG['Pth_filtered'], dtype=np.float32)
 
         # remove the origin
-        if cfg.ORIGIN == 'CM' :
-            coords -= self.halo.CM_DM
-        elif cfg.ORIGIN == 'pos' :
-            coords -= self.halo.pos_DM
+        coords -= self.halo.pos
 
         # take periodic boundary conditions into account
         coords = DataItem.__periodicize(coords)
 
         # if required, divide by R200c
         if cfg.NORMALIZE_COORDS :
-            coords /= self.halo.R200c_DM
+            coords /= self.halo.R200c
 
         # normalize the thermal pressure
-        Pth /= self.halo.P200c_DM
+        Pth /= self.halo.P200c
 
         return coords, Pth[:, None]
     #}}}

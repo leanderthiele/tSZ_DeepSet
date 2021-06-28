@@ -68,14 +68,11 @@ class DataBatch :
         # halo properties for the SphericalModel
         halo_to_tensor = lambda s : astensor(np.array([getattr(d.halo, s) for d in data_items]))
 
-        self.M200c = halo_to_tensor('M200c_DM')
-        self.R200c = halo_to_tensor('R200c_DM')
-        self.P200c = halo_to_tensor('P200c_DM')
+        self.M200c = halo_to_tensor('M200c')
+        self.R200c = halo_to_tensor('R200c')
+        self.P200c = halo_to_tensor('P200c')
 
-        self.CM_DM   = halo_to_tensor('CM_DM')
-        self.pos_DM  = halo_to_tensor('pos_DM')
-        self.CM_TNG  = halo_to_tensor('CM_TNG')
-        self.pos_TNG = halo_to_tensor('pos_TNG')
+        self.pos  = halo_to_tensor('pos')
     #}}}
 
 
@@ -90,7 +87,7 @@ class DataBatch :
                    (this origin is in the coordinate system that was used to center the particles
                     initially)
         compute_TNG_radii ... whether the radial positions of the TNG particles
-                              (with respect to the new origin)
+                              are to be computed (with respect to the new origin)
 
         """
     #{{{
