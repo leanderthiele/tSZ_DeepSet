@@ -71,7 +71,7 @@ namespace collect
                    Spin, spin_bullock, b_to_a, c_to_a;
         value_type pos[3];
         value_type ang_mom[3];
-        value_type vel[3]
+        value_type vel[3];
 
         value_type min_pot_pos[3];
         value_type min_potential_energy = std::numeric_limits<value_type>::max();
@@ -166,6 +166,11 @@ namespace collect
                                    " 'M2500c': %.8e, 'Spin': %.8e, 'spin_bullock': %.8e, "
                                    " 'b_to_a': %.8e, 'c_to_a': %.8e, "
                                    " 'pos': np.array([%.8e, %.8e, %.8e], dtype=np.float32), "
+                                   #if defined DM
+                                   " 'min_pot_pos_DM': np.array([%.8e, %.8e, %.8e], dtype=np.float32), "
+                                   #elif defined TNG
+                                   " 'min_pot_pos_TNG': np.array([%.8e, %.8e, %.8e], dtype=np.float32), "
+                                   #endif
                                    " 'vel': np.array([%.8e, %.8e, %.8e], dtype=np.float32), "
                                    " 'ang_mom': np.array([%.8e, %.8e, %.8e], dtype=np.float32) }",
                                    M200c, R200c, Xoff, Voff,
@@ -174,6 +179,7 @@ namespace collect
                                    M2500c, Spin, spin_bullock,
                                    b_to_a, c_to_a,
                                    pos[0], pos[1], pos[2],
+                                   min_pot_pos[0], min_pot_pos[1], min_pot_pos[2],
                                    vel[0], vel[1], vel[2],
                                    ang_mom[0], ang_mom[1], ang_mom[2]);
 
