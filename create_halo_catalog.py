@@ -51,9 +51,13 @@ def central_CM(r, x, rmax) :
 
 
 out = dict(M200c=[], R200c=[], Xoff=[], Voff=[],
-           pos=[], CM=[], ang_momentum=[],
+           Vmax=[], Vrms=[], Rs=[], rs_klypin=[],
+           M200c_all=[], Mvir=[], M200b=[], M500c=[],
+           M2500c=[], Spin=[], spin_bullock=[],
+           b_to_a=[], c_to_a=[],
+           pos=[], vel=[], ang_mom=[],
            min_pot_pos_DM=[], min_pot_pos_TNG=[],
-           inertia=[], ang_momentum2=[], vel_dispersion=[])
+           inertia=[], CM=[], ang_mom2=[], vel_dispersion=[])
 
 idx = 0
 
@@ -62,28 +66,28 @@ while True :
     print(idx)
 
     try :
-        globals_DM = np.fromfile(cfg.STORAGE_FILES['DM']%(idx, 'globals'), dtype=np.float32)
+        globals_DM = exec(open(cfg.STORAGE_FILES['DM']%(idx, 'globals'), 'r').readline())
     except FileNotFoundError :
         print('Found %d halos.'%idx)
         break
 
-    out['M200c'].append(globals_DM[0])
-    out['R200c'].append(globals_DM[1])
-    out['Xoff'].append(globals_DM[2])
-    out['Voff'].append(globals_DM[3])
-    out['pos'].append(globals_DM[4:7])
-    out['min_pot_pos_DM'].append(globals_DM[7:10])
-    out['ang_momentum'].append(globals_DM[10:13])
+    assert isinstance(globals_DM, dict)
 
-    globals_TNG = np.fromfile(cfg.STORAGE_FILES['TNG']%(idx, 'globals'), dtype=np.float32)
+    for k, v in globals_DM.items() :
+        out[k].append(v)
 
-    assert out['M200c'][-1] == globals_TNG[0]
-    assert out['R200c'][-1] == globals_TNG[1]
-    assert out['Xoff'][-1] == globals_TNG[2]
-    assert out['Voff'][-1] == globals_TNG[3]
-    assert np.allclose(out['pos'][-1], globals_TNG[4:7])
-    out['min_pot_pos_TNG'].append(globals_TNG[7:10])
-    assert np.allclose(out['ang_momentum'][-1], globals_TNG[10:13])
+    globals_TNG = exec(open(cfg.STORAGE_FILES['TNG']%(idx, 'globals'), 'r').readline())
+    assert isinstance(globals_TNG, dict)
+
+    out['min_pot_pos_TNG'].append(globals_TNG.pop('min_pot_pos_TNG'))
+
+    for k, v in globals_TNG.items() :
+        if isinstance(v, float) :
+            assert out[k][-1] == v
+        elif isinstance(v, np.ndarray) :
+            assert np.allclose(out[k][-1], v)
+        else :
+            raise RuntimeError('%s has unexpected type'%k)
 
     # only work with DM now, as these are fields we want to use as input
 
@@ -112,7 +116,7 @@ while True :
 
 # group as numpy arrays
 for k, v in out.items() :
-    out[k] = np.array(v)
+    out[k] = np.array(v, dtype=np.float32)
 
 # add number of halos to file
 out['Nobjects'] = idx

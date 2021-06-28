@@ -165,14 +165,14 @@ namespace collect
                                    " 'M200c_all': %.8e, 'Mvir': %.8e, 'M200b': %.8e, 'M500c': %.8e, "
                                    " 'M2500c': %.8e, 'Spin': %.8e, 'spin_bullock': %.8e, "
                                    " 'b_to_a': %.8e, 'c_to_a': %.8e, "
-                                   " 'pos': np.array([%.8e, %.8e, %.8e], dtype=np.float32), "
+                                   " 'pos': np.array([%.8e, %.8e, %.8e]), "
                                    #if defined DM
-                                   " 'min_pot_pos_DM': np.array([%.8e, %.8e, %.8e], dtype=np.float32), "
+                                   " 'min_pot_pos_DM': np.array([%.8e, %.8e, %.8e]), "
                                    #elif defined TNG
-                                   " 'min_pot_pos_TNG': np.array([%.8e, %.8e, %.8e], dtype=np.float32), "
+                                   " 'min_pot_pos_TNG': np.array([%.8e, %.8e, %.8e]), "
                                    #endif
-                                   " 'vel': np.array([%.8e, %.8e, %.8e], dtype=np.float32), "
-                                   " 'ang_mom': np.array([%.8e, %.8e, %.8e], dtype=np.float32) }",
+                                   " 'vel': np.array([%.8e, %.8e, %.8e]), "
+                                   " 'ang_mom': np.array([%.8e, %.8e, %.8e]) }",
                                    M200c, R200c, Xoff, Voff,
                                    Vmax, Vrms, Rs, rs_klypin,
                                    M200c_all, Mvir, M200b, M500c,
