@@ -16,6 +16,8 @@ for ii in range(halo_catalog['Nobjects']) :
     x = x.reshape((len(x)/3, 3))
 
     # compute radial coordinates
+    # TODO we should explore whether the minimum potential point
+    #      or the Rockstar position is better here
     dx = x - h.pos
     dx[dx > +0.5*cfg.BOX_SIZE] -= cfg.BOX_SIZE
     dx[dx < -0.5*cfg.BOX_SIZE] += cfg.BOX_SIZE
