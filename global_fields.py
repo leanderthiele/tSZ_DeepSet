@@ -64,7 +64,7 @@ class GlobalFields(np.ndarray, metaclass=FixedLenVec) :
             ang_mom_norm /= halo.R200c * halo.V200c * halo.M200c
             Xoff /= halo.R200c
             Voff /= halo.V200c
-            CM /= halo.R200c
+            CM_norm /= halo.R200c
             eigval_inertia *= cfg.UNIT_MASS / (halo.R200c**2 * halo.M200c)
             eigval_vel_dispersion *= cfg.UNIT_MASS / (halo.V200c**2 * halo.M200c)
 
@@ -79,7 +79,7 @@ class GlobalFields(np.ndarray, metaclass=FixedLenVec) :
         if cfg.GLOBALS_USE['Voff'] :
             out.append(Voff)
         if cfg.GLOBALS_USE['CM'] :
-            out.append(CM)
+            out.append(CM_norm)
         if cfg.GLOBALS_USE['inertia'] :
             out.extend(eigval_inertia)
         if cfg.GLOBALS_USE['inertia_dot_ang_mom'] :

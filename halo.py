@@ -18,14 +18,13 @@ class Halo :
         # into this instance
 
         for k, v in halo_catalog.items() :
-            if isinstance(v, np.ndarray) :
-                assert len(v) == halo_catalog['Nobjects']
-                setattr(self, k, v[halo_index])
-            else :
-                assert k == 'Nobjects'
+            if k == 'Nobjects' :
+                continue
+            assert len(v) == halo_catalog['Nobjects']
+            setattr(self, k, v[halo_index])
 
-        self.P200c = self.__P200c(self.M200c, self.R200c)
-        self.V200c = self.__V200c(self.M200c, self.R200c)
+        self.P200c = Halo.__P200c(self.M200c, self.R200c)
+        self.V200c = Halo.__V200c(self.M200c, self.R200c)
 
         self.storage_DM = dict(coords=cfg.STORAGE_FILES['DM']%(halo_index, 'coords'),
                                velocities=cfg.STORAGE_FILES['DM']%(halo_index, 'velocities'))
