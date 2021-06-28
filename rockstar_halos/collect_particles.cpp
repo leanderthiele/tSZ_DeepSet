@@ -18,7 +18,9 @@ namespace collect
     using GrpF = GrpFields<RockstarFields::pos,
                            RockstarFields::ang_mom,
                            RockstarFields::M200c,
-                           RockstarFields::R200c>;
+                           RockstarFields::R200c,
+                           RockstarFields::Xoff,
+                           RockstarFields::Voff>;
 
     using PrtF = PrtFields<IllustrisFields::Coordinates,
                            IllustrisFields::Potential,
@@ -50,7 +52,7 @@ namespace collect
         std::vector<value_type> velocities;
         #endif
 
-        value_type M200c, R200c;
+        value_type M200c, R200c, Xoff, Voff;
         value_type pos[3];
         value_type ang_mom[3];
 
@@ -64,6 +66,8 @@ namespace collect
         {
             M200c = grp.get<RockstarFields::M200c>();
             R200c = grp.get<RockstarFields::R200c>();
+            Xoff  = grp.get<RockstarFields::Xoff>();
+            Voff  = grp.get<RockstarFields::Voff>();
 
             auto r = grp.get<RockstarFields::pos>();
             for (size_t ii=0; ii != 3; ++ii)
@@ -124,6 +128,8 @@ namespace collect
         {
             std::fwrite(&M200c, sizeof(value_type), 1, fglobals);
             std::fwrite(&R200c, sizeof(value_type), 1, fglobals);
+            std::fwrite(&Xoff, sizeof(value_type), 1, fglobals);
+            std::fwrite(&Voff, sizeof(value_type), 1, fglobals);
             std::fwrite(pos, sizeof(value_type), 3, fglobals);
             std::fwrite(min_pot_pos, sizeof(value_type), 3, fglobals);
             std::fwrite(ang_mom, sizeof(value_type), 3, fglobals);
