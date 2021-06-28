@@ -90,7 +90,6 @@ for epoch in range(EPOCHS) :
                 np.savez('test_%d_%d.npz'%(epoch, t),
                          r=r_npy, g=g_npy, p=p_npy, t=t_npy)
 
-#        loss, loss_list = loss_fn(prediction, data.TNG_Pth, w=None)
         loss, loss_list = loss_fn(prediction, data.TNG_Pth, w=None)
         _, loss_list_guess = loss_fn(guess, data.TNG_Pth, w=None)
 

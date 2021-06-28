@@ -90,7 +90,7 @@ while True :
     v -= np.mean(v, axis=0)
 
     out['inertia'].append(inertia(x))
-    out['CM'].append(np.mean(x))
+    out['CM'].append(np.mean(x, axis=0))
     out['ang_mom2'].append(ang_momentum(x, v))
     out['vel_dispersion'].append(inertia(v))
 
