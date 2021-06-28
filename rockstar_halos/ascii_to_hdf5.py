@@ -10,7 +10,7 @@ FIN_HDF5  = '/tigress/lthiele/Illustris_300-1_Dark/output/groups_099/fof_subhalo
 
 FOUT_HDF5  = '/tigress/lthiele/Illustris_300-1_Dark/rockstar/out_99.hdf5'
 
-# which fields to read -- defaults are factor=1, dtype=float32, filter=None, save=True
+# which fields to read -- defaults are factor=1, dtype=float32, filter=None, save=True, alias=None
 # filter works in terms of the rescaled fields, i.e. factor is applied
 READ_FIELDS = dict(M200c={'factor': 1e-10},
                    R200c={},
@@ -20,12 +20,29 @@ READ_FIELDS = dict(M200c={'factor': 1e-10},
                    JX   ={'factor': 1e-7},
                    JY   ={'factor': 1e-7},
                    JZ   ={'factor': 1e-7},
+                   Vmax ={},
+                   Vrms ={},
+                   Rs   ={},
+                   VX   ={},
+                   VY   ={},
+                   VZ   ={},
+                   Spin ={},
+                   rs_klypin={},
+                   M200c_all={'factor': 1e-10},
+                   Mvir ={'factor': 1e-10},
+                   M200b={'factor': 1e-10},
+                   M500c={'factor': 1e-10},
+                   M2500c={'factor': 1e-10},
+                   spin_bullock={},
+                   b_to_a={},
+                   c_to_a={},
                    Xoff ={}, # already in kpc/h
                    Voff ={}, # in km/s
                    PID  ={'dtype': int, 'filter': lambda x: x==-1, 'save': False})
 
 # some fields should be stacked into multi-dimensional arrays
 STACKS = dict(pos=['X', 'Y', 'Z'],
+              vel=['VX', 'VY', 'VZ'],
               ang_mom=['JX', 'JY', 'JZ'])
 
 # for these groups we simply copy all the attributes from FIN_HDF5 to FOUT_HDF5
