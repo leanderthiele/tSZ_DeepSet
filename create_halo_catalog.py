@@ -51,7 +51,7 @@ def central_CM(r, x, rmax) :
 
 
 out = dict(M200c=[], R200c=[], Xoff=[], Voff=[],
-           pos=[], ang_momentum=[],
+           pos=[], CM=[], ang_momentum=[],
            min_pot_pos_DM=[], min_pot_pos_TNG=[],
            inertia=[], ang_momentum2=[], vel_dispersion=[])
 
@@ -104,6 +104,7 @@ while True :
     v -= np.mean(v, axis=0)
 
     out['inertia'].append(inertia(x))
+    out['CM'].append(np.mean(x))
     out['ang_momentum2'].append(ang_momentum(x, v))
     out['vel_dispersion'].append(inertia(v))
 

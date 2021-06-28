@@ -75,6 +75,7 @@ GLOBALS_USE = dict(none=False,
                    logM=True,
                    Xoff=False,
                    Voff=False,
+                   CM=False,
                    ang_mom=False,
                    inertia=True,
                    inertia_dot_ang_mom=False,
@@ -91,6 +92,7 @@ GLOBALS_NOISE = 5.0
 BASIS_USE = dict(none=False,
                  #--------#
                  ang_mom=False,
+                 CM=False,
                  inertia=True,
                  vel_dispersion=False)
 

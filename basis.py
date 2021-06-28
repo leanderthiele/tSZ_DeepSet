@@ -38,6 +38,8 @@ class Basis(np.ndarray, metaclass=FixedLenVec) :
 
         if cfg.BASIS_USE['ang_mom'] :
             out.append(halo.ang_momentum)
+        if cfg.BASIS_USE['CM'] :
+            out.append(halo.CM)
         if cfg.BASIS_USE['inertia'] :
             out.extend(v)
         if cfg.BASIS_USE['vel_dispersion'] :
@@ -82,6 +84,7 @@ class Basis(np.ndarray, metaclass=FixedLenVec) :
         """
     #{{{ 
         return (not cfg.BASIS_USE['none']) * (cfg.BASIS_USE['ang_mom']
+                                              + cfg.BASIS_USE['CM']
                                               + 3 * cfg.BASIS_USE['inertia']
                                               + 3 * cfg.BASIS_USE['vel_dispersion'])
     #}}}

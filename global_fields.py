@@ -34,6 +34,9 @@ class GlobalFields(np.ndarray, metaclass=FixedLenVec) :
         Xoff = halo.Xoff
         Voff = halo.Voff
 
+        # center of mass (with respect to the pos field)
+        CM_norm = LA.norm(halo.CM)
+
         # diagonalize inertia tensor
         eigval_inertia, eigvec_inertia = LA.eigh(halo.inertia)
         eigvec_inertia = eigvec_inertia.T # get into better format -- v[i, :] is the ith eigenvector
@@ -61,6 +64,7 @@ class GlobalFields(np.ndarray, metaclass=FixedLenVec) :
             ang_mom_norm /= halo.R200c * halo.V200c * halo.M200c
             Xoff /= halo.R200c
             Voff /= halo.V200c
+            CM /= halo.R200c
             eigval_inertia *= cfg.UNIT_MASS / (halo.R200c**2 * halo.M200c)
             eigval_vel_dispersion *= cfg.UNIT_MASS / (halo.V200c**2 * halo.M200c)
 
@@ -74,6 +78,8 @@ class GlobalFields(np.ndarray, metaclass=FixedLenVec) :
             out.append(Xoff)
         if cfg.GLOBALS_USE['Voff'] :
             out.append(Voff)
+        if cfg.GLOBALS_USE['CM'] :
+            out.append(CM)
         if cfg.GLOBALS_USE['inertia'] :
             out.extend(eigval_inertia)
         if cfg.GLOBALS_USE['inertia_dot_ang_mom'] :
@@ -122,6 +128,7 @@ class GlobalFields(np.ndarray, metaclass=FixedLenVec) :
                                                 + cfg.GLOBALS_USE['ang_mom']
                                                 + cfg.GLOBALS_USE['Xoff']
                                                 + cfg.GLOBALS_USE['Voff']
+                                                + cfg.GLOBALS_USE['CM']
                                                 + 3 * cfg.GLOBALS_USE['inertia']
                                                 + 3 * cfg.GLOBALS_USE['inertia_dot_ang_mom'] 
                                                 + 3 * cfg.GLOBALS_USE['vel_dispersion']

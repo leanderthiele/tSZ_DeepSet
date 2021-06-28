@@ -23,6 +23,7 @@ class Halo :
         self.Xoff = get_entry('Xoff')
         self.Voff = get_entry('Voff')
         self.pos = get_entry('pos')
+        self.CM = get_entry('CM') # note : this is a vector with respect to the pos!
         self.ang_momentum = get_entry('ang_momentum')
         self.min_pot_pos_DM = get_entry('min_pot_pos_DM')
         self.min_pot_pos_TNG = get_entry('min_pot_pos_TNG')
