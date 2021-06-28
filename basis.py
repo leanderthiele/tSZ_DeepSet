@@ -27,7 +27,7 @@ class Basis(np.ndarray, metaclass=FixedLenVec) :
         w, v = LA.eigh(halo.inertia)
         v = v.T # more intuitive
 
-        projections = v @ halo.ang_momentum
+        projections = v @ halo.ang_mom
 
         # choose the octant of the coordinate system where the angular momentum points
         # this fixes the coordinate system uniquely since the eigenvectors returned by eigh
@@ -37,7 +37,7 @@ class Basis(np.ndarray, metaclass=FixedLenVec) :
         out = []
 
         if cfg.BASIS_USE['ang_mom'] :
-            out.append(halo.ang_momentum)
+            out.append(halo.ang_mom)
         if cfg.BASIS_USE['CM'] :
             out.append(halo.CM)
         if cfg.BASIS_USE['inertia'] :

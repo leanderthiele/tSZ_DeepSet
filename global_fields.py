@@ -28,7 +28,7 @@ class GlobalFields(np.ndarray, metaclass=FixedLenVec) :
         logM = np.log(halo.M200c)
 
         # magnitude of angular momentum vector
-        ang_mom_norm = LA.norm(halo.ang_momentum)
+        ang_mom_norm = LA.norm(halo.ang_mom)
 
         # relaxation measures
         Xoff = halo.Xoff
@@ -43,14 +43,14 @@ class GlobalFields(np.ndarray, metaclass=FixedLenVec) :
 
         # compute the angles between angular momentum and inertia axes
         # note that the eigenvectors returned by eigh are already normalized
-        inertia_dot_ang_mom = eigvec_inertia @ halo.ang_momentum / ang_mom_norm
+        inertia_dot_ang_mom = eigvec_inertia @ halo.ang_mom / ang_mom_norm
 
         # diagonalize velocity dispersion tensor
         eigval_vel_dispersion, eigvec_vel_dispersion = LA.eigh(halo.vel_dispersion)
         eigvec_vel_dispersion = eigvec_vel_dispersion.T
 
         # compute the angles between angular momentum and velocity dispersion axes
-        vel_dispersion_dot_ang_mom = eigvec_vel_dispersion @ halo.ang_momentum / ang_mom_norm
+        vel_dispersion_dot_ang_mom = eigvec_vel_dispersion @ halo.ang_mom / ang_mom_norm
 
         # compute angles between inertia and velocity dispersion eigenvectors
         vel_dispersion_dot_inertia = np.einsum('id,jd->ij', eigvec_inertia, eigvec_vel_dispersion).flatten()
