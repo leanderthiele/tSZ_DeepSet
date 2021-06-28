@@ -36,8 +36,8 @@ OMEGA_M = 0.3089
 #   masses     [TNG only]
 #   Pth        [TNG only]
 #   velocities [DM only]
-STORAGE_FILES = dict(DM='/scratch/gpfs/lthiele/tSZ_DeepSet_halos/rockstar_halos/DM_%d_%s.bin',
-                     TNG='/scratch/gpfs/lthiele/tSZ_DeepSet_halos/rockstar_halos/TNG_%d_%s.bin')
+STORAGE_FILES = dict(DM='/scratch/gpfs/lthiele/tSZ_DeepSet_halos/rockstar/DM_%d_%s.bin',
+                     TNG='/scratch/gpfs/lthiele/tSZ_DeepSet_halos/rockstar/TNG_%d_%s.bin')
 
 # how many particles of each type to use per halo
 # set to None if all particles are to be used

@@ -55,7 +55,7 @@ class DataItem :
     #{{{
         # load the particle coordinates from file
         coords = np.fromfile(self.halo.storage_DM['coords'], dtype=np.float32)
-        coords = coords.reshape((len(coords)/3, 3))
+        coords = coords.reshape((len(coords)//3, 3))
 
         # remove the origin
         coords -= self.halo.pos
@@ -79,7 +79,7 @@ class DataItem :
         # load particle coordinates and thermal pressure at their position
         # from file
         coords = np.fromfile(self.halo.storage_TNG['coords_filtered'], dtype=np.float32)
-        coords = coords.reshape((len(coords)/3, 3))
+        coords = coords.reshape((len(coords)//3, 3))
         Pth = np.fromfile(self.halo.storage_TNG['Pth_filtered'], dtype=np.float32)
 
         # remove the origin

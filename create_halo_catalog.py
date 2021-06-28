@@ -57,6 +57,9 @@ out = dict(M200c=[], R200c=[], pos=[], ang_momentum=[],
 idx = 0
 
 while True :
+    
+    print(idx)
+
     try :
         globals_DM = np.fromfile(cfg.STORAGE_FILES['DM']%(idx, 'globals'), dtype=np.float32)
     except FileNotFoundError :
@@ -81,11 +84,11 @@ while True :
 
     # load coordinates from file
     x = np.fromfile(cfg.STORAGE_FILES['DM']%(idx, 'coords'), dtype=np.float32)
-    x = x.reshape((len(x)/3, 3))
+    x = x.reshape((len(x)//3, 3))
 
     # load velocities from file
     v = np.fromfile(cfg.STORAGE_FILES['DM']%(idx, 'velocities'), dtype=np.float32)
-    v = v.reshape((len(v)/3, 3))
+    v = v.reshape((len(v)//3, 3))
 
     # center the coordinates
     x -= out['pos'][-1]
