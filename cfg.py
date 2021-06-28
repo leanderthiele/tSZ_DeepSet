@@ -73,6 +73,8 @@ CONSISTENT_SEED = 137
 GLOBALS_USE = dict(none=False,
                    #-------#
                    logM=True,
+                   Xoff=False,
+                   Voff=False,
                    ang_mom=False,
                    inertia=True,
                    inertia_dot_ang_mom=False,

@@ -20,6 +20,8 @@ class Halo :
         self.R200c = get_entry('R200c')
         self.P200c = self.__P200c(self.M200c, self.R200c)
         self.V200c = self.__V200c(self.M200c, self.R200c)
+        self.Xoff = get_entry('Xoff')
+        self.Voff = get_entry('Voff')
         self.pos = get_entry('pos')
         self.ang_momentum = get_entry('ang_momentum')
         self.min_pot_pos_DM = get_entry('min_pot_pos_DM')

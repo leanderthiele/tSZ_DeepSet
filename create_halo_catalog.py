@@ -50,7 +50,8 @@ def central_CM(r, x, rmax) :
     return np.sum(xc, axis=0) / xc.shape[0]
 
 
-out = dict(M200c=[], R200c=[], pos=[], ang_momentum=[],
+out = dict(M200c=[], R200c=[], Xoff=[], Voff=[],
+           pos=[], ang_momentum=[],
            min_pot_pos_DM=[], min_pot_pos_TNG=[],
            inertia=[], ang_momentum2=[], vel_dispersion=[])
 
@@ -68,17 +69,21 @@ while True :
 
     out['M200c'].append(globals_DM[0])
     out['R200c'].append(globals_DM[1])
-    out['pos'].append(globals_DM[2:5])
-    out['min_pot_pos_DM'].append(globals_DM[5:8])
-    out['ang_momentum'].append(globals_DM[8:11])
+    out['Xoff'].append(globals_DM[2])
+    out['Voff'].append(globals_DM[3])
+    out['pos'].append(globals_DM[4:7])
+    out['min_pot_pos_DM'].append(globals_DM[7:10])
+    out['ang_momentum'].append(globals_DM[10:13])
 
     globals_TNG = np.fromfile(cfg.STORAGE_FILES['TNG']%(idx, 'globals'), dtype=np.float32)
 
     assert out['M200c'][-1] == globals_TNG[0]
     assert out['R200c'][-1] == globals_TNG[1]
-    assert np.allclose(out['pos'][-1], globals_TNG[2:5])
-    out['min_pot_pos_TNG'].append(globals_TNG[5:8])
-    assert np.allclose(out['ang_momentum'][-1], globals_TNG[8:11])
+    assert out['Xoff'][-1] == globals_TNG[2]
+    assert out['Voff'][-1] == globals_TNG[3]
+    assert np.allclose(out['pos'][-1], globals_TNG[4:7])
+    out['min_pot_pos_TNG'].append(globals_TNG[7:10])
+    assert np.allclose(out['ang_momentum'][-1], globals_TNG[10:13])
 
     # only work with DM now, as these are fields we want to use as input
 

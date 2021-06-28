@@ -24,8 +24,15 @@ class GlobalFields(np.ndarray, metaclass=FixedLenVec) :
     #{{{
         assert isinstance(halo, Halo)
 
+        # logarithmic mass
         logM = np.log(halo.M200c)
+
+        # magnitude of angular momentum vector
         ang_mom_norm = LA.norm(halo.ang_momentum)
+
+        # relaxation measures
+        Xoff = halo.Xoff
+        Voff = halo.Voff
 
         # diagonalize inertia tensor
         eigval_inertia, eigvec_inertia = LA.eigh(halo.inertia)
@@ -51,7 +58,9 @@ class GlobalFields(np.ndarray, metaclass=FixedLenVec) :
         vel_dispersion_dot_inertia[vel_dispersion_dot_inertia < 0] *= -1
 
         if cfg.NORMALIZE_COORDS :
-            ang_mom_norm *= cfg.UNIT_MASS / (halo.R200c * halo.V200c * halo.M200c)
+            ang_mom_norm /= halo.R200c * halo.V200c * halo.M200c
+            Xoff /= halo.R200c
+            Voff /= halo.V200c
             eigval_inertia *= cfg.UNIT_MASS / (halo.R200c**2 * halo.M200c)
             eigval_vel_dispersion *= cfg.UNIT_MASS / (halo.V200c**2 * halo.M200c)
 
@@ -61,6 +70,10 @@ class GlobalFields(np.ndarray, metaclass=FixedLenVec) :
             out.append(logM)
         if cfg.GLOBALS_USE['ang_mom'] :
             out.append(ang_mom_norm)
+        if cfg.GLOBALS_USE['Xoff'] :
+            out.append(Xoff)
+        if cfg.GLOBALS_USE['Voff'] :
+            out.append(Voff)
         if cfg.GLOBALS_USE['inertia'] :
             out.extend(eigval_inertia)
         if cfg.GLOBALS_USE['inertia_dot_ang_mom'] :
@@ -107,6 +120,8 @@ class GlobalFields(np.ndarray, metaclass=FixedLenVec) :
     #{{{
         return (not cfg.GLOBALS_USE['none']) * (cfg.GLOBALS_USE['logM']
                                                 + cfg.GLOBALS_USE['ang_mom']
+                                                + cfg.GLOBALS_USE['Xoff']
+                                                + cfg.GLOBALS_USE['Voff']
                                                 + 3 * cfg.GLOBALS_USE['inertia']
                                                 + 3 * cfg.GLOBALS_USE['inertia_dot_ang_mom'] 
                                                 + 3 * cfg.GLOBALS_USE['vel_dispersion']
