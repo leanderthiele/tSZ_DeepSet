@@ -7,26 +7,6 @@ has already been done in rockstar_halos/collect_particles.cpp,
 so the previous filtering function of this script no longer applies.
 
 However, it is still useful to collect some global properties of our halos.
-
-The output halo_catalog.npz file has the fields
-[direct rockstar output]
-    M200c
-    R200c
-    pos
-    ang_momentum [3]
-
-[from collect_particles.cpp]
-    min_pot_pos_DM
-    min_pot_pos_TNG
-
-[calculated here]
-    inertia [3,3]
-    ang_momentum2 [3] -- calculated here, could be interesting to compare to rockstar output
-    vel_dispersion [3,3]
-
-[added later by create_Nprt.py]
-    Nprt_DM
-    Nprt_TNG
 """
 
 import numpy as np
@@ -109,7 +89,7 @@ while True :
 
     out['inertia'].append(inertia(x))
     out['CM'].append(np.mean(x))
-    out['ang_momentum2'].append(ang_momentum(x, v))
+    out['ang_mom2'].append(ang_momentum(x, v))
     out['vel_dispersion'].append(inertia(v))
 
     idx += 1

@@ -20,16 +20,33 @@ class Halo :
         self.R200c = get_entry('R200c')
         self.P200c = self.__P200c(self.M200c, self.R200c)
         self.V200c = self.__V200c(self.M200c, self.R200c)
-        self.Xoff = get_entry('Xoff')
-        self.Voff = get_entry('Voff')
+
         self.pos = get_entry('pos')
         self.CM = get_entry('CM') # note : this is a vector with respect to the pos!
-        self.ang_momentum = get_entry('ang_momentum')
         self.min_pot_pos_DM = get_entry('min_pot_pos_DM')
         self.min_pot_pos_TNG = get_entry('min_pot_pos_TNG')
-        self.inertia = get_entry('inertia')
-        self.ang_momentum2 = get_entry('ang_momentum2')
+
+        self.vel = get_entry('vel')
         self.vel_dispersion = get_entry('vel_dispersion')
+        self.inertia = get_entry('inertia')
+        self.ang_momentum = get_entry('ang_mom')
+        self.ang_momentum2 = get_entry('ang_mom2')
+
+        self.Xoff = get_entry('Xoff')
+        self.Voff = get_entry('Voff')
+        self.Vmax = get_entry('Vmax')
+        self.Vrms = get_entry('Vrms')
+        self.Rs = get_entry('Rs')
+        self.rs_klypin = get_entry('rs_klypin')
+        self.M200c_all = get_entry('M200c_all')
+        self.Mvir = get_entry('Mvir')
+        self.M200b = get_entry('M200b')
+        self.M500c = get_entry('M500c')
+        self.M2500c = get_entry('M2500c')
+        self.Spin = get_entry('Spin')
+        self.spin_bullock = get_entry('spin_bullock')
+        self.b_to_a = get_entry('b_to_a')
+        self.c_to_a = get_entry('c_to_a')
 
         self.storage_DM = dict(coords=cfg.STORAGE_FILES['DM']%(halo_index, 'coords'),
                                velocities=cfg.STORAGE_FILES['DM']%(halo_index, 'velocities'))
