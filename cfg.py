@@ -27,10 +27,17 @@ G_NEWTON = 4.30091e4 # Newton's constant in Illustris code units
 OMEGA_B = 0.0486
 OMEGA_M = 0.3089
 
-# the .npz files where we store the particle information
-# '%d' is placeholder for the halo index (in the Illustris catalogs)
-STORAGE_FILES = dict(DM='/scratch/gpfs/lthiele/tSZ_DeepSet_halos/DM_%d.npz',
-                     TNG='/scratch/gpfs/lthiele/tSZ_DeepSet_halos/TNG_%d.npz')
+# the binary files where we store particle information and some global
+# properties of the halo
+# '%d' is placeholder for the halo index
+# '%s' is placeholder for some string, which can be
+#   globals    [DM & TNG]
+#   coords     [DM & TNG]
+#   masses     [TNG only]
+#   Pth        [TNG only]
+#   velocities [DM only]
+STORAGE_FILES = dict(DM='/scratch/gpfs/lthiele/tSZ_DeepSet_halos/rockstar_halos/DM_%d_%s.bin',
+                     TNG='/scratch/gpfs/lthiele/tSZ_DeepSet_halos/rockstar_halos/TNG_%d_%s.bin')
 
 # how many particles of each type to use per halo
 # set to None if all particles are to be used
