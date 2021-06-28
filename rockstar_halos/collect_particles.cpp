@@ -4,6 +4,8 @@
 #include "group_particles.hpp"
 #include "common_fields.hpp"
 
+#define DM
+
 namespace collect
 {
     constexpr const uint8_t PartType =
@@ -20,16 +22,17 @@ namespace collect
                            RockstarFields::M200c,
                            RockstarFields::R200c>;
 
-    using PrtF = PrtFields<IllustrisFields::Coordinates
-                           #ifdef TNG
-                           ,
+    using PrtF = PrtFields<IllustrisFields::Coordinates,
+                           IllustrisFields::Potential,
+                           #if defined TNG
                            IllustrisFields::Density,
                            IllustrisFields::Masses,
                            IllustrisFields::InternalEnergy,
                            IllustrisFields::ElectronAbundance,
-                           IllustrisFields::Potential,
                            IllustrisFields::StarFormationRate
-                           #endif // TNG
+                           #elif defined DM
+                           IllustrisFields::Velocities
+                           #endif
                            >;
 
     using AF = AllFields<GrpF, PrtF>;
@@ -42,19 +45,19 @@ namespace collect
         using value_type = float;
 
         std::vector<value_type> coords;
-        #ifdef TNG
+        #if defined TNG
         std::vector<value_type> masses;
         std::vector<value_type> Pth;
+        #elif defined DM
+        std::vector<value_type> velocities;
         #endif
 
         value_type M200c, R200c;
         value_type pos[3];
         value_type ang_mom[3];
 
-        #ifdef TNG
-        value_type TNG_pos[3];
+        value_type min_pot_pos[3];
         value_type min_potential_energy = std::numeric_limits<value_type>::max();
-        #endif
 
     public :
         ParticleCollection() = delete;
@@ -78,7 +81,7 @@ namespace collect
             auto r = prt.get<IllustrisFields::Coordinates>();
             // do not use it yet, since for TNG we want to filter for SFR
 
-            #ifdef TNG
+            #if defined TNG
             // we only include non-star-forming particles
             auto SFR = prt.get<IllustrisFields::StarFormationRate>();
             if (SFR > 0.0)
@@ -94,42 +97,47 @@ namespace collect
             static constexpr const value_type gamma = 5.0/3.0, XH = 0.76;
             Pth.push_back(4.0 * x * XH / (1.0+3.0*XH+4.0*XH*x)
                           * (gamma-1.0) * d * e);
+            #elif defined DM
+            auto v = prt.get<IllustrisFields::Velocities>();
+            for (size_t ii=0; ii != 3; ++ii)
+                velocities.push_back(v[ii]);
+            #endif
 
-            auto v = prt.get<IllustrisFields::Potential>();
-            if (v < min_potential_energy)
+            auto phi = prt.get<IllustrisFields::Potential>();
+            if (phi < min_potential_energy)
             {
-                min_potential_energy = v;
+                min_potential_energy = phi;
                 for (size_t ii=0; ii != 3; ++ii)
-                    TNG_pos[ii] = r[ii];
+                    min_pot_pos[ii] = r[ii];
             }
-            #endif // TNG
 
             for (size_t ii=0; ii != 3; ++ii)
                 coords.push_back(r[ii]);
         }
 
-        void save(std::FILE *fglobals, std::FILE *fcoords
-                  #ifdef TNG
-                  ,
+        void save(std::FILE *fglobals, std::FILE *fcoords,
+                  #if defined TNG
                   std::FILE *fmasses,
                   std::FILE *fPth
-                  #endif // TNG
+                  #elif defined DM
+                  std::FILE *fvelocities
+                  #endif
                   ) const
         {
             std::fwrite(&M200c, sizeof(value_type), 1, fglobals);
             std::fwrite(&R200c, sizeof(value_type), 1, fglobals);
-            std::fwrite(pos,    sizeof(value_type), 3, fglobals);
-            std::fwrite(ang_mom,sizeof(value_type), 3, fglobals);
-            #ifdef TNG
-            std::fwrite(TNG_pos,sizeof(value_type), 3, fglobals);
-            #endif // TNG
+            std::fwrite(pos, sizeof(value_type), 3, fglobals);
+            std::fwrite(min_pot_pos, sizeof(value_type), 3, fglobals);
+            std::fwrite(ang_mom, sizeof(value_type), 3, fglobals);
 
             std::fwrite(coords.data(), sizeof(value_type), coords.size(), fcoords);
 
-            #ifdef TNG
+            #if defined TNG
             std::fwrite(masses.data(), sizeof(value_type), masses.size(), fmasses);
             std::fwrite(Pth.data(), sizeof(value_type), Pth.size(), fPth);
-            #endif // TNG
+            #elif defined DM
+            std::fwrite(velocities.data(), sizeof(value_type), velocities.size(), fvelocities);
+            #endif
         }
     };// }}}
 
@@ -210,20 +218,24 @@ int main ()
         std::sprintf(buffer, "%s_%lu_coords.bin", out_root, grp_idx);
         auto fcoords = std::fopen(buffer, "wb");
 
-        #ifdef TNG
+        #if defined TNG
         std::sprintf(buffer, "%s_%lu_masses.bin", out_root, grp_idx);
         auto fmasses = std::fopen(buffer, "wb");
 
         std::sprintf(buffer, "%s_%lu_Pth.bin", out_root, grp_idx);
         auto fPth = std::fopen(buffer, "wb");
-        #endif // TNG
+        #elif defined DM
+        std::sprintf(buffer, "%s_%lu_velocities.bin", out_root, grp_idx);
+        auto fvelocities = std::fopen(buffer, "wb");
+        #endif
 
-        obj.save(fglobals, fcoords
-                 #ifdef TNG
-                 ,
+        obj.save(fglobals, fcoords,
+                 #if defined TNG
                  fmasses,
                  fPth
-                 #endif // TNG
+                 #elif defined DM
+                 fvelocities
+                 #endif
                  );
 
         ++grp_idx;
