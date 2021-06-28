@@ -66,7 +66,7 @@ while True :
     print(idx)
 
     try :
-        globals_DM = exec(open(cfg.STORAGE_FILES['DM']%(idx, 'globals'), 'r').readline())
+        globals_DM = eval(open(cfg.STORAGE_FILES['DM']%(idx, 'globals'), 'r').readline())
     except FileNotFoundError :
         print('Found %d halos.'%idx)
         break
@@ -76,7 +76,7 @@ while True :
     for k, v in globals_DM.items() :
         out[k].append(v)
 
-    globals_TNG = exec(open(cfg.STORAGE_FILES['TNG']%(idx, 'globals'), 'r').readline())
+    globals_TNG = eval(open(cfg.STORAGE_FILES['TNG']%(idx, 'globals'), 'r').readline())
     assert isinstance(globals_TNG, dict)
 
     out['min_pot_pos_TNG'].append(globals_TNG.pop('min_pot_pos_TNG'))
