@@ -17,10 +17,24 @@ namespace collect
 
     using GrpF = GrpFields<RockstarFields::pos,
                            RockstarFields::ang_mom,
+                           RockstarFields::vel,
                            RockstarFields::M200c,
                            RockstarFields::R200c,
                            RockstarFields::Xoff,
-                           RockstarFields::Voff>;
+                           RockstarFields::Voff,
+                           RockstarFields::Vmax,
+                           RockstarFields::Vrms,
+                           RockstarFields::Rs,
+                           RockstarFields::rs_klypin,
+                           RockstarFields::M200c_all,
+                           RockstarFields::Mvir,
+                           RockstarFields::M200b,
+                           RockstarFields::M500c,
+                           RockstarFields::M2500c,
+                           RockstarFields::Spin,
+                           RockstarFields::spin_bullock,
+                           RockstarFields::b_to_a,
+                           RockstarFields::c_to_a>;
 
     using PrtF = PrtFields<IllustrisFields::Coordinates,
                            IllustrisFields::Potential,
@@ -52,9 +66,12 @@ namespace collect
         std::vector<value_type> velocities;
         #endif
 
-        value_type M200c, R200c, Xoff, Voff;
+        value_type M200c, R200c, Xoff, Voff, Vmax, Vrms, Rs, rs_klypin,
+                   M200c_all, Mvir, M200b, M500c, M2500c,
+                   Spin, spin_bullock, b_to_a, c_to_a;
         value_type pos[3];
         value_type ang_mom[3];
+        value_type vel[3]
 
         value_type min_pot_pos[3];
         value_type min_potential_energy = std::numeric_limits<value_type>::max();
@@ -68,10 +85,27 @@ namespace collect
             R200c = grp.get<RockstarFields::R200c>();
             Xoff  = grp.get<RockstarFields::Xoff>();
             Voff  = grp.get<RockstarFields::Voff>();
+            Vmax  = grp.get<RockstarFields::Vmax>();
+            Vrms  = grp.get<RockstarFields::Vrms>();
+            Rs    = grp.get<RockstarFields::Rs>();
+            rs_klypin = grp.get<RockstarFields::rs_klypin>();
+            M200c_all = grp.get<RockstarFields::M200c_all>();
+            Mvir = grp.get<RockstarFields::Mvir>();
+            M200b = grp.get<RockstarFields::M200b>();
+            M500c = grp.get<RockstarFields::M500c>();
+            M2500c = grp.get<RockstarFields::M2500c>();
+            Spin = grp.get<RockstarFields::Spin>();
+            spin_bullock = grp.get<RockstarFields::spin_bullock>();
+            b_to_a = grp.get<RockstarFields::b_to_a>();
+            c_to_a = grp.get<RockstarFields::c_to_a>();
 
             auto r = grp.get<RockstarFields::pos>();
             for (size_t ii=0; ii != 3; ++ii)
                 pos[ii] = r[ii];
+
+            auto v = grp.get<RockstarFields::vel>();
+            for (size_t ii=0; ii != 3; ++ii)
+                vel[ii] = v[ii];
 
             auto J = grp.get<RockstarFields::ang_mom>();
             for (size_t ii=0; ii != 3; ++ii)
@@ -126,13 +160,22 @@ namespace collect
                   #endif
                   ) const
         {
-            std::fwrite(&M200c, sizeof(value_type), 1, fglobals);
-            std::fwrite(&R200c, sizeof(value_type), 1, fglobals);
-            std::fwrite(&Xoff, sizeof(value_type), 1, fglobals);
-            std::fwrite(&Voff, sizeof(value_type), 1, fglobals);
-            std::fwrite(pos, sizeof(value_type), 3, fglobals);
-            std::fwrite(min_pot_pos, sizeof(value_type), 3, fglobals);
-            std::fwrite(ang_mom, sizeof(value_type), 3, fglobals);
+            std::fprintf(fglobals, "{'M200c': %.8e, 'R200c': %.8e, 'Xoff': %.8e, 'Voff': %.8e, "
+                                   " 'Vmax': %.8e, 'Vrms': %.8e, 'Rs': %.8e, 'rs_klypin': %.8e, "
+                                   " 'M200c_all': %.8e, 'Mvir': %.8e, 'M200b': %.8e, 'M500c': %.8e, "
+                                   " 'M2500c': %.8e, 'Spin': %.8e, 'spin_bullock': %.8e, "
+                                   " 'b_to_a': %.8e, 'c_to_a': %.8e, "
+                                   " 'pos': np.array([%.8e, %.8e, %.8e]), "
+                                   " 'vel': np.array([%.8e, %.8e, %.8e]), "
+                                   " 'ang_mom': np.array([%.8e, %.8e, %.8e]) }",
+                                   M200c, R200c, Xoff, Voff,
+                                   Vmax, Vrms, Rs, rs_klypin,
+                                   M200c_all, Mvir, M200b, M500c,
+                                   M2500c, Spin, spin_bullock,
+                                   b_to_a, c_to_a,
+                                   pos[0], pos[1], pos[2],
+                                   vel[0], vel[1], vel[2],
+                                   ang_mom[0], ang_mom[1], ang_mom[2]);
 
             std::fwrite(coords.data(), sizeof(value_type), coords.size(), fcoords);
 
@@ -217,7 +260,7 @@ int main ()
     for (const auto &obj : c.prt_collect_v)
     {
         std::sprintf(buffer, "%s_%lu_globals.bin", out_root, grp_idx);
-        auto fglobals = std::fopen(buffer, "wb");
+        auto fglobals = std::fopen(buffer, "w");
 
         std::sprintf(buffer, "%s_%lu_coords.bin", out_root, grp_idx);
         auto fcoords = std::fopen(buffer, "wb");
