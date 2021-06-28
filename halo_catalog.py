@@ -16,9 +16,8 @@ class HaloCatalog(list) :
         assert isinstance(mode, DataModes)
 
         halo_catalog = dict(np.load(cfg.HALO_CATALOG))
-        Ntot = len(halo_catalog['idx_DM'])
 
-        halos = [Halo(halo_catalog, ii) for ii in mode.sample_indices(Ntot)]
+        halos = [Halo(halo_catalog, ii) for ii in mode.sample_indices(halo_catalog['Nobjects'])]
 
         # figure out the zero mean, unit variance normalization
         # we expect at this point that the halos do not have these fields

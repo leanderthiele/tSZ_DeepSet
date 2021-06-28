@@ -144,7 +144,7 @@ class DataItem :
         # NOTE this hash is not necessarily positive, as the sums may well overflow
         out.hash = ( np.sum(indices['DM']) if self.has_DM else 0 ) \
                    + ( np.sum(indices['TNG']) if self.has_TNG else 0 ) \
-                   + self.halo.idx_DM
+                   + hash(self.halo.M200c)
 
         return out
     #}}}
