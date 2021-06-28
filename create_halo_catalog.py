@@ -30,6 +30,8 @@ def central_CM(r, x, rmax) :
     return np.sum(xc, axis=0) / xc.shape[0]
 
 
+# this is a bit repetitive as we could infer these from other places,
+# but it is useful to have them centrally available in this script
 out = dict(M200c=[], R200c=[], Xoff=[], Voff=[],
            Vmax=[], Vrms=[], Rs=[], rs_klypin=[],
            M200c_all=[], Mvir=[], M200b=[], M500c=[],
