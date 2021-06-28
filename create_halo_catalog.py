@@ -23,6 +23,10 @@ The output halo_catalog.npz file has the fields
     inertia [3,3]
     ang_momentum2 [3] -- calculated here, could be interesting to compare to rockstar output
     vel_dispersion [3,3]
+
+[added later by create_Nprt.py]
+    Nprt_DM
+    Nprt_TNG
 """
 
 import numpy as np
@@ -44,6 +48,7 @@ def ang_momentum(x, v) :
 def central_CM(r, x, rmax) :
     xc = x[r < rmax]
     return np.sum(xc, axis=0) / xc.shape[0]
+
 
 out = dict(M200c=[], R200c=[], pos=[], ang_momentum=[],
            min_pot_pos_DM=[], min_pot_pos_TNG=[],

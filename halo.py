@@ -15,34 +15,28 @@ class Halo :
         """
     #{{{ 
         get_entry = lambda name : halo_catalog[name][halo_index]
-        
-        self.idx_DM = get_entry('idx_DM')
-        self.pos_DM = get_entry('pos_DM')
-        self.CM_DM = get_entry('CM_DM')
-        self.M200c_DM = get_entry('M200c_DM')
-        self.R200c_DM = get_entry('R200c_DM')
-        self.P200c_DM = Halo.__P200c(self.M200c_DM, self.R200c_DM)
-        self.V200c_DM = Halo.__V200c(self.M200c_DM, self.R200c_DM)
-        self.prt_start_DM = get_entry('prt_start_DM')
-        self.prt_len_DM = get_entry('prt_len_DM')
 
-        self.inertia_DM = get_entry('inertia_DM')
-        self.ang_momentum_DM = get_entry('ang_momentum_DM')
-        self.central_CM_DM = get_entry('central_CM_DM')
-        self.vel_dispersion = get_entry('vel_dispersion_DM')
+        self.M200c = get_entry('M200c')
+        self.R200c = get_entry('R200c')
+        self.P200c = self.__P200c(self.M200c, self.R200c)
+        self.V200c = self.__V200c(self.M200c, self.R200c)
+        self.pos = get_entry('pos')
+        self.ang_momentum = get_entry('ang_momentum')
+        self.min_pot_pos_DM = get_entry('min_pot_pos_DM')
+        self.min_pot_pos_TNG = get_entry('min_pot_pos_TNG')
+        self.inertia = get_entry('inertia')
+        self.ang_momentum2 = get_entry('ang_momentum2')
+        self.vel_dispersion = get_entry('vel_dispersion')
 
-        self.idx_TNG = get_entry('idx_TNG')
-        self.pos_TNG = get_entry('pos_TNG')
-        self.CM_TNG = get_entry('CM_TNG')
-        self.M200c_TNG = get_entry('M200c_TNG')
-        self.R200c_TNG = get_entry('R200c_TNG')
-        self.P200c_TNG = Halo.__P200c(self.M200c_TNG, self.R200c_TNG)
-        self.V200c_TNG = Halo.__V200c(self.M200c_TNG, self.R200c_TNG)
-        self.prt_start_TNG = get_entry('prt_start_TNG')
-        self.prt_len_TNG = get_entry('prt_len_TNG')
-
-        self.storage_DM = cfg.STORAGE_FILES['DM']%self.idx_DM
-        self.storage_TNG = cfg.STORAGE_FILES['TNG']%self.idx_TNG
+        self.storage_DM = dict(coords=cfg.STORAGE_FILES['DM']%(halo_index, 'coords'))
+        self.storage_TNG = dict(# these are the direct output of rockstar_halos/collect_particles.cpp
+                                coords=cfg.STORAGE_FILES['TNG']%(halo_index, 'coords'),
+                                masses=cfg.STORAGE_FILES['TNG']%(halo_index, 'masses'),
+                                Pth=cfg.STORAGE_FILES['TNG']%(halo_index, 'Pth'),
+                                # the following store the same arrays with outliers removed
+                                coords_filtered=cfg.STORAGE_FILES['TNG']%(halo_index, 'coords_filtered'),
+                                masses_filtered=cfg.STORAGE_FILES['TNG']%(halo_index, 'masses_filtered'),
+                                Pth_filtered=cfg.STORAGE_FILES['TNG']%(halo_index, 'Pth_filtered'))
 
         if 'Nprt_DM' in halo_catalog :
             self.Nprt_DM = get_entry('Nprt_DM')
