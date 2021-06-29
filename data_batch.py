@@ -31,6 +31,8 @@ class DataBatch :
 
         self.has_DM = data_items[0].has_DM
         assert all(self.has_DM == d.has_DM for d in data_items)
+        self.has_DM_velocities = data_items[0].DM_vels is not None
+        assert all(self.has_DM_velocities == d.DM_vels is not None for d in data_items)
         self.has_TNG = data_items[0].has_TNG
         assert all(self.has_TNG == d.has_TNG for d in data_items)
         self.has_TNG_radii = data_items[0].has_TNG_radii
@@ -47,6 +49,10 @@ class DataBatch :
 
         if self.has_DM :
             self.DM_coords = batch('DM_coords')
+            if self.has_DM_velocities :
+                self.DM_vels = batch('DM_vels')
+            else :
+                self.DM_vels = None
 
         if self.has_TNG :
             self.TNG_coords = batch('TNG_coords')
@@ -60,10 +66,14 @@ class DataBatch :
         # the globals if provided
         if len(GlobalFields) != 0 :
             self.u = astensor(np.stack([GlobalFields(d.halo, rng=rng) for d in data_items], axis=0))
+        else :
+            self.u = None
 
         # the basis vectors if provided
         if len(Basis) != 0 :
             self.basis = astensor(np.stack([Basis(d.halo, rng=rng) for d in data_items], axis=0))
+        else :
+            self.basis = None
 
         # halo properties for the SphericalModel
         halo_to_tensor = lambda s : astensor(np.array([getattr(d.halo, s) for d in data_items]))
@@ -124,6 +134,8 @@ class DataBatch :
                 elif isinstance(v, bool) :
                     continue
                 elif isinstance(v, DataModes) :
+                    continue
+                elif v is None :
                     continue
                 elif isinstance(v, torch.Tensor) :
                     setattr(self, k, v.to(cfg.DEVICE_IDX))

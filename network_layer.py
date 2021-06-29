@@ -12,11 +12,12 @@ class NetworkLayer(nn.Module) :
     one block of the network, transforms a set of vectors into another set of vectors
     """
 
-    def __init__(self, k_in, k_out, basis_passed=True, globals_passed=True, **MLP_kwargs) :
+    def __init__(self, k_in, k_out, velocities_passed=True, basis_passed=True, globals_passed=True, **MLP_kwargs) :
         """
         Nk_in  ... number of feature vectors coming in
                    (set to non-positive for the initial layer that takes the positions)
         Nk_out ... number of neurons going out
+        velocities_passed ... whether the particle velocities are going to be passed
         basis_passed ... whether the basis will be passed
         globals_passed ... whether the globals will be passed
         MLP_kwargs ... kwargs that will be passed forward to the NetworkMLP constructor
@@ -27,19 +28,27 @@ class NetworkLayer(nn.Module) :
         # whether the forward method takes some latent vectors or actual particle positions
         # (in the latter case, we do not compute all the mutual dot products)
         self.x_is_latent = k_in > 0
-        self.mlp = NetworkMLP(1 + globals_passed * len(GlobalFields)
-                                + basis_passed * len(Basis)
+
+        if self.x_is_latent :
+            assert not velocities_passed
+
+        self.mlp = NetworkMLP(1 + velocities_passed
+                                + globals_passed * len(GlobalFields)
+                                + (1+velocities_passed)*(basis_passed * len(Basis))
                                 + self.x_is_latent * k_in,
                               k_out, **MLP_kwargs)
 
+        self.velocities_passed = velocities_passed
         self.globals_passed = globals_passed
         self.basis_passed = basis_passed
     #}}}
 
 
-    def forward(self, x, u=None, basis=None) :
+    def forward(self, x, v=None, u=None, basis=None) :
         """
-        x     ... the input tensor, of shape [batch, Nvecs, 3]
+        x     ... the input positions tensor, of shape [batch, Nvecs, 3]
+                  or a list of length batch with shapes [1, Nvecs[ii], 3]
+        v     ... the input velocities tensor, of shape [batch, Nvecs, 3]
                   or a list of length batch with shapes [1, Nvecs[ii], 3]
         u     ... the global tensor -- assumed to be a vector, i.e. of shape [batch, Nglobals]
         basis ... the basis vectors to use -- either None if no basis is provided
@@ -49,6 +58,7 @@ class NetworkLayer(nn.Module) :
         if isinstance(x, list) :
             assert not self.x_is_latent # this can only happen for the variable size initial inputs
             return torch.cat([self(xi,
+                                   v[ii],
                                    u[ii, ...].unsqueeze(0) if u is not None else u,
                                    basis[ii, ...].unsqueeze(0) if basis is not None else basis)
                               for ii, xi in enumerate(x)])
@@ -81,6 +91,16 @@ class NetworkLayer(nn.Module) :
             scalars = torch.cat((u.unsqueeze(1).repeat(1, scalars.shape[1], 1), scalars), dim=-1)
         else :
             assert not self.globals_passed or len(GlobalFields) == 0
+
+        # if passed, concatenate with velocity magnitudes and, if a basis is given,
+        # with the projections on the basis vectors
+        if v is not None :
+            assert self.velocities_passed and cfg.USE_VELOCITIES
+            norms = torch.linalg.norm(v, dim=-1, keepdim=True)
+            scalars = torch.cat((scalars, norms), dim=-1)
+            if basis is not None :
+                basis_projections = torch.einsum('bid,bnd->bin', v, basis) / norms
+                scalars = torch.cat((scalars, basis_projections), dim=-1)
 
         # pass through the MLP, transform scalars -> scalars
         fk = self.mlp(scalars)

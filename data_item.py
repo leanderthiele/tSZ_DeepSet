@@ -37,7 +37,9 @@ class DataItem :
         self.has_TNG_radii = compute_TNG_radii
 
         if load_DM :
-            self.DM_coords = self.__get_DM()
+            self.DM_coords, self.DM_vels = self.__get_DM()
+            assert (self.DM_vels is None and not cfg.USE_VELOCITIES) \
+                   or (self.DM_vels is not None and cfg.USE_VELOCITIES)
 
         if load_TNG :
             self.TNG_coords, self.TNG_Pth = self.__get_TNG()
@@ -63,11 +65,23 @@ class DataItem :
         # take periodic boundary conditions into account
         coords = DataItem.__periodicize(coords)
 
+        # load the velocities if required
+        if cfg.USE_VELOCITIES :
+            vels = np.fromfile(self.halo.storage_DM['velocities'], dtype=np.float32)
+            vels = vels.reshape((len(vels)//3, 3))
+            assert len(vels) == len(coords)
+            # subtract bulk motion
+            vels -= self.halo.vel
+        else :
+            vels = None
+
         # if required, divide by R200c
         if cfg.NORMALIZE_COORDS :
             coords /= self.halo.R200c
+            if vels is not None :
+                vels /= self.halo.V200c
 
-        return coords
+        return coords, vels
     #}}}
 
 
@@ -132,6 +146,8 @@ class DataItem :
 
         if self.has_DM :
             out.DM_coords = self.DM_coords[indices['DM']]
+            if self.DM_vels is not None :
+                out.DM_vels = self.DM_vels[indices['DM']]
 
         if self.has_TNG :
             out.TNG_coords = self.TNG_coords[indices['TNG']]

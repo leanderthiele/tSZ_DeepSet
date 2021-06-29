@@ -102,6 +102,9 @@ BASIS_USE = dict(none=False,
 # set to None if no noise is desired
 BASIS_NOISE = 20.0
 
+# whether the DM particle velocities should be used
+USE_VELOCITIES = True
+
 # arguments passed to the torch DataLoader constructor
 DATALOADER_ARGS = dict(batch_size=8,
                        num_workers=4,

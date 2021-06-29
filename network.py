@@ -54,33 +54,31 @@ class Network(nn.Module) :
     #{{{ 
         assert isinstance(batch, DataBatch)
 
-        u = batch.u if len(GlobalFields) != 0 else None
-        basis = batch.basis if len(GlobalFields) != 0 else None
-
         if cfg.NET_ARCH['origin'] :
             # first find the shifted origin
-            o = self.origin(batch.DM_coords, u=u, basis=basis)
+            o = self.origin(batch.DM_coords, v=batch.DM_vels, u=batch.u, basis=batch.basis)
 
             # shift all coordinates according to this new origin
             batch = batch.add_origin(o)
 
         if cfg.NET_ARCH['encoder'] :
             # encode the DM field
-            x = self.encoder(batch.DM_coords, u=u, basis=basis)
+            x = self.encoder(batch.DM_coords, v=batch.DM_vels, u=batch.u, basis=batch.basis)
 
         if cfg.NET_ARCH['decoder'] :
             # decode at the TNG particle positions
             x = self.decoder(batch.TNG_coords,
                              h=x if cfg.NET_ARCH['encoder'] else None,
                              r=batch.TNG_radii if self.decoder.r_passed else None,
-                             u=u if self.decoder.globals_passed else None,
-                             basis=basis if self.decoder.basis_passed else None)
+                             u=batch.u if self.decoder.globals_passed else None,
+                             basis=batch.basis if self.decoder.basis_passed else None)
 
         if cfg.NET_ARCH['batt12'] :
             if cfg.NET_ARCH['deformer'] :
                 # now deform the TNG positions -- TODO experiment with the order
                 # relative to the decoder evaluation
-                batch.TNG_radii = self.deformer(batch.TNG_coords, batch.TNG_radii, u=u, basis=basis)
+                batch.TNG_radii = self.deformer(batch.TNG_coords, batch.TNG_radii,
+                                                u=batch.u, basis=batch.basis)
 
             # now evaluate the (modified) Battaglia+2012 model at the deformed radial coordinates
             b12 = self.batt12(batch.M200c, batch.TNG_radii,

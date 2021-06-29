@@ -53,6 +53,7 @@ class NetworkEncoder(nn.Module) :
                           else Nhidden['first'] if 'first' in Nhidden and ii==0 \
                           else Nhidden['last'] if 'last' in Nhidden and ii==Nlayers-1 \
                           else cfg.ENCODER_DEFAULT_NHIDDEN,
+                          velocities_passed=cfg.USE_VELOCITIES if ii==0 else False,
                           basis_passed=ii <= self.basis_max_layer,
                           globals_passed=ii <= self.globals_max_layer,
                           **(MLP_kwargs_dict[str(ii)] if str(ii) in MLP_kwargs_dict \
@@ -63,9 +64,11 @@ class NetworkEncoder(nn.Module) :
     #}}}
 
 
-    def forward(self, x, u=None, basis=None) :
+    def forward(self, x, v=None, u=None, basis=None) :
         """
-        x     ... the input tensor, of shape [batch, Nvecs, 3]
+        x     ... the input position tensor, of shape [batch, Nvecs, 3]
+                  or a list of length batch with shapes [1, Nvecs[ii], 3]
+        v     ... the input velocity tensor, of shape [batch, Nvecs, 3]
                   or a list of length batch with shapes [1, Nvecs[ii], 3]
         u     ... the global tensor -- assumed to be a vector, i.e. of shape [batch, Nglobals]
         basis ... the basis vectors to use -- either None if no basis is provided
@@ -74,6 +77,7 @@ class NetworkEncoder(nn.Module) :
     #{{{
         for ii, l in enumerate(self.layers) :
             x = l(x,
+                  v=v if ii==0 else None,
                   u=u if ii <= self.globals_max_layer else None,
                   basis=basis if ii <= self.basis_max_layer else None)
 
