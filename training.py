@@ -15,7 +15,7 @@ from data_batch import DataBatch
 from init_proc import InitProc
 import cfg
 
-EPOCHS = 2000
+EPOCHS = 500
 
 InitProc(0)
 
@@ -28,7 +28,7 @@ model = Network().to_device()
 batt12 = NetworkBatt12().to_device() # use this to compute the reference loss
 batt12.eval()
 
-optimizer = torch.optim.Adam(model.parameters())
+optimizer = torch.optim.Adam(model.parameters(), weight_decay=1e-3)
 loss_fn = TrainingLoss()
 
 training_loader = DataLoader(mode=DataModes.TRAINING)
@@ -82,7 +82,7 @@ for epoch in range(EPOCHS) :
                 plt.show()
         else :
             # FIXME diagnostics to file
-            if True and (epoch in [10, 30, 80] and t < 10) :
+            if True and (epoch in [30, 80, 250] and t < 10) :
                 r_npy = data.TNG_radii.cpu().detach().numpy()[0, ...].squeeze()
                 g_npy = guess.cpu().detach().numpy()[0, ...].squeeze()
                 p_npy = prediction.cpu().detach().numpy()[0, ...].squeeze()

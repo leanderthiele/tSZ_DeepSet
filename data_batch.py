@@ -32,7 +32,7 @@ class DataBatch :
         self.has_DM = data_items[0].has_DM
         assert all(self.has_DM == d.has_DM for d in data_items)
         self.has_DM_velocities = data_items[0].DM_vels is not None
-        assert all(self.has_DM_velocities == d.DM_vels is not None for d in data_items)
+        assert all(self.has_DM_velocities == (d.DM_vels is not None) for d in data_items)
         self.has_TNG = data_items[0].has_TNG
         assert all(self.has_TNG == d.has_TNG for d in data_items)
         self.has_TNG_radii = data_items[0].has_TNG_radii
