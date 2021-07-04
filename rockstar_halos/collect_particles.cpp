@@ -4,6 +4,8 @@
 #include "group_particles.hpp"
 #include "common_fields.hpp"
 
+#define TNG
+
 namespace collect
 {
     constexpr const uint8_t PartType =
@@ -61,6 +63,7 @@ namespace collect
         std::vector<value_type> coords;
         #if defined TNG
         std::vector<value_type> masses;
+        std::vector<value_type> densities;
         std::vector<value_type> Pth;
         #elif defined DM
         std::vector<value_type> velocities;
@@ -127,6 +130,8 @@ namespace collect
             masses.push_back(m);
 
             auto d = prt.get<IllustrisFields::Density>();
+            densities.push_back(d);
+
             auto x = prt.get<IllustrisFields::ElectronAbundance>();
             auto e = prt.get<IllustrisFields::InternalEnergy>();
 
@@ -154,6 +159,7 @@ namespace collect
         void save(std::FILE *fglobals, std::FILE *fcoords,
                   #if defined TNG
                   std::FILE *fmasses,
+                  std::FILE *fdensities,
                   std::FILE *fPth
                   #elif defined DM
                   std::FILE *fvelocities
@@ -187,6 +193,7 @@ namespace collect
 
             #if defined TNG
             std::fwrite(masses.data(), sizeof(value_type), masses.size(), fmasses);
+            std::fwrite(densities.data(), sizeof(value_type), densities.size(), fdensities);
             std::fwrite(Pth.data(), sizeof(value_type), Pth.size(), fPth);
             #elif defined DM
             std::fwrite(velocities.data(), sizeof(value_type), velocities.size(), fvelocities);
@@ -275,6 +282,9 @@ int main ()
         std::sprintf(buffer, "%s_%lu_masses.bin", out_root, grp_idx);
         auto fmasses = std::fopen(buffer, "wb");
 
+        std::sprintf(buffer, "%s_%lu_densities.bin", out_root, grp_idx);
+        auto fdensities = std::fopen(buffer, "wb");
+
         std::sprintf(buffer, "%s_%lu_Pth.bin", out_root, grp_idx);
         auto fPth = std::fopen(buffer, "wb");
         #elif defined DM
@@ -285,6 +295,7 @@ int main ()
         obj.save(fglobals, fcoords,
                  #if defined TNG
                  fmasses,
+                 fdensities,
                  fPth
                  #elif defined DM
                  fvelocities
