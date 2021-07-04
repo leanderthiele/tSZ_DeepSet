@@ -4,8 +4,6 @@
 #include "group_particles.hpp"
 #include "common_fields.hpp"
 
-#define TNG
-
 namespace collect
 {
     constexpr const uint8_t PartType =
