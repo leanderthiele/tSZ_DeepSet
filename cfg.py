@@ -128,7 +128,7 @@ DROPOUT = None
 VISIBLE_DROPOUT = None
 
 # default number of hidden layers in the encoder
-ENCODER_DEFAULT_NLAYERS = 4
+ENCODER_DEFAULT_NLAYERS = 2
 
 # default number of neurons in the outer layers of the MLPs
 # (which correspond to hidden layers at the encoder level)
