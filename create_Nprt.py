@@ -5,6 +5,13 @@ import cfg
 
 halo_catalog = dict(np.load(cfg.HALO_CATALOG))
 
+if 'Nprt_DM' in halo_catalog :
+    print('Found Nprt_DM, continuing')
+    del halo_catalog['Nprt_DM']
+if 'Nprt_TNG' in halo_catalog :
+    print('Found Nprt_TNG, continuing')
+    del halo_catalog['Nprt_TNG']
+
 Nhalos = halo_catalog['Nobjects']
 
 Nprt_DM = np.empty(Nhalos, dtype=int)
