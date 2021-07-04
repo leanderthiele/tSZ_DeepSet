@@ -28,14 +28,8 @@ class Halo :
 
         self.storage_DM = dict(coords=cfg.STORAGE_FILES['DM']%(halo_index, 'coords'),
                                velocities=cfg.STORAGE_FILES['DM']%(halo_index, 'velocities'))
-        self.storage_TNG = dict(# these are the direct output of rockstar_halos/collect_particles.cpp
-                                coords=cfg.STORAGE_FILES['TNG']%(halo_index, 'coords'),
-                                masses=cfg.STORAGE_FILES['TNG']%(halo_index, 'masses'),
-                                Pth=cfg.STORAGE_FILES['TNG']%(halo_index, 'Pth'),
-                                # the following store the same arrays with outliers removed
-                                coords_filtered=cfg.STORAGE_FILES['TNG']%(halo_index, 'coords_filtered'),
-                                masses_filtered=cfg.STORAGE_FILES['TNG']%(halo_index, 'masses_filtered'),
-                                Pth_filtered=cfg.STORAGE_FILES['TNG']%(halo_index, 'Pth_filtered'))
+        self.storage_TNG = dict(coords=cfg.STORAGE_FILES['TNG']%(halo_index, 'box_coords'),
+                                Pth=cfg.STORAGE_FILES['TNG']%(halo_index, 'box_Pth'))
     #}}}
 
 

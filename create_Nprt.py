@@ -19,11 +19,9 @@ for ii in range(Nhalos) :
     vDM = np.fromfile(h.storage_DM['velocities'], dtype=np.float32)
     assert 3 * Nprt_DM[ii] == len(vDM)
 
-    xTNG = np.fromfile(h.storage_TNG['coords_filtered'], dtype=np.float32)
+    xTNG = np.fromfile(h.storage_TNG['coords'], dtype=np.float32)
     Nprt_TNG[ii] = len(xTNG) / 3
-    m = np.fromfile(h.storage_TNG['masses_filtered'], dtype=np.float32)
-    assert Nprt_TNG[ii] == len(m)
-    Pth = np.fromfile(h.storage_TNG['Pth_filtered'], dtype=np.float32)
+    Pth = np.fromfile(h.storage_TNG['Pth'], dtype=np.float32)
     assert Nprt_TNG[ii] == len(Pth)
 
 np.savez(cfg.HALO_CATALOG, **halo_catalog, Nprt_DM=Nprt_DM, Nprt_TNG=Nprt_TNG)
