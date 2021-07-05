@@ -28,8 +28,7 @@ model = Network().to_device()
 batt12 = NetworkBatt12().to_device() # use this to compute the reference loss
 batt12.eval()
 
-#optimizer = torch.optim.Adam(model.parameters(), weight_decay=1e-5)
-optimizer = torch.optim.Adam(model.parameters())
+optimizer = torch.optim.Adam(model.parameters(), weight_decay=1e-4)
 loss_fn = TrainingLoss()
 
 training_loader = DataLoader(mode=DataModes.TRAINING)
@@ -67,6 +66,8 @@ for epoch in range(EPOCHS) :
         with torch.no_grad() :
             guess = batt12(data.M200c, data.TNG_radii, R200c=data.R200c if not cfg.NORMALIZE_COORDS else None)
 
+        _, loss_list_guess = loss_fn(guess, data.TNG_Pth, w=None)
+
         prediction = model(data)
 
         if cfg.MPI_ENV_TYPE is MPIEnvTypes.NOGPU :
@@ -92,7 +93,6 @@ for epoch in range(EPOCHS) :
                          r=r_npy, g=g_npy, p=p_npy, t=t_npy)
 
         loss, loss_list = loss_fn(prediction, data.TNG_Pth, w=None)
-        _, loss_list_guess = loss_fn(guess, data.TNG_Pth, w=None)
 
         this_training_loss_arr.extend([l.item() for l in loss_list])
         this_training_guess_loss_arr.extend([l.item() for l in loss_list_guess])

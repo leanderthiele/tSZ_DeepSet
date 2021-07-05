@@ -56,7 +56,7 @@ NORMALIZE_COORDS = True
 # if decoder is False, encoder has no consequence
 NET_ARCH = dict(origin=True,
                 batt12=True,
-                deformer=False,
+                deformer=True,
                 encoder=True,
                 decoder=True)
 
@@ -122,13 +122,13 @@ MLP_DEFAULT_NHIDDEN = 128
 LAYERNORM = True
 
 # dropout rate (for the hidden neurons) -- set to None if not wanted
-DROPOUT = 0.5
+DROPOUT = None
 
 # dropout rate (for the visible neurons) -- set to None if not wanted
 VISIBLE_DROPOUT = None
 
 # default number of hidden layers in the encoder
-ENCODER_DEFAULT_NLAYERS = 2
+ENCODER_DEFAULT_NLAYERS = 0
 
 # default number of neurons in the outer layers of the MLPs
 # (which correspond to hidden layers at the encoder level)
@@ -149,12 +149,16 @@ DECODER_DEFAULT_GLOBALS_PASSED = False
 # whether we pass the basis to the decoder
 DECODER_DEFAULT_BASIS_PASSED = False
 
+# how many layers we have in the origin encoder (other settings equal to the usual encoder
+#    at least for now)
+ORIGIN_DEFAULT_NLAYERS = 3
+
 # default number of latent features in the space separating encoder and decoder
 NETWORK_DEFAULT_NLATENT = 128
 
 # number of features per point in the final output
 # so far, 1 and 2 are implemented
-OUTPUT_NFEATURES = 1
+OUTPUT_NFEATURES = 2
 
 # where our results (like model states and loss curves) will go
 RESULTS_PATH = 'results'

@@ -48,9 +48,12 @@ class Network(nn.Module) :
             if cfg.NET_ARCH['deformer'] :
                 self.deformer = NetworkDeformer()
 
-        if cfg.NET_ARCH['decoder'] and cfg.NET_ARCH['batt12'] :
+        if cfg.NET_ARCH['decoder'] :
             # register degree of freedom to rescale the network output
             self.register_parameter('scaling', nn.Parameter(torch.tensor(1.0, dtype=torch.float32)))
+
+        if cfg.NET_ARCH['decoder'] and not cfg.NET_ARCH['batt12'] :
+            assert cfg.OUTPUT_NFEATURES == 1
     #}}}
 
     
@@ -89,7 +92,7 @@ class Network(nn.Module) :
                               R200c=batch.R200c if not cfg.NORMALIZE_COORDS else None)
 
         if cfg.NET_ARCH['decoder'] and not cfg.NET_ARCH['batt12'] :
-            return x
+            return self.scaling * torch.sinh(x)
         elif cfg.NET_ARCH['decoder'] and cfg.NET_ARCH['batt12'] :
             return self.__combine(x, b12)
         elif not cfg.NET_ARCH['decoder'] and cfg.NET_ARCH['batt12'] :
