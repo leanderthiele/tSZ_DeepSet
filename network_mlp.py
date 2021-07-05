@@ -23,7 +23,7 @@ class _MLPLayer(nn.Sequential) :
 
         super().__init__(nn.LayerNorm(Nin) if layernorm and input_is_hidden else nn.Identity(),
                          nn.Dropout(p=dropout) if input_is_hidden and dropout is not None \
-                         else nn.Dropout(p=cfg.VISIBLE_DROPOUT) if dropout is not None \
+                         else nn.Dropout(p=cfg.VISIBLE_DROPOUT) if dropout is not None and cfg.VISIBLE_DROPOUT is not None \
                          else nn.Identity(),
                          nn.Linear(Nin, Nout, bias=bias),
                          nn.LeakyReLU() if activation else nn.Identity())

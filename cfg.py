@@ -122,7 +122,7 @@ MLP_DEFAULT_NHIDDEN = 128
 LAYERNORM = True
 
 # dropout rate (for the hidden neurons) -- set to None if not wanted
-DROPOUT = None
+DROPOUT = 0.5
 
 # dropout rate (for the visible neurons) -- set to None if not wanted
 VISIBLE_DROPOUT = None

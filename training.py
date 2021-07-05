@@ -28,7 +28,8 @@ model = Network().to_device()
 batt12 = NetworkBatt12().to_device() # use this to compute the reference loss
 batt12.eval()
 
-optimizer = torch.optim.Adam(model.parameters(), weight_decay=1e-3)
+#optimizer = torch.optim.Adam(model.parameters(), weight_decay=1e-5)
+optimizer = torch.optim.Adam(model.parameters())
 loss_fn = TrainingLoss()
 
 training_loader = DataLoader(mode=DataModes.TRAINING)
