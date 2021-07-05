@@ -153,6 +153,7 @@ DECODER_DEFAULT_BASIS_PASSED = False
 NETWORK_DEFAULT_NLATENT = 128
 
 # number of features per point in the final output
+# so far, 1 and 2 are implemented
 OUTPUT_NFEATURES = 1
 
 # where our results (like model states and loss curves) will go

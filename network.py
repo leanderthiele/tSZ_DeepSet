@@ -47,6 +47,10 @@ class Network(nn.Module) :
             self.batt12 = NetworkBatt12()
             if cfg.NET_ARCH['deformer'] :
                 self.deformer = NetworkDeformer()
+
+        if cfg.NET_ARCH['decoder'] and cfg.NET_ARCH['batt12'] :
+            # register degree of freedom to rescale the network output
+            self.register_parameter('scaling', nn.Parameter(torch.tensor(1.0, dtype=torch.float32)))
     #}}}
 
     
@@ -87,7 +91,7 @@ class Network(nn.Module) :
         if cfg.NET_ARCH['decoder'] and not cfg.NET_ARCH['batt12'] :
             return x
         elif cfg.NET_ARCH['decoder'] and cfg.NET_ARCH['batt12'] :
-            return Network.__combine(x, b12)
+            return self.__combine(x, b12)
         elif not cfg.NET_ARCH['decoder'] and cfg.NET_ARCH['batt12'] :
             return b12
         else :
@@ -95,8 +99,7 @@ class Network(nn.Module) :
     #}}}
 
 
-    @staticmethod
-    def __combine(x, b12) :
+    def __combine(self, x, b12) :
         """
         combines the network output with the spherically symmetric prediction
         TODO this is something we can play with, e.g. multiply vs add, different functions applied to x, etc
@@ -110,7 +113,11 @@ class Network(nn.Module) :
         if isinstance(x, list) :
             return [Network.__combine(xi, b12[ii]) for ii, xi in enumerate(x)]
 
-        return b12 + torch.sinh(x)
+        if cfg.OUTPUT_NFEATURES == 1 :
+            return b12 + self.scaling * torch.sinh(x)
+        elif cfg.OUTPUT_NFEATURES == 2 :
+            return b12 * (1 + x[..., 0].unsqueeze(-1)) \
+                   + self.scaling * torch.sinh(x[..., 1].unsqueeze(-1))
     #}}}
 
 
