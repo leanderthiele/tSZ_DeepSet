@@ -60,7 +60,7 @@ class NetworkBatt12(nn.Module) :
         r = r / xc[:,None,None]
 
         # make sure we don't have a divergence if a particle is directly at the origin
-        r += 1e-8
+        r += 1e-3
 
         return P0[:,None,None] * r.pow(-0.3) * ( 1 + r ).pow(-beta[:,None,None])
     #}}}

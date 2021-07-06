@@ -15,7 +15,7 @@ from data_batch import DataBatch
 from init_proc import InitProc
 import cfg
 
-EPOCHS = 100
+EPOCHS = 50
 
 InitProc(0)
 
@@ -28,7 +28,7 @@ model = Network().to_device()
 batt12 = NetworkBatt12().to_device() # use this to compute the reference loss
 batt12.eval()
 
-optimizer = torch.optim.Adam(model.parameters(), weight_decay=3e-4)
+optimizer = torch.optim.Adam(model.parameters(), weight_decay=3e-5)
 loss_fn = TrainingLoss()
 
 training_loader = DataLoader(mode=DataModes.TRAINING)

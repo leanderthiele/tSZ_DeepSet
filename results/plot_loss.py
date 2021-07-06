@@ -40,6 +40,11 @@ fig, ax = plt.subplots(ncols=2)
 
 ax[0].scatter(tg, t, label='training', s=3+20*(tlogm-vmin)/(vmax-vmin))
 ax[0].scatter(vg, v, label='validation', s=3+20*(vlogm-vmin)/(vmax-vmin))
+ax[0].plot([0,1e3], [0,1e3], linestyle='dashed', color='black')
+#ax[0].set_xlim(1e-3,1e0)
+#ax[0].set_ylim(1e-3,1e0)
+ax[0].set_yscale('log')
+ax[0].set_xscale('log')
 
 if Nidx :
     assert isinstance(Nidx, int) and Nidx > 0
@@ -49,13 +54,8 @@ if Nidx :
     tidx_sorted = tidx[sorter][::-1]
     for ii in range(Nidx) :
         ax[0].text(tg_sorted[ii], t_sorted[ii], '%d'%tidx_sorted[ii],
-                   ha='center', va='top')
+                   ha='center', va='top', transform=ax[0].transData)
 
-ax[0].plot([0,1e3], [0,1e3], linestyle='dashed', color='black')
-ax[0].set_xlim(1e-3,1e0)
-ax[0].set_ylim(1e-3,1e0)
-ax[0].set_yscale('log')
-ax[0].set_xscale('log')
 ax[0].set_xlabel('B12 loss')
 ax[0].set_ylabel('network loss')
 ax[0].legend(loc='upper left', frameon=False)
