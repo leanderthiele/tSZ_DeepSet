@@ -15,7 +15,7 @@ from data_batch import DataBatch
 from init_proc import InitProc
 import cfg
 
-EPOCHS = 50
+EPOCHS = 100
 
 InitProc(0)
 
@@ -42,10 +42,12 @@ scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=1e-2, div_fact
 training_loss_arr = []
 training_guess_loss_arr = []
 training_logM_arr = []
+training_idx_arr = []
 
 validation_loss_arr = []
 validation_guess_loss_arr = []
 validation_logM_arr = []
+validation_idx_arr = []
 
 for epoch in range(EPOCHS) :
 
@@ -55,6 +57,7 @@ for epoch in range(EPOCHS) :
     this_training_loss_arr = []
     this_training_guess_loss_arr = []
     this_training_logM_arr = []
+    this_training_idx_arr = []
 
     for t, data in enumerate(training_loader) :
 
@@ -97,6 +100,7 @@ for epoch in range(EPOCHS) :
         this_training_loss_arr.extend([l.item() for l in loss_list])
         this_training_guess_loss_arr.extend([l.item() for l in loss_list_guess])
         this_training_logM_arr.extend(np.log(data.M200c.cpu().detach().numpy()))
+        this_training_idx_arr.extend(data.idx)
 
         loss.backward()
         
@@ -112,6 +116,7 @@ for epoch in range(EPOCHS) :
     training_loss_arr.append(this_training_loss_arr)
     training_guess_loss_arr.append(this_training_guess_loss_arr)
     training_logM_arr.append(this_training_logM_arr)
+    training_idx_arr.append(this_training_idx_arr)
 
 
     model.eval()
@@ -119,6 +124,7 @@ for epoch in range(EPOCHS) :
     this_validation_loss_arr = []
     this_validation_guess_loss_arr = []
     this_validation_logM_arr = []
+    this_validation_idx_arr = []
 
     for t, data in enumerate(validation_loader) :
         
@@ -134,11 +140,13 @@ for epoch in range(EPOCHS) :
         this_validation_loss_arr.extend([l.item() for l in loss_list])
         this_validation_guess_loss_arr.extend([l.item() for l in loss_list_guess])
         this_validation_logM_arr.extend(np.log(data.M200c.cpu().detach().numpy()))
+        this_validation_idx_arr.extend(data.idx)
 
     # put the validation losses in the global arrays
     validation_loss_arr.append(this_validation_loss_arr)
     validation_guess_loss_arr.append(this_validation_guess_loss_arr)
     validation_logM_arr.append(this_validation_logM_arr)
+    validation_idx_arr.append(this_validation_idx_arr)
 
 
     # save all the losses so far to file 
@@ -146,6 +154,8 @@ for epoch in range(EPOCHS) :
              training=np.array(training_loss_arr),
              training_guess=np.array(training_guess_loss_arr),
              training_logM=np.array(training_logM_arr),
+             training_idx=np.array(training_idx_arr, dtype=int),
              validation=np.array(validation_loss_arr),
              validation_guess=np.array(validation_guess_loss_arr),
-             validation_logM=np.array(validation_logM_arr))
+             validation_logM=np.array(validation_logM_arr),
+             validation_idx=np.array(validation_idx_arr, dtype=int))

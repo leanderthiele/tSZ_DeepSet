@@ -33,6 +33,8 @@ class Halo :
 
         self.storage_TNG = dict(coords=cfg.STORAGE_FILES['TNG']%(halo_index, 'box_%scoords'%res_str),
                                 Pth=cfg.STORAGE_FILES['TNG']%(halo_index, 'box_%sPth'%res_str))
+
+        self.idx = halo_index
     #}}}
 
 

@@ -121,7 +121,9 @@ class DataSet(torch_DataSet) :
            or cfg.PRT_FRACTION[ptype] is None :
             return None
 
-        Nprt = halo.Nprt_DM if ptype=='DM' else halo.Nprt_TNG
+        res_str = '%d_'%cfg.TNG_RESOLUTION if cfg.TNG_RESOLUTION != 256 else ''
+
+        Nprt = getattr(halo, 'Nprt_%s%s'%(res_str, ptype))
         Nindices = int(cfg.PRT_FRACTION[ptype] * Nprt) \
                    if isinstance(cfg.PRT_FRACTION[ptype], float) and cfg.PRT_FRACTION[ptype]<=1 \
                    else int(cfg.PRT_FRACTION[ptype])

@@ -83,6 +83,9 @@ class DataBatch :
         self.P200c = halo_to_tensor('P200c')
 
         self.pos  = halo_to_tensor('pos')
+
+        # store the halo indices in the global data set, useful for debugging
+        self.idx = [d.halo.idx for d in data_items]
     #}}}
 
 
@@ -134,6 +137,8 @@ class DataBatch :
                 elif isinstance(v, bool) :
                     continue
                 elif isinstance(v, DataModes) :
+                    continue
+                elif isinstance(v, list) and all(isinstance(x, int) for x in v) :
                     continue
                 elif v is None :
                     continue

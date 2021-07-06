@@ -9,6 +9,9 @@ from matplotlib import pyplot as plt
 
 epoch = int(argv[1])
 
+# for how many halos we want to insert the index
+Nidx = 0
+
 with np.load('loss.npz') as f :
     epochs = f['training'].shape[0]
     print('max epoch = %d'%(epochs-1))
@@ -17,6 +20,7 @@ with np.load('loss.npz') as f :
     t = f['training'][epoch,:]
     tg = f['training_guess'][epoch,:]
     tlogm = f['training_logM'][epoch,:]
+#    tidx = f['training_idx'][epoch,:]
     tmean = np.median(f['training'], axis=-1)
     tgmean = np.median(f['training_guess'], axis=-1)
     all_v = f['validation']
@@ -24,6 +28,7 @@ with np.load('loss.npz') as f :
     v = f['validation'][epoch,:]
     vg = f['validation_guess'][epoch,:]
     vlogm = f['validation_logM'][epoch,:]
+#    vidx = f['validation_idx'][epoch,:]
     vmean = np.median(f['validation'], axis=-1)
     vgmean = np.median(f['validation_guess'], axis=-1)
 
@@ -35,6 +40,17 @@ fig, ax = plt.subplots(ncols=2)
 
 ax[0].scatter(tg, t, label='training', s=3+20*(tlogm-vmin)/(vmax-vmin))
 ax[0].scatter(vg, v, label='validation', s=3+20*(vlogm-vmin)/(vmax-vmin))
+
+if Nidx :
+    assert isinstance(Nidx, int) and Nidx > 0
+    sorter = np.argsort(t)
+    tg_sorted = tg[sorter][::-1]
+    t_sorted = t[sorter][::-1]
+    tidx_sorted = tidx[sorter][::-1]
+    for ii in range(Nidx) :
+        ax[0].text(tg_sorted[ii], t_sorted[ii], '%d'%tidx_sorted[ii],
+                   ha='center', va='top')
+
 ax[0].plot([0,1e3], [0,1e3], linestyle='dashed', color='black')
 ax[0].set_xlim(1e-3,1e0)
 ax[0].set_ylim(1e-3,1e0)

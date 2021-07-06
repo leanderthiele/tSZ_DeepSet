@@ -5,12 +5,17 @@ import cfg
 
 halo_catalog = dict(np.load(cfg.HALO_CATALOG))
 
-if 'Nprt_DM' in halo_catalog :
-    print('Found Nprt_DM, continuing')
-    del halo_catalog['Nprt_DM']
-if 'Nprt_TNG' in halo_catalog :
-    print('Found Nprt_TNG, continuing')
-    del halo_catalog['Nprt_TNG']
+res_str = '%d_'%cfg.TNG_RESOLUTION if cfg.TNG_RESOLUTION != 256 else ''
+
+Nprt_DM_str = 'Nprt_%sDM'%res_str
+Nprt_TNG_str = 'Nprt_%sTNG'%res_str
+
+if Nprt_DM_str in halo_catalog :
+    print('Found %s, continuing'%Nprt_DM_str)
+    del halo_catalog[Nprt_DM_str]
+if Nprt_TNG_str in halo_catalog :
+    print('Found %s, continuing'%Nprt_TNG_str)
+    del halo_catalog[Nprt_TNG_str]
 
 Nhalos = halo_catalog['Nobjects']
 
@@ -31,4 +36,5 @@ for ii in range(Nhalos) :
     Pth = np.fromfile(h.storage_TNG['Pth'], dtype=np.float32)
     assert Nprt_TNG[ii] == len(Pth)
 
-np.savez(cfg.HALO_CATALOG, **halo_catalog, Nprt_DM=Nprt_DM, Nprt_TNG=Nprt_TNG)
+np.savez(cfg.HALO_CATALOG, **halo_catalog,
+         **{Nprt_DM_str: Nprt_DM, Nprt_TNG_str: Nprt_TNG})
