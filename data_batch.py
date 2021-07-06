@@ -133,21 +133,15 @@ class DataBatch :
 
             for k, v in self.__dict__.items() :
                 if k.startswith('__') :
-                    continue
-                elif isinstance(v, bool) :
-                    continue
-                elif isinstance(v, DataModes) :
-                    continue
-                elif isinstance(v, list) and all(isinstance(x, int) for x in v) :
-                    continue
-                elif v is None :
+                    # make sure we don't do anything to any internals
                     continue
                 elif isinstance(v, torch.Tensor) :
                     setattr(self, k, v.to(cfg.DEVICE_IDX))
                 elif isinstance(v, list) and isinstance(v[0], torch.Tensor) :
                     setattr(self, k, [t.to(cfg.DEVICE_IDX) for t in v])
                 else :
-                    raise RuntimeError(f'Attribute {k} has unexpected type.')
+                    # not a valid torch tensor or list thereof, don't care
+                    continue
 
         return self
     #}}}
