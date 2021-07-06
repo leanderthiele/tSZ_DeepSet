@@ -15,7 +15,7 @@ from data_batch import DataBatch
 from init_proc import InitProc
 import cfg
 
-EPOCHS = 500
+EPOCHS = 50
 
 InitProc(0)
 
@@ -28,13 +28,13 @@ model = Network().to_device()
 batt12 = NetworkBatt12().to_device() # use this to compute the reference loss
 batt12.eval()
 
-optimizer = torch.optim.Adam(model.parameters(), weight_decay=1e-4)
+optimizer = torch.optim.Adam(model.parameters(), weight_decay=3e-4)
 loss_fn = TrainingLoss()
 
 training_loader = DataLoader(mode=DataModes.TRAINING)
 validation_loader = DataLoader(mode=DataModes.VALIDATION)
 
-scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=1e-2,
+scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=1e-2, div_factor=25,
                                                 steps_per_epoch=len(training_loader),
                                                 epochs=EPOCHS)
 

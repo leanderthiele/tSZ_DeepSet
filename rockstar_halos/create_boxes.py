@@ -6,7 +6,7 @@ from voxelize import Voxelize
 
 ROOT = '/scratch/gpfs/lthiele/tSZ_DeepSet_halos/rockstar/TNG'
 
-N = 256 # box sidelength
+N = 128 # box sidelength
 
 F = 2.5 # out to which radius (in units of R200c) we have particles
 
@@ -46,7 +46,7 @@ with Voxelize(use_gpu=True) as v :
         box = v(2*F*R200c, x, r, p, box).flatten().astype(np.float32)
 
         # save the original box to file so we can visually inspect interesting objects
-        box.tofile(fname('box_cube_Pth'))
+        box.tofile(fname('box_%d_cube_Pth'%N))
 
         # coordinates of the box cells
         # NOTE the following works for both even and odd N
@@ -63,7 +63,7 @@ with Voxelize(use_gpu=True) as v :
         # now fix the coordinate units
         x = (pos + x * 2*F*R200c).astype(np.float32)
 
-        x.tofile(fname('box_coords'))
-        box.tofile(fname('box_Pth'))
+        x.tofile(fname('box_%d_coords'%N))
+        box.tofile(fname('box_%d_Pth'%N))
 
         idx += 1

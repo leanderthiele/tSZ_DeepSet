@@ -39,6 +39,9 @@ OMEGA_M = 0.3089
 STORAGE_FILES = dict(DM='/scratch/gpfs/lthiele/tSZ_DeepSet_halos/rockstar/DM_%d_%s.bin',
                      TNG='/scratch/gpfs/lthiele/tSZ_DeepSet_halos/rockstar/TNG_%d_%s.bin')
 
+# the resolution of the TNG grids
+TNG_RESOLUTION = 128
+
 # how many particles of each type to use per halo
 # set to None if all particles are to be used
 # if an integer or float larger than one, not the fraction but this number is used
@@ -73,10 +76,10 @@ CONSISTENT_SEED = 137
 GLOBALS_USE = dict(none=False,
                    #-------#
                    logM=True,
-                   Xoff=False,
-                   Voff=False,
-                   CM=False,
-                   ang_mom=False,
+                   Xoff=True,
+                   Voff=True,
+                   CM=True,
+                   ang_mom=True,
                    inertia=True,
                    inertia_dot_ang_mom=False,
                    vel_dispersion=True,
@@ -100,13 +103,13 @@ BASIS_USE = dict(none=False,
 # specifies standard deviation of the Gaussians from which rotation angles will be drawn (in degrees)
 # [currently, we keep the basis vectors normed]
 # set to None if no noise is desired
-BASIS_NOISE = 20.0
+BASIS_NOISE = 2.0
 
 # whether the DM particle velocities should be used
 USE_VELOCITIES = True
 
 # arguments passed to the torch DataLoader constructor
-DATALOADER_ARGS = dict(batch_size=8,
+DATALOADER_ARGS = dict(batch_size=4,
                        num_workers=4,
                        pin_memory=True, # TODO for this to have an effect, I think the Batch class must have a pin_memory() method
                        prefetch_factor=1,

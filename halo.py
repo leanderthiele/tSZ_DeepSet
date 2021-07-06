@@ -28,8 +28,11 @@ class Halo :
 
         self.storage_DM = dict(coords=cfg.STORAGE_FILES['DM']%(halo_index, 'coords'),
                                velocities=cfg.STORAGE_FILES['DM']%(halo_index, 'velocities'))
-        self.storage_TNG = dict(coords=cfg.STORAGE_FILES['TNG']%(halo_index, 'box_coords'),
-                                Pth=cfg.STORAGE_FILES['TNG']%(halo_index, 'box_Pth'))
+        
+        res_str = '%d_'%cfg.TNG_RESOLUTION if cfg.TNG_RESOLUTION != 256 else ''
+
+        self.storage_TNG = dict(coords=cfg.STORAGE_FILES['TNG']%(halo_index, 'box_%scoords'%res_str),
+                                Pth=cfg.STORAGE_FILES['TNG']%(halo_index, 'box_%sPth'%res_str))
     #}}}
 
 
