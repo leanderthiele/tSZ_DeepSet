@@ -44,7 +44,7 @@ class Network(nn.Module) :
             self.origin = NetworkOrigin()
 
         if cfg.NET_ARCH['batt12'] :
-            self.batt12 = NetworkBatt12()
+            self.batt12 = NetworkBatt12(xc_fixed=cfg.NET_ARCH['deformer'])
             if cfg.NET_ARCH['deformer'] :
                 self.deformer = NetworkDeformer()
 
@@ -84,11 +84,13 @@ class Network(nn.Module) :
             if cfg.NET_ARCH['deformer'] :
                 # now deform the TNG positions -- TODO experiment with the order
                 # relative to the decoder evaluation
-                batch.TNG_radii = self.deformer(batch.TNG_coords, batch.TNG_radii,
-                                                u=batch.u, basis=batch.basis)
+                r_b12 = self.deformer(batch.TNG_coords, batch.TNG_radii,
+                                      u=batch.u, basis=batch.basis)
+            else :
+                r_b12 = batch.TNG_radii
 
             # now evaluate the (modified) Battaglia+2012 model at the deformed radial coordinates
-            b12 = self.batt12(batch.M200c, batch.TNG_radii,
+            b12 = self.batt12(batch.M200c, r_b12,
                               R200c=batch.R200c if not cfg.NORMALIZE_COORDS else None)
 
         if cfg.NET_ARCH['decoder'] and not cfg.NET_ARCH['batt12'] :

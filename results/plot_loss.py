@@ -12,11 +12,15 @@ epoch = int(argv[1])
 with np.load('loss.npz') as f :
     epochs = f['training'].shape[0]
     print('max epoch = %d'%(epochs-1))
+    all_t = f['training']
+    all_tg = f['training_guess']
     t = f['training'][epoch,:]
     tg = f['training_guess'][epoch,:]
     tlogm = f['training_logM'][epoch,:]
     tmean = np.median(f['training'], axis=-1)
     tgmean = np.median(f['training_guess'], axis=-1)
+    all_v = f['validation']
+    all_vg = f['validation_guess']
     v = f['validation'][epoch,:]
     vg = f['validation_guess'][epoch,:]
     vlogm = f['validation_logM'][epoch,:]
@@ -42,10 +46,12 @@ ax[0].legend(loc='upper left', frameon=False)
 ax[0].text(0.95, 0.05, 'epoch %d'%(epoch), transform=ax[0].transAxes, ha='right', va='bottom', color='green')
 
 e = np.arange(epochs)
-ax[1].plot(e, tmean/tgmean, label='training')
-ax[1].plot(e, vmean/vgmean, label='validation')
+#ax[1].plot(e, tmean/tgmean, label='training')
+#ax[1].plot(e, vmean/vgmean, label='validation')
+ax[1].plot(e, np.median(all_t/all_tg, axis=-1), label='training')
+ax[1].plot(e, np.median(all_v/all_vg, axis=-1), label='validation')
 ax[1].set_xlabel('epoch')
-ax[1].set_ylabel('median(network)/median(B12)')
+ax[1].set_ylabel('median(network/B12)')
 ax[1].legend(loc='upper right', frameon=False)
 ax[1].set_yscale('log')
 ax[1].plot([epoch, epoch], [0,1e2], color='green', alpha=0.3, linewidth=1)

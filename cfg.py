@@ -91,10 +91,10 @@ GLOBALS_NOISE = 5.0
 # which basis vectors to use -- set `none' to true if no basis vectors are to be used
 BASIS_USE = dict(none=False,
                  #--------#
-                 ang_mom=False,
-                 CM=False,
+                 ang_mom=True,
+                 CM=True,
                  inertia=True,
-                 vel_dispersion=False)
+                 vel_dispersion=True)
 
 # amount of noise added to the vectors
 # specifies standard deviation of the Gaussians from which rotation angles will be drawn (in degrees)
@@ -128,7 +128,7 @@ DROPOUT = None
 VISIBLE_DROPOUT = None
 
 # default number of hidden layers in the encoder
-ENCODER_DEFAULT_NLAYERS = 0
+ENCODER_DEFAULT_NLAYERS = 1
 
 # default number of neurons in the outer layers of the MLPs
 # (which correspond to hidden layers at the encoder level)
@@ -141,7 +141,7 @@ ENCODER_DEFAULT_BASIS_MAXLAYER = 0
 ENCODER_DEFAULT_GLOBALS_MAXLAYER = 0
 
 # whether we pass the TNG radii to the decoder
-DECODER_DEFAULT_R_PASSED = False
+DECODER_DEFAULT_R_PASSED = True
 
 # whether we pass the globals to the decoder
 DECODER_DEFAULT_GLOBALS_PASSED = False

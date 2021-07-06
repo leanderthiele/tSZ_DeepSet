@@ -9,9 +9,12 @@ class NetworkBatt12(nn.Module) :
     implements a version of the Battaglia+2012 profile with learnable parameters.
     We use the output from this model as the baseline, the actual DeepSet
     is then supposed to learn local corrections to this model.
+
+    xc_fixed ... can keep the radial scale fixed, useful in order to remove degeneracy
+                 with the deformer
     """
 
-    def __init__(self) :
+    def __init__(self, xc_fixed=False) :
     #{{{
         super().__init__()
 
@@ -24,6 +27,10 @@ class NetworkBatt12(nn.Module) :
         self.register_parameter('am_xc', scalar_param(-0.00865))
         self.register_parameter('A_beta', scalar_param(4.35))
         self.register_parameter('am_beta', scalar_param(0.0393))
+
+        if xc_fixed :
+            self.A_xc.requires_grad = False
+            self.am_xc.requires_grad = False
     #}}}
     
 
@@ -51,6 +58,9 @@ class NetworkBatt12(nn.Module) :
         beta = self.__primitive(M200c, 'beta')
 
         r = r / xc[:,None,None]
+
+        # make sure we don't have a divergence if a particle is directly at the origin
+        r += 1e-8
 
         return P0[:,None,None] * r.pow(-0.3) * ( 1 + r ).pow(-beta[:,None,None])
     #}}}
