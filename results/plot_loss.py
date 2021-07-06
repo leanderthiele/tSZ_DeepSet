@@ -10,7 +10,7 @@ from matplotlib import pyplot as plt
 epoch = int(argv[1])
 
 # for how many halos we want to insert the index
-Nidx = 0
+Nidx = 2
 
 with np.load('loss.npz') as f :
     epochs = f['training'].shape[0]
@@ -20,7 +20,7 @@ with np.load('loss.npz') as f :
     t = f['training'][epoch,:]
     tg = f['training_guess'][epoch,:]
     tlogm = f['training_logM'][epoch,:]
-#    tidx = f['training_idx'][epoch,:]
+    tidx = f['training_idx'][epoch,:]
     tmean = np.median(f['training'], axis=-1)
     tgmean = np.median(f['training_guess'], axis=-1)
     all_v = f['validation']
@@ -28,7 +28,7 @@ with np.load('loss.npz') as f :
     v = f['validation'][epoch,:]
     vg = f['validation_guess'][epoch,:]
     vlogm = f['validation_logM'][epoch,:]
-#    vidx = f['validation_idx'][epoch,:]
+    vidx = f['validation_idx'][epoch,:]
     vmean = np.median(f['validation'], axis=-1)
     vgmean = np.median(f['validation_guess'], axis=-1)
 

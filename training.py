@@ -15,7 +15,7 @@ from data_batch import DataBatch
 from init_proc import InitProc
 import cfg
 
-EPOCHS = 50
+EPOCHS = 100
 
 InitProc(0)
 
