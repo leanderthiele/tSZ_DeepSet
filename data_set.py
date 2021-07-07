@@ -34,7 +34,7 @@ class DataSet(torch_DataSet) :
         self.len_all = len(self.halo_catalog)
 
         # now slice the object we use for this process
-        self.halo_catalog = self.halo_catalog[cfg.RANK::cfg.WORLD_SIZE]
+        self.halo_catalog = self.halo_catalog[cfg.rank::cfg.world_size]
 
         self.data_items = [DataItem(h, mode, **data_item_kwargs) for h in self.halo_catalog]
 
@@ -97,7 +97,7 @@ class DataSet(torch_DataSet) :
         """
     #{{{
         if self.mode is DataModes.TRAINING :
-            n = int(np.ceil(self.len_all / cfg.WORLD_SIZE))
+            n = int(np.ceil(self.len_all / cfg.world_size))
             # return the next larger integer that is divisible by the batch size
             bs = cfg.DATALOADER_ARGS['batch_size']
             return n + bs - n % bs

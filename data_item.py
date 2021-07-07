@@ -119,8 +119,8 @@ class DataItem :
         remaps the array x into the interval [-BoxSize/2, +BoxSize/2] with periodic boundary conditions
         """
     #{{{
-        x[x >  0.5*cfg.BOX_SIZE] -= cfg.BOX_SIZE
-        x[x < -0.5*cfg.BOX_SIZE] += cfg.BOX_SIZE
+        x[x >  0.5*cfg._BOX_SIZE] -= cfg._BOX_SIZE
+        x[x < -0.5*cfg._BOX_SIZE] += cfg._BOX_SIZE
 
         return x
     #}}}

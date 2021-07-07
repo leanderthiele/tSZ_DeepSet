@@ -48,7 +48,7 @@ while True :
     print(idx)
 
     try :
-        globals_DM = eval(open(cfg.STORAGE_FILES['DM']%(idx, 'globals'), 'r').readline())
+        globals_DM = eval(open(cfg._STORAGE_FILES['DM']%(idx, 'globals'), 'r').readline())
     except FileNotFoundError :
         print('Found %d halos.'%idx)
         break
@@ -58,7 +58,7 @@ while True :
     for k, v in globals_DM.items() :
         out[k].append(v)
 
-    globals_TNG = eval(open(cfg.STORAGE_FILES['TNG']%(idx, 'globals'), 'r').readline())
+    globals_TNG = eval(open(cfg._STORAGE_FILES['TNG']%(idx, 'globals'), 'r').readline())
     assert isinstance(globals_TNG, dict)
 
     out['min_pot_pos_TNG'].append(globals_TNG.pop('min_pot_pos_TNG'))
@@ -74,17 +74,17 @@ while True :
     # only work with DM now, as these are fields we want to use as input
 
     # load coordinates from file
-    x = np.fromfile(cfg.STORAGE_FILES['DM']%(idx, 'coords'), dtype=np.float32)
+    x = np.fromfile(cfg._STORAGE_FILES['DM']%(idx, 'coords'), dtype=np.float32)
     x = x.reshape((len(x)//3, 3))
 
     # load velocities from file
-    v = np.fromfile(cfg.STORAGE_FILES['DM']%(idx, 'velocities'), dtype=np.float32)
+    v = np.fromfile(cfg._STORAGE_FILES['DM']%(idx, 'velocities'), dtype=np.float32)
     v = v.reshape((len(v)//3, 3))
 
     # center the coordinates
     x -= out['pos'][-1]
-    x[x > +0.5*cfg.BOX_SIZE] -= cfg.BOX_SIZE
-    x[x < -0.5*cfg.BOX_SIZE] += cfg.BOX_SIZE
+    x[x > +0.5*cfg._BOX_SIZE] -= cfg._BOX_SIZE
+    x[x < -0.5*cfg._BOX_SIZE] += cfg._BOX_SIZE
 
     # remove monopole from velocities
     v -= np.mean(v, axis=0)

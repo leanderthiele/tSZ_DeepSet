@@ -65,8 +65,8 @@ class GlobalFields(np.ndarray, metaclass=FixedLenVec) :
             Xoff /= halo.R200c
             Voff /= halo.V200c
             CM_norm /= halo.R200c
-            eigval_inertia *= cfg.UNIT_MASS / (halo.R200c**2 * halo.M200c)
-            eigval_vel_dispersion *= cfg.UNIT_MASS / (halo.V200c**2 * halo.M200c)
+            eigval_inertia *= cfg._UNIT_MASS / (halo.R200c**2 * halo.M200c)
+            eigval_vel_dispersion *= cfg._UNIT_MASS / (halo.V200c**2 * halo.M200c)
 
         out = []
 

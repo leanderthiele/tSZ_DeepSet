@@ -129,16 +129,16 @@ class DataBatch :
                 (it also returns the altered object)
         """
     #{{{
-        if cfg.DEVICE_IDX is not None :
+        if cfg.device_idx is not None :
 
             for k, v in self.__dict__.items() :
                 if k.startswith('__') :
                     # make sure we don't do anything to any internals
                     continue
                 elif isinstance(v, torch.Tensor) :
-                    setattr(self, k, v.to(cfg.DEVICE_IDX))
+                    setattr(self, k, v.to(cfg.device_idx))
                 elif isinstance(v, list) and isinstance(v[0], torch.Tensor) :
-                    setattr(self, k, [t.to(cfg.DEVICE_IDX) for t in v])
+                    setattr(self, k, [t.to(cfg.device_idx) for t in v])
                 else :
                     # not a valid torch tensor or list thereof, don't care
                     continue

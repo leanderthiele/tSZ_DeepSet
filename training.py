@@ -17,7 +17,7 @@ import cfg
 
 InitProc(0)
 
-if cfg.MPI_ENV_TYPE is MPIEnvTypes.NOGPU :
+if cfg.mpi_env_type is MPIEnvTypes.NOGPU :
     torch.set_num_threads(5)
     from matplotlib import pyplot as plt
 

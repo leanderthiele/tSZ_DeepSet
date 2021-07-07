@@ -26,13 +26,13 @@ class Halo :
         self.P200c = Halo.__P200c(self.M200c, self.R200c)
         self.V200c = Halo.__V200c(self.M200c, self.R200c)
 
-        self.storage_DM = dict(coords=cfg.STORAGE_FILES['DM']%(halo_index, 'coords'),
-                               velocities=cfg.STORAGE_FILES['DM']%(halo_index, 'velocities'))
+        self.storage_DM = dict(coords=cfg._STORAGE_FILES['DM']%(halo_index, 'coords'),
+                               velocities=cfg._STORAGE_FILES['DM']%(halo_index, 'velocities'))
         
         res_str = '%d_'%cfg.TNG_RESOLUTION if cfg.TNG_RESOLUTION != 256 else ''
 
-        self.storage_TNG = dict(coords=cfg.STORAGE_FILES['TNG']%(halo_index, 'box_%scoords'%res_str),
-                                Pth=cfg.STORAGE_FILES['TNG']%(halo_index, 'box_%sPth'%res_str))
+        self.storage_TNG = dict(coords=cfg._STORAGE_FILES['TNG']%(halo_index, 'box_%scoords'%res_str),
+                                Pth=cfg._STORAGE_FILES['TNG']%(halo_index, 'box_%sPth'%res_str))
 
         self.idx = halo_index
     #}}}
@@ -45,7 +45,7 @@ class Halo :
         TODO so far, this is only at z=0
         """
     #{{{
-        return 100 * cfg.G_NEWTON  * cfg.RHO_CRIT * cfg.OMEGA_B * M200c / cfg.OMEGA_M / R200c
+        return 100 * cfg._G_NEWTON  * cfg._RHO_CRIT * cfg._OMEGA_B * M200c / cfg._OMEGA_M / R200c
     #}}}
 
 
@@ -55,5 +55,5 @@ class Halo :
         computes the characteristic velocity in Illustris code units
         """
     #{{{
-        return np.sqrt(cfg.G_NEWTON * M200c / R200c)
+        return np.sqrt(cfg._G_NEWTON * M200c / R200c)
     #}}}

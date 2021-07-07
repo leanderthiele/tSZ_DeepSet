@@ -18,7 +18,7 @@ class _WorkerPool :
     def __init__(self) :
     #{{{
         # store this in the instance so it gets carried over to the worker process
-        self.local_rank = copy(cfg.LOCAL_RANK)
+        self.local_rank = copy(cfg.local_rank)
     #}}}
 
     

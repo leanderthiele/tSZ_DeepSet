@@ -78,8 +78,8 @@ class NetworkBatt12(nn.Module) :
 
     def to_device(self) :
     #{{{
-        if cfg.DEVICE_IDX is not None :
-            return self.to(cfg.DEVICE_IDX)
+        if cfg.device_idx is not None :
+            return self.to(cfg.device_idx)
         else :
             return self
     #}}}

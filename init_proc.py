@@ -48,6 +48,10 @@ def _parse_cmd_line() :
         # check that this is a valid key
         assert hasattr(cfg, cfg_key)
 
+        # check that this is a key that we allow to be changed
+        assert cfg_key.isupper()
+        assert not cfg_key.startswith('_')
+
         # TODO for the [] case, make sure we are not adding a new item to the dict
         #      (for lists this would throw)
         
@@ -65,40 +69,40 @@ def _set_mp_env() :
     if 'SLURM_SRUN_COMM_HOST' in os.environ :
         # we were launched using srun
 
-        cfg.MPI_WORLD_SIZE = int(os.environ['SLURM_NTASKS'])
-        cfg.MPI_RANK = int(os.environ['SLURM_PROCID'])
-        cfg.MPI_LOCAL_WORLD_SIZE = len(os.environ['SLURM_GTIDS'].split(','))
-        cfg.MPI_LOCAL_RANK = int(os.environ['SLURM_LOCALID'])
-        cfg.MPI_NODENAME = os.environ['SLURMD_NODENAME']
-        cfg.MASTER_ADDR = os.environ['SLURM_SRUN_COMM_HOST']
+        cfg.mpi_world_size = int(os.environ['SLURM_NTASKS'])
+        cfg.mpi_rank = int(os.environ['SLURM_PROCID'])
+        cfg.mpi_local_world_size = len(os.environ['SLURM_GTIDS'].split(','))
+        cfg.mpi_local_rank = int(os.environ['SLURM_LOCALID'])
+        cfg.mpi_nodename = os.environ['SLURMD_NODENAME']
+        cfg.master_addr = os.environ['SLURM_SRUN_COMM_HOST']
 
     elif 'OMPI_COMM_WORLD_SIZE' in os.environ :
         # we were launched using mpirun
 
-        cfg.MPI_WORLD_SIZE = int(os.environ['OMPI_COMM_WORLD_SIZE'])
-        cfg.MPI_RANK = int(os.environ['OMPI_COMM_WORLD_RANK'])
-        cfg.MPI_LOCAL_WORLD_SIZE = int(os.environ['OMPI_COMM_WORLD_LOCAL_SIZE'])
-        cfg.MPI_LOCAL_RANK = int(os.environ['OMPI_COMM_WORLD_NODE_RANK'])
-        cfg.MPI_NODENAME = os.environ['HOSTNAME']
+        cfg.mpi_world_size = int(os.environ['OMPI_COMM_WORLD_SIZE'])
+        cfg.mpi_rank = int(os.environ['OMPI_COMM_WORLD_RANK'])
+        cfg.mpi_local_world_size = int(os.environ['OMPI_COMM_WORLD_LOCAL_SIZE'])
+        cfg.mpi_local_rank = int(os.environ['OMPI_COMM_WORLD_NODE_RANK'])
+        cfg.mpi_nodename = os.environ['HOSTNAME']
 
         from mpi4py import MPI
         comm = MPI.COMM_WORLD
-        assert comm.Get_rank() == cfg.MPI_RANK
-        if cfg.MPI_RANK == 0 :
-            root_name = cfg.MPI_NODENAME
+        assert comm.Get_rank() == cfg.mpi_rank
+        if cfg.mpi_rank == 0 :
+            root_name = cfg.mpi_nodename
         else :
             root_name = None
         root_name = comm.bcast(root_name, root=0)
-        cfg.MASTER_ADDR = root_name
+        cfg.master_addr = root_name
 
     else :
         # this is a single node job, maybe on the head node
         # we can leave the variables at their default values
         pass
 
-    cfg.VISIBLE_GPUS = torch.cuda.device_count() if torch.cuda.is_available() else 0
-    cfg.MPI_ENV_TYPE = MPIEnvTypes.get(cfg.VISIBLE_GPUS, cfg.MPI_LOCAL_WORLD_SIZE)
-    cfg.WORLD_SIZE = cfg.MPI_ENV_TYPE.world_size(cfg.VISIBLE_GPUS, cfg.MPI_WORLD_SIZE)
+    cfg.visible_gpus = torch.cuda.device_count() if torch.cuda.is_available() else 0
+    cfg.mpi_env_type = MPIEnvTypes.get(cfg.visible_gpus, cfg.mpi_local_world_size)
+    cfg.world_size = cfg.mpi_env_type.world_size(cfg.visible_gpus, cfg.mpi_world_size)
 #}}}
 
 
@@ -107,11 +111,11 @@ def _set_mp_env_for_rank(local_rank) :
     sets the multiprocessing variables that depend on knowledge of the intra-process rank
     """
 #{{{
-    assert not cfg.SET_RANK
-    cfg.LOCAL_RANK = local_rank
-    cfg.RANK = cfg.MPI_ENV_TYPE.rank(cfg.MPI_RANK, cfg.LOCAL_RANK, cfg.VISIBLE_GPUS)
-    cfg.DEVICE_IDX = cfg.MPI_ENV_TYPE.device_idx(cfg.MPI_LOCAL_RANK, cfg.LOCAL_RANK)
-    cfg.SET_RANK = True
+    assert not cfg.set_rank
+    cfg.local_rank = local_rank
+    cfg.rank = cfg.mpi_env_type.rank(cfg.mpi_rank, cfg.local_rank, cfg.visible_gpus)
+    cfg.device_idx = cfg.mpi_env_type.device_idx(cfg.mpi_local_rank, cfg.local_rank)
+    cfg.set_rank = True
 #}}}
 
 
@@ -123,9 +127,9 @@ def InitProc(local_rank=None) :
     local_rank ... process-local rank (i.e. within this MPI process)
     """
 #{{{
-    if cfg.INIT_PROC_CALLED :
+    if cfg.init_proc_called :
         
-        if local_rank is not None and not cfg.SET_RANK :
+        if local_rank is not None and not cfg.set_rank :
             assert local_rank == 0
             _set_mp_env_for_rank(local_rank)
 
@@ -136,5 +140,7 @@ def InitProc(local_rank=None) :
     if local_rank is not None :
         _set_mp_env_for_rank(local_rank)
 
-    cfg.INIT_PROC_CALLED = True
+    _parse_cmd_line()
+
+    cfg.init_proc_called = True
 #}}}

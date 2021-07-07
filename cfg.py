@@ -1,5 +1,10 @@
-# whether the init_proc function has been called on this module
-INIT_PROC_CALLED = False
+"""
+Syntax in this file:
+    > things that are normal to be touched from command line are in UPPER_CASE
+    > things that should not be touched from command line have a _ prefixed, _UPPER_CASE
+    > things that we use for communication (e.g. the multiprocessing environment) at runtime
+      are in lower case
+"""
 
 # an identifier that we use to tag outputs
 ID = 'default'
@@ -14,43 +19,8 @@ ADAM_KWARGS = dict(weight_decay=3e-5)
 ONE_CYCLE_LR_KWARGS = dict(max_lr=3e-2,
                            div_factor=250)
 
-# which redshift snapshot to work with
-SNAP_IDX = 99
-
-# the particle types in Illustris
-PART_TYPES = dict(DM=1, TNG=0)
-
 # where we have the halo catalog stored
 HALO_CATALOG = 'halo_catalog.npz'
-
-# the (virtual) hdf5 files where we find the simulations
-SIM_FILES = dict(DM='/tigress/lthiele/Illustris_300-1_Dark/simulation.hdf5',
-                 TNG='/tigress/lthiele/Illustris_300-1_TNG/simulation.hdf5')
-
-# the simulation box size -- avoid repeated and perhaps concurrent hdf5 reads
-# by hardcoding this here
-BOX_SIZE = 205000.0
-
-# the DM simulation particle mass
-UNIT_MASS = 0.00472716
-
-# some constants in simulation units
-RHO_CRIT = 2.775e-8 # critical density at z=0 in Illustris code units
-G_NEWTON = 4.30091e4 # Newton's constant in Illustris code units
-OMEGA_B = 0.0486
-OMEGA_M = 0.3089
-
-# the binary files where we store particle information and some global
-# properties of the halo
-# '%d' is placeholder for the halo index
-# '%s' is placeholder for some string, which can be
-#   globals    [DM & TNG]
-#   coords     [DM & TNG]
-#   masses     [TNG only]
-#   Pth        [TNG only]
-#   velocities [DM only]
-STORAGE_FILES = dict(DM='/scratch/gpfs/lthiele/tSZ_DeepSet_halos/rockstar/DM_%d_%s.bin',
-                     TNG='/scratch/gpfs/lthiele/tSZ_DeepSet_halos/rockstar/TNG_%d_%s.bin')
 
 # the resolution of the TNG grids
 TNG_RESOLUTION = 128
@@ -184,44 +154,89 @@ GRADIENT_CLIP = 1.0
 
 # multiprocessing environment -- these variables are potentially changed by init_proc
 # and set to head-node process defaults
+# NOTE these things should never be touched from the command line,
+#      which is indicated by them being in lower case
 
 # number of MPI-level processes
-MPI_WORLD_SIZE = 1
+mpi_world_size = 1
 
 # rank within the MPI team
-MPI_RANK = 0
+mpi_rank = 0
 
 # number of MPI processes running on this node
-MPI_LOCAL_WORLD_SIZE = 1
+mpi_local_world_size = 1
 
 # rank within the MPI processes running on this node
-MPI_LOCAL_RANK = 0
+mpi_local_rank = 0
 
 # our name
-MPI_NODENAME = 'localhost'
+mpi_nodename = 'localhost'
 
 # the name of the root machine
-MASTER_ADDR = None
+master_addr = None
 
 # number of GPUs visible from this MPI-level process
-VISIBLE_GPUS = 0
+visible_gpus = 0
 
 # what type of MPI environment we are in
-MPI_ENV_TYPE = None
+mpi_env_type = None
 
 # total number of processes, including spawned training processes
 # but not workers
-WORLD_SIZE = 1
+world_size = 1
 
 # our rank in the entire world, including spawned training processes
 # but not workers
-RANK = 0
+rank = 0
 
 # whether the RANK variable has been set
-SET_RANK = False
+set_rank = False
 
 # our rank within this MPI process (usually zero, except for spawned training processes)
-LOCAL_RANK = 0
+local_rank = 0
 
 # the GPU we want to use -- this needs to be modified from somewhere
-DEVICE_IDX = None
+device_idx = None
+
+# whether the init_proc function has been called on this module
+init_proc_called = False
+
+# NOTE the following are 'constants', in that we expect that it should never be necessary
+#      to access them from the command line
+#      This is indicated by the prefixed underscore
+
+# which redshift snapshot to work with
+_SNAP_IDX = 99
+
+# the particle types in Illustris
+_PART_TYPES = dict(DM=1, TNG=0)
+
+# the (virtual) hdf5 files where we find the simulations
+_SIM_FILES = dict(DM='/tigress/lthiele/Illustris_300-1_Dark/simulation.hdf5',
+                  TNG='/tigress/lthiele/Illustris_300-1_TNG/simulation.hdf5')
+
+# the simulation box size -- avoid repeated and perhaps concurrent hdf5 reads
+# by hardcoding this here
+_BOX_SIZE = 205000.0
+
+# the DM simulation particle mass
+_UNIT_MASS = 0.00472716
+
+# some constants in simulation units
+_RHO_CRIT = 2.775e-8 # critical density at z=0 in Illustris code units
+_G_NEWTON = 4.30091e4 # Newton's constant in Illustris code units
+_OMEGA_B = 0.0486
+_OMEGA_M = 0.3089
+
+# the binary files where we store particle information and some global
+# properties of the halo
+# '%d' is placeholder for the halo index
+# '%s' is placeholder for some string, which can be
+#   globals    [DM & TNG]
+#   coords     [DM & TNG]
+#   masses     [TNG only]
+#   Pth        [TNG only]
+#   velocities [DM only]
+_STORAGE_FILES = dict(DM='/scratch/gpfs/lthiele/tSZ_DeepSet_halos/rockstar/DM_%d_%s.bin',
+                      TNG='/scratch/gpfs/lthiele/tSZ_DeepSet_halos/rockstar/TNG_%d_%s.bin')
+
