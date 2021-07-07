@@ -15,8 +15,6 @@ from data_batch import DataBatch
 from init_proc import InitProc
 import cfg
 
-EPOCHS = 50
-
 InitProc(0)
 
 if cfg.MPI_ENV_TYPE is MPIEnvTypes.NOGPU :
@@ -28,15 +26,15 @@ model = Network().to_device()
 batt12 = NetworkBatt12().to_device() # use this to compute the reference loss
 batt12.eval()
 
-optimizer = torch.optim.Adam(model.parameters(), weight_decay=3e-5)
+optimizer = torch.optim.Adam(model.parameters(), **cfg.ADAM_KWARGS)
 loss_fn = TrainingLoss()
 
 training_loader = DataLoader(mode=DataModes.TRAINING)
 validation_loader = DataLoader(mode=DataModes.VALIDATION)
 
-scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=3e-2, div_factor=250,
+scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, **cfg.ONE_CYCLE_LR_KWARGS,
                                                 steps_per_epoch=len(training_loader),
-                                                epochs=EPOCHS)
+                                                epochs=cfg.EPOCHS)
 
 # store all the losses here
 training_loss_arr = []
@@ -49,7 +47,7 @@ validation_guess_loss_arr = []
 validation_logM_arr = []
 validation_idx_arr = []
 
-for epoch in range(EPOCHS) :
+for epoch in range(cfg.EPOCHS) :
 
     model.train()
     print('epoch %d'%epoch)
@@ -92,7 +90,7 @@ for epoch in range(EPOCHS) :
                 g_npy = guess.cpu().detach().numpy()[0, ...].squeeze()
                 p_npy = prediction.cpu().detach().numpy()[0, ...].squeeze()
                 t_npy = data.TNG_Pth.cpu().detach().numpy()[0, ...].squeeze()
-                np.savez('test_%d_%d.npz'%(epoch, t),
+                np.savez('test_%s_%d_%d.npz'%(cfg.ID, epoch, t),
                          r=r_npy, g=g_npy, p=p_npy, t=t_npy)
 
         loss, loss_list = loss_fn(prediction, data.TNG_Pth, w=None)
@@ -150,7 +148,7 @@ for epoch in range(EPOCHS) :
 
 
     # save all the losses so far to file 
-    np.savez(os.path.join(cfg.RESULTS_PATH, 'loss.npz'),
+    np.savez(os.path.join(cfg.RESULTS_PATH, 'loss_%s.npz'%cfg.ID),
              training=np.array(training_loss_arr),
              training_guess=np.array(training_guess_loss_arr),
              training_logM=np.array(training_logM_arr),

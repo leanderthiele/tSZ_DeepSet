@@ -1,9 +1,60 @@
 import os
+from sys import argv
 
 import torch
 
 from mpi_env_types import MPIEnvTypes
 import cfg
+
+
+def _parse_cmd_line() :
+    """
+    replaces settings in cfg.py with those given on the command line
+    The command line should look something like
+       --VARIABLE_IN_CFG=value ...
+    such that
+        exec(cfg.VARIABLE_IN_CFG=value)
+    is a valid python statement.
+    In particular, be careful that strings are properly quoted and the quotation
+    marks are escaped.
+    NOTE it is allowed to have spaces in the command line items, because the double dash
+         is used to separate components
+    NOTE we assume that VARIABLE_IN_CFG is either the complete variable or is a complete
+         variable followed by a [. In particular, no composite datatypes with attribute
+         access are allowed
+    NOTE we assume that VARIABLE_IN_CFG does not contain an = sign
+    """
+#{{{
+    # cut out the program name
+    _argv = argv[1:]
+
+    if len(argv) == 0 :
+        return
+
+    # concatenate into one long string
+    _argv = ''.join(_argv)
+
+    # now split on the double dash
+    _argv = _argv.split('--')
+
+    for a in _argv :
+
+        # implicitly checks for existence of equality sign
+        cfg_key, _ = a.split('=', maxsplit=1)
+
+        # account for the fact that there may be indexing/key access involved
+        cfg_key = cfg_key.split('[', maxsplit=1)[0]
+
+        # check that this is a valid key
+        assert hasattr(cfg, cfg_key)
+
+        # TODO for the [] case, make sure we are not adding a new item to the dict
+        #      (for lists this would throw)
+        
+        # now hopefully everything is alright, let's do this super unsafe thing
+        exec('cfg.%s'%a)
+#}}}
+
 
 def _set_mp_env() :
     """

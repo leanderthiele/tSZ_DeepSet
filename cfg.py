@@ -1,6 +1,19 @@
 # whether the init_proc function has been called on this module
 INIT_PROC_CALLED = False
 
+# an identifier that we use to tag outputs
+ID = 'default'
+
+# for how many epochs to train
+EPOCHS = 50
+
+# how to construct the optimizer
+ADAM_KWARGS = dict(weight_decay=3e-5)
+
+# how to construct the learning rate scheduler
+ONE_CYCLE_LR_KWARGS = dict(max_lr=3e-2,
+                           div_factor=250)
+
 # which redshift snapshot to work with
 SNAP_IDX = 99
 
