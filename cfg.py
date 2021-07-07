@@ -31,7 +31,7 @@ TNG_RESOLUTION = 128
 # NOTE that if the absolute number is given, it is not a bug to choose it larger than
 # the number of particles in some low-mass halos. This will result in duplicate entries
 # in the particle list for those halos, which should be ok.
-PRT_FRACTION = dict(DM=1e5, TNG=1e5)
+PRT_FRACTION = dict(DM=1e4, TNG=1e5)
 
 # whether to divide the coordinates by R200c
 NORMALIZE_COORDS = True

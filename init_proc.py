@@ -35,10 +35,14 @@ def _parse_cmd_line() :
     _argv = ''.join(_argv)
 
     # now split on the double dash
-    _argv = _argv.split('--')
+    _argv = _argv.strip().split('--')
+
+    # since our string starts with '--', the first entry will be an empty string
+    assert _argv[0] == ''
+    _argv = _argv[1:]
 
     for a in _argv :
-
+        
         # implicitly checks for existence of equality sign
         cfg_key, _ = a.split('=', maxsplit=1)
 
