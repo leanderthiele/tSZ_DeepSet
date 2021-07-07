@@ -147,7 +147,7 @@ NETWORK_DEFAULT_NLATENT = 128
 OUTPUT_NFEATURES = 2
 
 # where our results (like model states and loss curves) will go
-RESULTS_PATH = 'results'
+RESULTS_PATH = '/scratch/gpfs/lthiele/tSZ_DeepSet_results'
 
 # gradient clipping value (set to None for no clipping)
 GRADIENT_CLIP = 1.0

@@ -71,7 +71,7 @@ for epoch in range(cfg.EPOCHS) :
 
         prediction = model(data)
 
-        if cfg.MPI_ENV_TYPE is MPIEnvTypes.NOGPU :
+        if cfg.mpi_env_type is MPIEnvTypes.NOGPU :
             # FIXME diagnostics on head node
             if epoch > 0 :
                 r_npy = data.TNG_radii.cpu().detach().numpy()[0, ...].squeeze()
@@ -85,7 +85,7 @@ for epoch in range(cfg.EPOCHS) :
                 plt.show()
         else :
             # FIXME diagnostics to file
-            if True and (epoch in [30, 80, 250] and t < 10) :
+            if False and (epoch in [30, 80, 250] and t < 10) :
                 r_npy = data.TNG_radii.cpu().detach().numpy()[0, ...].squeeze()
                 g_npy = guess.cpu().detach().numpy()[0, ...].squeeze()
                 p_npy = prediction.cpu().detach().numpy()[0, ...].squeeze()
@@ -157,3 +157,6 @@ for epoch in range(cfg.EPOCHS) :
              validation_guess=np.array(validation_guess_loss_arr),
              validation_logM=np.array(validation_logM_arr),
              validation_idx=np.array(validation_idx_arr, dtype=int))
+
+# save the network to file
+torch.save(model.state_dict(), os.path.join(cfg.RESULTS_PATH, 'model_%s.pt'%cfg.ID))

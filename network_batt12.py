@@ -21,12 +21,13 @@ class NetworkBatt12(nn.Module) :
         scalar_param = lambda x : nn.Parameter(torch.tensor(x, dtype=torch.float32))
 
         # this is what Battaglia+2012 fit for
-        self.register_parameter('A_P0', scalar_param(18.1))
-        self.register_parameter('am_P0', scalar_param(0.154))
-        self.register_parameter('A_xc', scalar_param(0.497))
-        self.register_parameter('am_xc', scalar_param(-0.00865))
-        self.register_parameter('A_beta', scalar_param(4.35))
-        self.register_parameter('am_beta', scalar_param(0.0393))
+        # we take the default values not from the B12 paper but from a simple fit using only the B12 model
+        self.register_parameter('A_P0', scalar_param(6.7396))
+        self.register_parameter('am_P0', scalar_param(0.4603))
+        self.register_parameter('A_xc', scalar_param(1.0876))
+        self.register_parameter('am_xc', scalar_param(-0.4171))
+        self.register_parameter('A_beta', scalar_param(6.6081))
+        self.register_parameter('am_beta', scalar_param(-0.2466))
 
         if xc_fixed :
             self.A_xc.requires_grad = False
