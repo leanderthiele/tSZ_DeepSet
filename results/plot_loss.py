@@ -10,7 +10,7 @@ from matplotlib import pyplot as plt
 epoch = int(argv[1])
 
 # for how many halos we want to insert the index
-Nidx = 2
+Nidx = 4
 
 with np.load('loss.npz') as f :
     epochs = f['training'].shape[0]
@@ -41,8 +41,8 @@ fig, ax = plt.subplots(ncols=2)
 ax[0].scatter(tg, t, label='training', s=3+20*(tlogm-vmin)/(vmax-vmin))
 ax[0].scatter(vg, v, label='validation', s=3+20*(vlogm-vmin)/(vmax-vmin))
 ax[0].plot([0,1e3], [0,1e3], linestyle='dashed', color='black')
-#ax[0].set_xlim(1e-3,1e0)
-#ax[0].set_ylim(1e-3,1e0)
+ax[0].set_xlim(1e-3,1e0)
+ax[0].set_ylim(1e-3,1e0)
 ax[0].set_yscale('log')
 ax[0].set_xscale('log')
 
@@ -70,7 +70,7 @@ ax[1].set_xlabel('epoch')
 ax[1].set_ylabel('median(network/B12)')
 ax[1].legend(loc='upper right', frameon=False)
 ax[1].set_yscale('log')
-ax[1].plot([epoch, epoch], [0,1e2], color='green', alpha=0.3, linewidth=1)
+ax[1].plot([epoch, epoch], [0,1], color='green', alpha=0.3, linewidth=1)
 ax[1].set_xlim(0, epochs-1)
 ax[1].set_ylim(None, 1)
 

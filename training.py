@@ -34,7 +34,7 @@ loss_fn = TrainingLoss()
 training_loader = DataLoader(mode=DataModes.TRAINING)
 validation_loader = DataLoader(mode=DataModes.VALIDATION)
 
-scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=1e-2, div_factor=25,
+scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=3e-2, div_factor=250,
                                                 steps_per_epoch=len(training_loader),
                                                 epochs=EPOCHS)
 

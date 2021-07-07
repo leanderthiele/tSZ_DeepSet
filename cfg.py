@@ -48,7 +48,7 @@ TNG_RESOLUTION = 128
 # NOTE that if the absolute number is given, it is not a bug to choose it larger than
 # the number of particles in some low-mass halos. This will result in duplicate entries
 # in the particle list for those halos, which should be ok.
-PRT_FRACTION = dict(DM=1e4, TNG=1e5)
+PRT_FRACTION = dict(DM=1e5, TNG=1e5)
 
 # whether to divide the coordinates by R200c
 NORMALIZE_COORDS = True
@@ -89,7 +89,7 @@ GLOBALS_USE = dict(none=False,
 # amount of noise added to the globals
 # 1 means that confusion with other halos is almost impossible
 # set to None if no noise desired
-GLOBALS_NOISE = 5.0
+GLOBALS_NOISE = 0.5
 
 # which basis vectors to use -- set `none' to true if no basis vectors are to be used
 BASIS_USE = dict(none=False,
