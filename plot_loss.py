@@ -80,6 +80,8 @@ ax[1].plot([epoch, epoch], [0,1], color='green', alpha=0.3, linewidth=1)
 ax[1].set_xlim(0, epochs-1)
 ax[1].set_ylim(None, 1)
 
+fig.suptitle(ID, fontsize=5)
+
 plt.show()
 
 

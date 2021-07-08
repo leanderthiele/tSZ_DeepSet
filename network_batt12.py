@@ -22,12 +22,12 @@ class NetworkBatt12(nn.Module) :
 
         # this is what Battaglia+2012 fit for
         # we take the default values not from the B12 paper but from a simple fit using only the B12 model
-        self.register_parameter('A_P0', scalar_param(6.7396))
-        self.register_parameter('am_P0', scalar_param(0.4603))
-        self.register_parameter('A_xc', scalar_param(1.0876))
-        self.register_parameter('am_xc', scalar_param(-0.4171))
-        self.register_parameter('A_beta', scalar_param(6.6081))
-        self.register_parameter('am_beta', scalar_param(-0.2466))
+        self.register_parameter('A_P0', scalar_param(6.3351))
+        self.register_parameter('am_P0', scalar_param(0.5383))
+        self.register_parameter('A_xc', scalar_param(1.9009))
+        self.register_parameter('am_xc', scalar_param(-0.3837))
+        self.register_parameter('A_beta', scalar_param(11.3687))
+        self.register_parameter('am_beta', scalar_param(-0.1877))
 
         if xc_fixed :
             self.A_xc.requires_grad = False
