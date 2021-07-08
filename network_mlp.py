@@ -36,7 +36,8 @@ class _MLPLayer(nn.Sequential) :
         nn.init.kaiming_uniform_(self[2].weight,
                                  a=self[3].negative_slope if activation else math.sqrt(5))
         if bias :
-            nn.init.ones_(self[2].bias)
+            # FIXME for testing
+            nn.init.normal_(self[2].bias, mean=1.0, std=0.1)
     #}}}
 
 

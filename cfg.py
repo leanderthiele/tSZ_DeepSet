@@ -13,7 +13,7 @@ ID = 'default'
 EPOCHS = 50
 
 # weight decay (applied only to weights)
-WEIGHT_DECAY = 3e-5
+WEIGHT_DECAY = 1e-1
 
 # how to construct the learning rate scheduler
 ONE_CYCLE_LR_KWARGS = dict(max_lr=3e-2,
@@ -72,7 +72,7 @@ GLOBALS_USE = dict(none=False,
 # amount of noise added to the globals
 # 1 means that confusion with other halos is almost impossible
 # set to None if no noise desired
-GLOBALS_NOISE = 0.5
+GLOBALS_NOISE = 5
 
 # which basis vectors to use -- set `none' to true if no basis vectors are to be used
 BASIS_USE = dict(none=False,
