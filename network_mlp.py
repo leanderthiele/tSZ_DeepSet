@@ -1,4 +1,5 @@
 import math
+from collections import OrderedDict
 
 import torch
 import torch.nn as nn
@@ -20,18 +21,20 @@ class _MLPLayer(nn.Sequential) :
     #{{{ 
         # NOTE apparently the ordering here is not that well explored, but I found at least
         #      one source that says a Google network has dropout after layer normalization
+        # NOTE the names of the parameters in the OrderedDict are important as we use them to figure
+        #      out where to apply weight decay
 
-        super().__init__(nn.LayerNorm(Nin) if layernorm and input_is_hidden else nn.Identity(),
-                         nn.Dropout(p=dropout) if input_is_hidden and dropout is not None \
-                         else nn.Dropout(p=cfg.VISIBLE_DROPOUT) if dropout is not None and cfg.VISIBLE_DROPOUT is not None \
-                         else nn.Identity(),
-                         nn.Linear(Nin, Nout, bias=bias),
-                         nn.LeakyReLU() if activation else nn.Identity())
+        super().__init__(OrderedDict([('layernorm', nn.LayerNorm(Nin) if layernorm and input_is_hidden \
+                                                    else nn.Identity()),
+                                      ('dropout', nn.Dropout(p=dropout) if input_is_hidden and dropout is not None \
+                                                  else nn.Dropout(p=cfg.VISIBLE_DROPOUT) if dropout is not None and cfg.VISIBLE_DROPOUT is not None \
+                                                  else nn.Identity()),
+                                      ('linear', nn.Linear(Nin, Nout, bias=bias)),
+                                      ('activation', nn.LeakyReLU() if activation else nn.Identity())]))
 
         # NOTE be careful about the indexing here if the sequential order is changed
         nn.init.kaiming_uniform_(self[2].weight,
-                                 a=self[3].negative_slope if activation else math.sqrt(5)
-                                )
+                                 a=self[3].negative_slope if activation else math.sqrt(5))
         if bias :
             nn.init.ones_(self[2].bias)
     #}}}

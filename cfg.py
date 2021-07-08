@@ -12,8 +12,8 @@ ID = 'default'
 # for how many epochs to train
 EPOCHS = 50
 
-# how to construct the optimizer
-ADAM_KWARGS = dict(weight_decay=3e-5)
+# weight decay (applied only to weights)
+WEIGHT_DECAY = 3e-5
 
 # how to construct the learning rate scheduler
 ONE_CYCLE_LR_KWARGS = dict(max_lr=3e-2,

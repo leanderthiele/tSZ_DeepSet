@@ -1,6 +1,6 @@
 """
 command line arguments :
-    [1] file
+    [1] ID
     [2] epoch
 """
 
@@ -12,13 +12,13 @@ from matplotlib import pyplot as plt
 
 import cfg
 
-fname = argv[1]
+ID = argv[1]
 epoch = int(argv[2])
 
 # for how many halos we want to insert the index
 Nidx = 4
 
-with np.load(os.path.join(cfg.RESULTS_PATH, fname)) as f :
+with np.load(os.path.join(cfg.RESULTS_PATH, 'loss_%s.npz'%ID)) as f :
     epochs = f['training'].shape[0]
     print('max epoch = %d'%(epochs-1))
     all_t = f['training']
