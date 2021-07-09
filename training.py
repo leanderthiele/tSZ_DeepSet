@@ -26,6 +26,7 @@ model = Network().to_device()
 batt12 = NetworkBatt12().to_device() # use this to compute the reference loss
 batt12.eval()
 
+# TODO put the optimizer in a separate module, it is quite complex already
 # solution adopted from
 # https://discuss.pytorch.org/t/weight-decay-only-for-weights-of-nn-linear-and-nn-conv/114348/4
 # We need to do this carefully in order to avoid regularizing the layernorm weights
@@ -37,8 +38,11 @@ for n, p in model.named_parameters() :
     else :
         no_wd_params.append(p)
 
+Npars = sum(p.numel() for p in wd_params)
+
+# we normalize the weight decay with the number of parameters it was calibrated for
 optimizer = torch.optim.Adam([{'params': no_wd_params, 'weight_decay': 0},
-                              {'params': wd_params, 'weight_decay': cfg.WEIGHT_DECAY}])
+                              {'params': wd_params, 'weight_decay': Npars/568192*cfg.WEIGHT_DECAY}])
 
 loss_fn = TrainingLoss()
 
