@@ -82,10 +82,14 @@ class DataBatch :
         self.R200c = halo_to_tensor('R200c')
         self.P200c = halo_to_tensor('P200c')
 
+        # store the offset scale for the origin network
+        self.Xoff = halo_to_tensor('Xoff')
+
         self.pos  = halo_to_tensor('pos')
 
         # store the halo indices in the global data set, useful for debugging
         self.idx = [d.halo.idx for d in data_items]
+
     #}}}
 
 

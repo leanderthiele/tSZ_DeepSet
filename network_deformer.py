@@ -55,7 +55,7 @@ class NetworkDeformer(nn.Module) :
 
         # concatenate with the global features if required
         if u is not None :
-            scalars = torch.cat((u.unsqueeze(1).repeat(1, scalars.shape[1], 1), scalars), dim=-1)
+            scalars = torch.cat((u.unsqueeze(1).expand(-1, scalars.shape[1], -1), scalars), dim=-1)
 
         # pass through the MLP
         scalars = self.mlp(scalars)

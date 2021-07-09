@@ -88,10 +88,10 @@ class NetworkDecoder(nn.Module) :
         # concatenate with the global vector if requested
         if u is not None :
             assert self.globals_passed and len(GlobalFields) != 0
-            u_repeated = u.unsqueeze(1).repeat(1, x.shape[1], 1)
-            scalars = torch.cat((u_repeated, scalars), dim=-1) \
+            u_expanded = u.unsqueeze(1).expand(-1, x.shape[1], -1)
+            scalars = torch.cat((u_expanded, scalars), dim=-1) \
                       if scalars is not None \
-                      else u_repeated
+                      else u_expanded
         else :
             assert not self.globals_passed or len(GlobalFields) == 0
 

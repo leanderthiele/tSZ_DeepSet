@@ -66,7 +66,11 @@ class Network(nn.Module) :
 
         if cfg.NET_ARCH['origin'] :
             # first find the shifted origin
-            o = self.origin(batch.DM_coords, v=batch.DM_vels, u=batch.u, basis=batch.basis)
+            o_norm = self.origin(batch.DM_coords, v=batch.DM_vels, u=batch.u, basis=batch.basis)
+
+            # we want the origin network to be nicely normalized, so multiply by an appropriate scale
+            # o is of shape [batch, 1, 3]
+            o = o_norm * batch.Xoff.unsqueeze(1).expand(-1, -1, 3)
 
             # shift all coordinates according to this new origin
             batch = batch.add_origin(o)
