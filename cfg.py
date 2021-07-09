@@ -46,6 +46,9 @@ NET_ARCH = dict(origin=True,
                 encoder=True,
                 decoder=True)
 
+# can provide a pre-trained network here
+NET_ID = None
+
 # fraction of samples to use for each mode -- training is inferred
 # NOTE with Mmin=5e13, we have 439 samples in total, of which 10% are ~44
 #      which is very nicely divisibly by batch size 4
