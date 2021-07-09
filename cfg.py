@@ -10,13 +10,13 @@ Syntax in this file:
 ID = 'default'
 
 # for how many epochs to train
-EPOCHS = 50
+EPOCHS = 100
 
 # weight decay (applied only to weights)
 WEIGHT_DECAY = 1e-1
 
 # how to construct the learning rate scheduler
-ONE_CYCLE_LR_KWARGS = dict(max_lr=1e-3,
+ONE_CYCLE_LR_KWARGS = dict(max_lr=3e-2,
                            div_factor=25)
 
 # where we have the halo catalog stored
