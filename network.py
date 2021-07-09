@@ -70,7 +70,7 @@ class Network(nn.Module) :
 
             # we want the origin network to be nicely normalized, so multiply by an appropriate scale
             # o is of shape [batch, 1, 3]
-            o = o_norm * (batch.Xoff / batch.R200c).unsqueeze(1).expand(-1, -1, 3)
+            o = o_norm * (batch.Xoff / batch.R200c).unsqueeze(1).unsqueeze(1).expand(-1, -1, 3)
 
             # shift all coordinates according to this new origin
             batch = batch.add_origin(o)
