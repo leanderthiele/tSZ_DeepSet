@@ -42,7 +42,7 @@ Npars = sum(p.numel() for p in wd_params)
 
 # we normalize the weight decay with the number of parameters it was calibrated for
 optimizer = torch.optim.Adam([{'params': no_wd_params, 'weight_decay': 0},
-                              {'params': wd_params, 'weight_decay': Npars/568192*cfg.WEIGHT_DECAY}])
+                              {'params': wd_params, 'weight_decay': 568192/Npars*cfg.WEIGHT_DECAY}])
 
 loss_fn = TrainingLoss()
 
