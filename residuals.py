@@ -41,4 +41,4 @@ for t, data in enumerate(loader) :
     for ii in range(cfg.DATALOADER_ARGS['batch_size']) :
 
         np.savez(os.path.join('/scratch/gpfs/lthiele/tSZ_DeepSet_pca', '%d.npz'%data.idx[ii]),
-                 r=r, prediction=prediction, target=target)
+                 r=r[ii], prediction=prediction[ii], target=target[ii])
