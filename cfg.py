@@ -13,7 +13,7 @@ ID = 'default'
 EPOCHS = 100
 
 # weight decay (applied only to weights)
-WEIGHT_DECAY = 1e-1
+WEIGHT_DECAY = 1e-4
 
 # how to construct the learning rate scheduler
 ONE_CYCLE_LR_KWARGS = dict(max_lr=3e-2,
@@ -106,7 +106,7 @@ MLP_DEFAULT_NHIDDEN = 128
 
 # default way to initialize the bias
 # a string containing one %s which takes the bias and can be concatenated with nn.init. to form a valid statement
-MLP_DEFAULT_BIAS_INIT = 'normal_(%s, mean=1.0, std=1.0)'
+MLP_DEFAULT_BIAS_INIT = 'normal_(%s, mean=0.0, std=0.1)'
 
 # whether to apply layer normalization in the hidden layers
 LAYERNORM = True
