@@ -17,7 +17,7 @@ WEIGHT_DECAY = 1e-1
 
 # how to construct the learning rate scheduler
 ONE_CYCLE_LR_KWARGS = dict(max_lr=3e-2,
-                           div_factor=25)
+                           div_factor=1000)
 
 # where we have the halo catalog stored
 HALO_CATALOG = 'halo_catalog.npz'
