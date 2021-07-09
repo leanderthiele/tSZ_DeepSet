@@ -23,7 +23,8 @@ class NetworkDeformer(nn.Module) :
                               + len(Basis),
                               1, # output only the changed radial magnitude
                               layer_kwargs_dict=dict(last={'activation' : False,
-                                                           'dropout': None}))
+                                                           'dropout': None,
+                                                           'bias_init': 'zeros_(%s)'}))
     #}}}
 
 

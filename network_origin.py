@@ -13,9 +13,11 @@ class NetworkOrigin(NetworkEncoder) :
         super().__init__(1, # predict exactly one vector
                          # do not have an activation function before the final output
                          # since we generally want to map to the entire real line
+                         # initialize last bias to zero because on average we don't expect a shift
                          Nlayers=cfg.ORIGIN_DEFAULT_NLAYERS,
                          MLP_kwargs_dict=dict(last=dict(layer_kwargs_dict=dict(last={'activation' : False,
-                                                                                     'dropout': None})))
+                                                                                     'dropout': None,
+                                                                                     'bias_init': 'zeros_(%s)'})))
                         )
     #}}}
 

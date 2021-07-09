@@ -14,7 +14,8 @@ class _MLPLayer(nn.Sequential) :
 
     def __init__(self, Nin, Nout, input_is_hidden,
                        bias=True, layernorm=cfg.LAYERNORM,
-                       activation=True, dropout=cfg.DROPOUT) :
+                       activation=True, dropout=cfg.DROPOUT,
+                       bias_init=cfg.MLP_DEFAULT_BIAS_INIT) :
         """
         set dropout to None if not desired
         """
@@ -36,8 +37,7 @@ class _MLPLayer(nn.Sequential) :
         nn.init.kaiming_uniform_(self[2].weight,
                                  a=self[3].negative_slope if activation else math.sqrt(5))
         if bias :
-            # FIXME for testing
-            nn.init.normal_(self[2].bias, mean=1.0, std=0.1)
+            exec('nn.init.%s'%(bias_init%'self[2].bias'))
     #}}}
 
 

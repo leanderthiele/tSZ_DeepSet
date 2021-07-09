@@ -34,8 +34,11 @@ class Network(nn.Module) :
             self.decoder = NetworkDecoder(k_latent, k_out=cfg.OUTPUT_NFEATURES,
                                           # do not have an activation function before the final output
                                           # since we generally want to map to the entire real line
+                                          # we also initialize the last bias to zero because our base model
+                                          # expects zero output on average here
                                           layer_kwargs_dict=dict(last={'activation' : False,
-                                                                       'dropout' : None}))
+                                                                       'dropout' : None,
+                                                                       'bias_init': 'zeros_(%s)'}))
 
         if cfg.NET_ARCH['encoder'] :
             assert cfg.NET_ARCH['decoder']

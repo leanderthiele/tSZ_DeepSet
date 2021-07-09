@@ -104,6 +104,10 @@ MLP_DEFAULT_NLAYERS = 4
 # default number of neurons in the hidden layers for the MLPs
 MLP_DEFAULT_NHIDDEN = 128
 
+# default way to initialize the bias
+# a string containing one %s which takes the bias and can be concatenated with nn.init. to form a valid statement
+MLP_DEFAULT_BIAS_INIT = 'normal_(%s, mean=1.0, std=1.0)'
+
 # whether to apply layer normalization in the hidden layers
 LAYERNORM = True
 
