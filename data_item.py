@@ -25,7 +25,8 @@ class DataItem :
         load_DM  ... whether to load the dark matter particles
         load_TNG ... whether to load the TNG particles
         compute_TNG_radii ... whether the radial positions of the TNG particles are to be computed
-        load_TNG_residuals ... whether the TNG residuals are to be loaded
+        load_TNG_residuals ... whether the TNG residuals are to be loaded (these files are small
+                               so we load them regarless of load_TNG)
         
         (we do not want to open the halo catalog file for each construction,
          also maybe the caller wants to modify it in some way)
@@ -45,11 +46,14 @@ class DataItem :
                    or (self.DM_vels is not None and cfg.USE_VELOCITIES)
 
         if load_TNG :
-            self.TNG_coords, self.TNG_Pth, self.TNG_residuals = self.__get_TNG()
+            self.TNG_coords, self.TNG_Pth = self.__get_TNG()
 
             if compute_TNG_radii :
                 # compute the scalar distances if coordinates are already in the correct frame
                 self.TNG_radii = np.linalg.norm(self.TNG_coords, axis=-1, keepdims=True)
+
+        if load_TNG_residuals :
+            self.TNG_residuals = self__get_TNG_residuals()
     #}}}
 
 
@@ -93,16 +97,10 @@ class DataItem :
         returns the properties for the network output
         """
     #{{{
-        # load particle coordinates and thermal pressure at their position
-        # from file
+        # load particle coordinates and thermal pressure at their position from file
         coords = np.fromfile(self.halo.storage_TNG['coords'], dtype=np.float32)
         coords = coords.reshape((len(coords)//3, 3))
         Pth = np.fromfile(self.halo.storage_TNG['Pth'], dtype=np.float32)
-
-        if self.has_TNG_residuals :
-            residuals = np.fromfile(self.halo.storage_TNG['residuals'], dtype=np.float32)
-        else :
-            residuals = None
 
         # remove the origin
         coords -= self.halo.pos
@@ -117,7 +115,13 @@ class DataItem :
         # normalize the thermal pressure
         Pth /= self.halo.P200c
 
-        return coords, Pth[:, None], residuals
+        return coords, Pth[:, None]
+    #}}}
+
+
+    def __get_TNG_residuals(self) :
+    #{{{
+        return np.fromfile(self.halo.storage_TNG['residuals'], dtype=np.float32)
     #}}}
 
 
@@ -149,6 +153,7 @@ class DataItem :
         out.has_DM = self.has_DM
         out.has_TNG = self.has_TNG
         out.has_TNG_radii = self.has_TNG_radii
+        out.has_TNG_residuals = self.has_TNG_residuals
 
         # now fill in the sampled particles
 

@@ -4,6 +4,7 @@ import torch.nn as nn
 from network_mlp import NetworkMLP
 from global_fields import GlobalFields
 from basis import Basis
+from default_from_cfg import DefaultFromCfg, SetDefaults
 import cfg
 
 
@@ -16,10 +17,10 @@ class NetworkDecoder(nn.Module) :
     """
 
     def __init__(self, k_latent, k_out=1,
-                 r_passed=cfg.DECODER_DEFAULT_R_PASSED,
-                 basis_passed=cfg.DECODER_DEFAULT_BASIS_PASSED,
-                 globals_passed=cfg.DECODER_DEFAULT_GLOBALS_PASSED,
-                 vae_passed=cfg.NET_ARCH['vae'],
+                 r_passed=DefaultFromCfg('DECODER_DEFAULT_R_PASSED'),
+                 basis_passed=DefaultFromCfg('DECODER_DEFAULT_BASIS_PASSED'),
+                 globals_passed=DefaultFromCfg('DECODER_DEFAULT_GLOBALS_PASSED'),
+                 vae_passed=DefaultFromCfg('NET_ARCH["vae"]'),
                  **MLP_kwargs) :
         """
         k_latent   ... the number of latent space vectors (can be zero, then h should be None in forward)
@@ -31,6 +32,8 @@ class NetworkDecoder(nn.Module) :
         MLP_kwargs ... to specify the multi-layer perceptron used here
         """
     #{{{
+        exec(SetDefaults(locals()))
+
         super().__init__()
 
         self.mlp = NetworkMLP(k_latent + r_passed

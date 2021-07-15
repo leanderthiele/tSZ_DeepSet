@@ -4,6 +4,7 @@ from collections import OrderedDict
 import torch
 import torch.nn as nn
 
+from default_from_cfg import DefaultFromCfg, SetDefaults
 import cfg
 
 
@@ -13,13 +14,15 @@ class _MLPLayer(nn.Sequential) :
     """
 
     def __init__(self, Nin, Nout, input_is_hidden,
-                       bias=True, layernorm=cfg.LAYERNORM,
-                       activation=True, dropout=cfg.DROPOUT,
-                       bias_init=cfg.MLP_DEFAULT_BIAS_INIT) :
+                       bias=True, layernorm=DefaultFromCfg('LAYERNORM'),
+                       activation=True, dropout=DefaultFromCfg('Dropout'),
+                       bias_init=DefaultFromCfg('MLP_DEFAULT_BIAS_INIT')) :
         """
         set dropout to None if not desired
         """
     #{{{ 
+        exec(SetDefaults(locals()))
+
         # NOTE apparently the ordering here is not that well explored, but I found at least
         #      one source that says a Google network has dropout after layer normalization
         # NOTE the names of the parameters in the OrderedDict are important as we use them to figure
@@ -47,8 +50,8 @@ class NetworkMLP(nn.Sequential) :
     """
 
     def __init__(self, Nin, Nout,
-                       MLP_Nlayers=cfg.MLP_DEFAULT_NLAYERS,
-                       MLP_Nhidden=cfg.MLP_DEFAULT_NHIDDEN,
+                       MLP_Nlayers=DefaultFromCfg('MLP_DEFAULT_NLAYERS'),
+                       MLP_Nhidden=DefaultFromCfg('MLP_DEFAULT_NHIDDEN'),
                        layer_kwargs_dict=dict(),
                        **layer_kwargs) :
         """
@@ -65,6 +68,8 @@ class NetworkMLP(nn.Sequential) :
                               in layer_kwargs_dict
         """
     #{{{
+        exec(SetDefaults(locals()))
+
         super().__init__(*[_MLPLayer(Nin if ii==0 else MLP_Nhidden,
                                      Nout if ii==MLP_Nlayers else MLP_Nhidden,
                                      ii != 0, # = input is hidden

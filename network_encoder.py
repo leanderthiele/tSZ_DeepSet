@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 
 from network_layer import NetworkLayer
+from default_from_cfg import DefaultFromCfg, SetDefaults
 import cfg
 
 
@@ -12,10 +13,10 @@ class NetworkEncoder(nn.Module) :
     """
 
     def __init__(self, k_latent,
-                       Nlayers=cfg.ENCODER_DEFAULT_NLAYERS,
-                       Nhidden=cfg.ENCODER_DEFAULT_NHIDDEN,
-                       basis_max_layer=cfg.ENCODER_DEFAULT_BASIS_MAXLAYER,
-                       globals_max_layer=cfg.ENCODER_DEFAULT_GLOBALS_MAXLAYER,
+                       Nlayers=DefaultFromCfg('ENCODER_DEFAULT_NLAYERS'),
+                       Nhidden=DefaultFromCfg('ENCODER_DEFAULT_NHIDDEN'),
+                       basis_max_layer=DefaultFromCfg('ENCODER_DEFAULT_BASIS_MAXLAYER'),
+                       globals_max_layer=DefaultFromCfg('ENCODER_DEFAULT_GLOBALS_MAXLAYER'),
                        MLP_kwargs_dict=dict(),
                        **MLP_kwargs) :
         """
@@ -35,6 +36,8 @@ class NetworkEncoder(nn.Module) :
                             in MLP_kwargs_dict
         """
     #{{{
+        exec(SetDefaults(locals()))
+
         assert isinstance(Nhidden, int) or isinstance(Nhidden, dict)
 
         super().__init__()
