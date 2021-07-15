@@ -22,7 +22,7 @@ model.load_state_dict(checkpoint, strict=True)
 
 model.eval()
 
-loader = DataLoader(mode=DataModes.TRAINING)
+loader = DataLoader(mode=DataModes.ALL)
 
 for t, data in enumerate(loader) :
 
