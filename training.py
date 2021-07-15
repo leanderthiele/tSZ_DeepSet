@@ -13,9 +13,12 @@ from data_modes import DataModes
 from training_loss import TrainingLoss
 from data_batch import DataBatch
 from init_proc import InitProc
+from archive_cfg import ArchiveCfg
 import cfg
 
 InitProc(0)
+
+ArchiveCfg()
 
 if cfg.mpi_env_type is MPIEnvTypes.NOGPU :
     torch.set_num_threads(5)

@@ -148,7 +148,7 @@ class DataBatch :
     #{{{
         if cfg.device_idx is not None :
 
-            for k, v in self.__dict__.items() :
+            for k, v in vars(self).items() :
                 if k.startswith('__') :
                     # make sure we don't do anything to any internals
                     continue
