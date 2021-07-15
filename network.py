@@ -57,6 +57,9 @@ class Network(nn.Module) :
             if cfg.NET_ARCH['deformer'] :
                 self.deformer = NetworkDeformer()
 
+        if cfg.NET_ARCH['deformer'] :
+            assert cfg.NET_ARCH['batt12']
+
         if cfg.NET_ARCH['decoder'] :
             # register degree of freedom to rescale the network output
             self.register_parameter('scaling', nn.Parameter(torch.tensor(1.0, dtype=torch.float32)))

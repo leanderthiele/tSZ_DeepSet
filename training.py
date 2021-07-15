@@ -26,6 +26,17 @@ if cfg.mpi_env_type is MPIEnvTypes.NOGPU :
 
 model = Network().to_device()
 
+if cfg.NET_ID is not None :
+    checkpoint = torch.load(os.path.join(cfg.RESULTS_PATH, 'model_%s.pt'%cfg.NET_ID))
+    model.load_state_dict(checkpoint, strict=False)
+
+for n, p in model.named_parameters() :
+    if any(n.startswith(s) for s in cfg.NET_FREEZE) :
+        print('Freezing %s'%n)
+        p.requires_grad = False
+    else :
+        p.requires_grad = True
+
 batt12 = NetworkBatt12().to_device() # use this to compute the reference loss
 batt12.eval()
 
@@ -36,7 +47,7 @@ batt12.eval()
 wd_params = list()
 no_wd_params = list()
 for n, p in model.named_parameters() :
-    if 'linear' in n and 'weight' in n :
+    if 'linear' in n and 'weight' in n and p.requires_grad :
         wd_params.append(p)
     else :
         no_wd_params.append(p)

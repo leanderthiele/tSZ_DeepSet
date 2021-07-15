@@ -47,6 +47,9 @@ NET_ARCH = dict(origin=True,
                 decoder=True,
                 vae=True)
 
+# can list parts of the network architecture that should be frozen
+NET_FREEZE = ['origin', 'batt12', ]
+
 # can provide a pre-trained network here
 NET_ID = None
 
