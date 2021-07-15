@@ -53,7 +53,7 @@ class DataItem :
                 self.TNG_radii = np.linalg.norm(self.TNG_coords, axis=-1, keepdims=True)
 
         if load_TNG_residuals :
-            self.TNG_residuals = self__get_TNG_residuals()
+            self.TNG_residuals = self.__get_TNG_residuals()
     #}}}
 
 
