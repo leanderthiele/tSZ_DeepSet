@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
 
+import cfg
+
 
 class TrainingLoss :
     """
@@ -25,7 +27,9 @@ class TrainingLoss :
         l = [self.mse(x[ii], y[ii]) * (w[ii] if w is not None else 1) \
              for ii in range(len(x))]
         
-        return (sum(l) + KLD.sum() if KLD is not None else 0) / len(l), \
+        # TODO we may want to introduce some relative scaling here,
+        #      perhaps with the loss w.r.t. B12
+        return (sum(l) + cfg.KLD_SCALING * KLD.sum() if KLD is not None else 0) / len(l), \
                [_l.item() for _l in l], \
                [_kld.item() for _kld in KLD] if KLD is not None else None
     #}}}

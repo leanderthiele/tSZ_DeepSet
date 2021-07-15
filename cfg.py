@@ -160,6 +160,9 @@ VAE_NLAYERS = 4
 # number of hidden features in VAE MLP
 VAE_NHIDDEN = 128
 
+# scaling of the KL divergence loss
+KLD_SCALING = 1e-5
+
 # how many layers we have in the origin encoder (other settings equal to the usual encoder
 #    at least for now)
 ORIGIN_DEFAULT_NLAYERS = 3
