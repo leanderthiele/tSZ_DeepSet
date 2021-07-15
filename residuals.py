@@ -35,11 +35,9 @@ for t, data in enumerate(loader) :
     p_npy = prediction.cpu().detach().numpy().squeeze()
     t_npy = data.TNG_Pth.cpu().detach().numpy().squeeze()
 
-    assert len(r_npy) == cfg.DATALOADER_ARGS['batch_size']
-    assert len(r_npy) == len(p_npy)
-    assert len(r_npy) == len(t_npy)
+    print(r_npy.shape)
 
-    for ii in range(cfg.DATALOADER_ARGS['batch_size']) :
+    for ii in range(len(r_npy)) :
 
         np.savez(os.path.join('/scratch/gpfs/lthiele/tSZ_DeepSet_pca', '%d.npz'%data.idx[ii]),
                  r=r_npy[ii], prediction=p_npy[ii], target=t_npy[ii])
