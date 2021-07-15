@@ -143,7 +143,7 @@ ENCODER_DEFAULT_GLOBALS_MAXLAYER = 0
 DECODER_DEFAULT_R_PASSED = True
 
 # whether we pass the globals to the decoder
-DECODER_DEFAULT_GLOBALS_PASSED = False
+DECODER_DEFAULT_GLOBALS_PASSED = True
 
 # whether we pass the basis to the decoder
 DECODER_DEFAULT_BASIS_PASSED = False
