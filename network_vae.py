@@ -46,7 +46,7 @@ class NetworkVAE(nn.Module) :
         logvar = h[:, self.Nlatent:]
 
         # compute the latent space variables
-        z = mu + torch.exp(0.5*logvar) * torch.randn(x.shape[0], self.Nlatent)
+        z = mu + torch.exp(0.5*logvar) * torch.randn(x.shape[0], self.Nlatent, device=x.device)
 
         # compute negative KL divergence
         KLD = -0.5 * torch.sum(1 + logvar - mu.square() - logvar.exp(), dim=1) 

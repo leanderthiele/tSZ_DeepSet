@@ -155,7 +155,7 @@ for epoch in range(cfg.EPOCHS) :
             guess = batt12(data.M200c, data.TNG_radii, R200c=data.R200c if not cfg.NORMALIZE_COORDS else None)
             prediction, KLD = model(data)
 
-            _, loss_list, KLD_list = loss_fn(prediction, data.TNG_Pth, w=None)
+            _, loss_list, KLD_list = loss_fn(prediction, data.TNG_Pth, KLD, w=None)
             _, loss_list_guess, _ = loss_fn(guess, data.TNG_Pth, w=None)
 
         this_validation_loss_arr.extend(loss_list)
