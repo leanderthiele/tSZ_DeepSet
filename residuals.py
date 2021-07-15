@@ -7,6 +7,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
+from init_proc import InitProc
 from network import Network
 from network_batt12 import NetworkBatt12
 from data_loader import DataLoader
@@ -41,4 +42,4 @@ for t, data in enumerate(loader) :
     for ii in range(cfg.DATALOADER_ARGS['batch_size']) :
 
         np.savez(os.path.join('/scratch/gpfs/lthiele/tSZ_DeepSet_pca', '%d.npz'%data.idx[ii]),
-                 r=r[ii], prediction=prediction[ii], target=target[ii])
+                 r=r_npy[ii], prediction=p_npy[ii], target=t_npy[ii])
