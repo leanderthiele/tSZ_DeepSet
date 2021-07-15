@@ -55,6 +55,11 @@ NET_ID = None
 SAMPLE_FRACTIONS = dict(validation=0.2,
                         testing=0.1)
 
+# binning of the pressure residuals with respect to a simple network
+BINNING_RMIN = 0.0
+BINNING_RMAX = 2.5
+BINNING_NBINS = 32
+
 # seed that we use whenever we need something to be consistent between runs
 CONSISTENT_SEED = 137
 
@@ -243,6 +248,7 @@ _OMEGA_M = 0.3089
 #   coords     [DM & TNG]
 #   masses     [TNG only]
 #   Pth        [TNG only]
+#   residuals  [TNG only]
 #   velocities [DM only]
 _STORAGE_FILES = dict(DM='/scratch/gpfs/lthiele/tSZ_DeepSet_halos/rockstar/DM_%d_%s.bin',
                       TNG='/scratch/gpfs/lthiele/tSZ_DeepSet_halos/rockstar/TNG_%d_%s.bin')

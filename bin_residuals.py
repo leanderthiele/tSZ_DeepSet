@@ -1,35 +1,33 @@
-PLOT = False
-RECOMPUTE = False
+RECOMPUTE = True
 
 import os.path
 from glob import glob
 
 import numpy as np
 
-from matplotlib import pyplot as plt
-
-NBINS = 20
+from data_modes import DataModes
+import cfg
 
 ROOT = '/scratch/gpfs/lthiele/tSZ_DeepSet_pca'
 
-FNAMES = glob(os.path.join(ROOT, '*.npz'))
+halo_catalog = dict(np.load(cfg.HALO_CATALOG))
 
-print(len(FNAMES))
-
-RBINS = np.linspace(0, 1.5, num=NBINS+1)
+RBINS = np.linspace(cfg.BINNING_RMIN, cfg.BINNING_RMAX, num=cfg.BINNING_NBINS+1)
 RCENTERS = 0.5*(RBINS[:-1] + RBINS[1:])
 
 def get_binned(x, indices) :
-    out = np.empty(NBINS)
-    for ii in range(NBINS) :
+    out = np.empty(cfg.BINNING_NBINS)
+    for ii in range(cfg.BINNING_NBINS) :
         out[ii] = np.mean(x[indices==ii])
     return out
 
 if RECOMPUTE or not os.path.isfile(os.path.join(ROOT, 'data.npy')) :
-    data = np.empty((len(FNAMES), NBINS))
 
-    for ff, fname in enumerate(FNAMES) :
+    data = np.empty((halo_catalog['Nobjects'], cfg.BINNING_NBINS))
 
+    for ff in range(halo_catalog['Nobjects']) :
+
+        fname = os.path.join(ROOT, '%d.npz'%ff)
         print(fname)
 
         with np.load(fname) as f :
@@ -42,26 +40,11 @@ if RECOMPUTE or not os.path.isfile(os.path.join(ROOT, 'data.npy')) :
         p = p[sorter]
         t = t[sorter]
 
-        if PLOT :
-            print(r.shape)
-            print(p.shape)
-            print(t.shape)
-            plt.semilogy(r, t, label='target')
-            plt.semilogy(r, p, label='prediction')
-            plt.legend()
-            plt.show()
-
         indices = np.digitize(r, RBINS) - 1
         assert np.min(indices) == 0
 
         p_binned = get_binned(p, indices)
         t_binned = get_binned(t, indices)
-
-        if PLOT :
-            plt.semilogy(p_binned, label='prediction')
-            plt.semilogy(t_binned, label='target')
-            plt.legend()
-            plt.show()
 
         data[ff, :] = (t_binned - p_binned) / p_binned
 
@@ -70,34 +53,15 @@ if RECOMPUTE or not os.path.isfile(os.path.join(ROOT, 'data.npy')) :
 else : # data file exists and RECOMPUTE is false
     data = np.load(os.path.join(ROOT, 'data.npy'))
 
+# slice the data corresponding to the training set
+training_data = data[DataModes.TRAINING.sample_indices(len(data))]
+
 # center
-data -= np.mean(data, axis=0, keepdims=True)
+data -= np.mean(data[training_data, axis=0, keepdims=True)
 
 # normalize
-data /= np.std(data, axis=0, keepdims=True)
+data /= np.std(training_data, axis=0, keepdims=True)
 
-# compute covariance matrix
-C = data.T @ data / (len(FNAMES)-1)
-assert np.allclose(C, C.T)
-
-# diagonalize
-w, v = np.linalg.eigh(C)
-
-# numpy returns eigenvalues in ascending order, descending is more convenient
-w = w[::-1]
-v = v.T[::-1, :]
-
-plt.semilogy(w, marker='o')
-plt.xlabel('index')
-plt.ylabel('principal component score')
-plt.show()
-
-for ii in range(4) :
-    plt.plot(RCENTERS, v[ii] / np.sign(v[ii,0]), label='%d (score=%.1f)'%(ii,w[ii]))
-plt.xlabel('$R/R_{\sf 200c}$')
-plt.ylabel('principal component')
-plt.legend()
-plt.show()
-
-plt.hist(data @ v[0,:], bins=40)
-plt.show()
+# now save to files
+for ii in range(len(data)) :
+    data[ii].tofile(cfg._STORAGE_FILES%(ii, 'residuals'))
