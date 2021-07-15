@@ -15,7 +15,7 @@ class _MLPLayer(nn.Sequential) :
 
     def __init__(self, Nin, Nout, input_is_hidden,
                        bias=True, layernorm=DefaultFromCfg('LAYERNORM'),
-                       activation=True, dropout=DefaultFromCfg('Dropout'),
+                       activation=True, dropout=DefaultFromCfg('DROPOUT'),
                        bias_init=DefaultFromCfg('MLP_DEFAULT_BIAS_INIT')) :
         """
         set dropout to None if not desired
