@@ -12,6 +12,7 @@ class DataModes(Enum) :
     TRAINING = auto()
     VALIDATION = auto()
     TESTING = auto()
+    ALL = auto()
 
 
     def __str__(self) :
@@ -25,11 +26,16 @@ class DataModes(Enum) :
             return 'validation'
         elif self is DataModes.TESTING :
             return 'testing'
+        elif self is DataModes.ALL :
+            return 'all'
     #}}}
 
 
     def Nsamples(self, Ntot) :
     #{{{
+        if self is DataModes.ALL :
+            return Ntot
+
         try :
             Nsamples = int(round(Ntot * cfg.SAMPLE_FRACTIONS[str(self)]))
         except KeyError : # we have hit the one that is not specified
@@ -45,6 +51,9 @@ class DataModes(Enum) :
         Ntot ... total numbers of samples, of which we choose a certain number
         """
     #{{{
+        if self is DataModes.ALL :
+            return np.arange(Ntot)
+
         Ntraining = DataModes.TRAINING.Nsamples(Ntot)
         Nvalidation = DataModes.VALIDATION.Nsamples(Ntot)
         Ntesting = DataModes.TESTING.Nsamples(Ntot)
