@@ -97,6 +97,15 @@ class DataBatch :
     #}}}
 
 
+    def __len__(self) :
+        """
+        Idiomatic way to get the batch size
+        """
+    #{{{
+        return len(self.idx)
+    #}}}
+
+
     def add_origin(self, origin, compute_TNG_radii=True) :
         """
         CAUTION this function modifies the instance in-place
