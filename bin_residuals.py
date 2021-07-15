@@ -1,4 +1,4 @@
-RECOMPUTE = True
+RECOMPUTE = False
 
 import os.path
 from glob import glob
@@ -57,11 +57,11 @@ else : # data file exists and RECOMPUTE is false
 training_data = data[DataModes.TRAINING.sample_indices(len(data))]
 
 # center
-data -= np.mean(data[training_data, axis=0, keepdims=True)
+data -= np.mean(training_data, axis=0, keepdims=True)
 
 # normalize
 data /= np.std(training_data, axis=0, keepdims=True)
 
 # now save to files
 for ii in range(len(data)) :
-    data[ii].astype(np.float32).tofile(cfg._STORAGE_FILES%(ii, 'residuals'))
+    data[ii].astype(np.float32).tofile(cfg._STORAGE_FILES['TNG']%(ii, 'residuals'))
