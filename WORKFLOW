@@ -2,29 +2,37 @@ This file lists the steps to be taken to prepare the data
 for training etc.
 
 
-1) run Rockstar on the simulation
+ 1) run Rockstar on the simulation
 
-2) run Rockstar/find_parents on the out_<snap>.list output file,
-   creating out_<snap>_wparents.list
+ 2) run Rockstar/find_parents on the out_<snap>.list output file,
+    creating out_<snap>_wparents.list
 
-3) fix the header in the out_<snap>_wparents.list output file
-   [there's a bug in find_parents.c]
+ 3) fix the header in the out_<snap>_wparents.list output file
+    [there's a bug in find_parents.c]
 
-4) convert the ascii out_<snap>_wparents.list to an hdf5 file that
-   is analogous in structure to the Arepo FOF group files
-   using ascii_to_hdf5.py
+ 4) convert the ascii out_<snap>_wparents.list to an hdf5 file that
+    is analogous in structure to the Arepo FOF group files
+    using ascii_to_hdf5.py
 
-5) run collect_particles_{DM, TNG} on the created hdf5 group file
-   and the existing particle files.
-   This creates binary files containing particle positions and some other
-   things.
+ 5) run collect_particles_{DM, TNG} on the created hdf5 group file
+    and the existing particle files.
+    This creates binary files containing particle positions and some other
+    things.
 
-6) run create_halo_catalog.py to generate the first version of the halo
-   catalog.
-   This catalog will not yet have the Nprt fields.
+ 6) run create_halo_catalog.py to generate the first version of the halo
+    catalog.
+    This catalog will not yet have the Nprt fields.
 
-7) run remove_TNG_outliers.py to remove particles with extremely high
-   pressures that would make training difficult for us.
+ 7) run remove_TNG_outliers.py to remove particles with extremely high
+    pressures that would make training difficult for us.
 
-8) run create_Nprt.py which will add the Nprt fields to the halo catalog.
-   [now we now how many TNG particles we have]
+ 8) run create_Nprt.py which will add the Nprt fields to the halo catalog.
+    [now we now how many TNG particles we have]
+
+ 9) train a simple network (modified B12 + origin shift)
+
+10) evaluate this network on the entire data set to find the residuals,
+    using residuals.py
+
+11) bin the residuals, using bin_residuals.py
+    Now we have the input for the VAE part of the larger architecture.
