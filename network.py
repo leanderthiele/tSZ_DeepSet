@@ -6,6 +6,7 @@ from network_decoder import NetworkDecoder
 from network_origin import NetworkOrigin
 from network_deformer import NetworkDeformer
 from network_batt12 import NetworkBatt12
+from network_vae import NetworkVAE
 from global_fields import GlobalFields
 from basis import Basis
 from data_batch import DataBatch
@@ -39,6 +40,11 @@ class Network(nn.Module) :
                                           layer_kwargs_dict=dict(last={'activation' : False,
                                                                        'dropout' : None,
                                                                        'bias_init': 'zeros_(%s)'}))
+
+        if cfg.NET_ARCH['vae'] :
+            assert cfg.NET_ARCH['decoder']
+            self.vae = NetworkVAE(MLP_Nlayers=cfg.VAE_NLAYERS, MLP_Nhidden=cfg.VAE_NHIDDEN,
+                                  layer_kwargs_dict=dict(last={'bias_init': 'zeros_(%s)'}))
 
         if cfg.NET_ARCH['encoder'] :
             assert cfg.NET_ARCH['decoder']
@@ -79,13 +85,19 @@ class Network(nn.Module) :
             # encode the DM field
             x = self.encoder(batch.DM_coords, v=batch.DM_vels, u=batch.u, basis=batch.basis)
 
+        if cfg.NET_ARCH['vae'] :
+            z, KLD = self.vae(batch.TNG_residuals)
+        else :
+            KLD = torch.zeros(len(batch))
+
         if cfg.NET_ARCH['decoder'] :
             # decode at the TNG particle positions
             x = self.decoder(batch.TNG_coords,
                              h=x if cfg.NET_ARCH['encoder'] else None,
                              r=batch.TNG_radii if self.decoder.r_passed else None,
                              u=batch.u if self.decoder.globals_passed else None,
-                             basis=batch.basis if self.decoder.basis_passed else None)
+                             basis=batch.basis if self.decoder.basis_passed else None,
+                             vae=z if cfg.NET_ARCH['vae'] else None)
 
         if cfg.NET_ARCH['batt12'] :
             if cfg.NET_ARCH['deformer'] :
@@ -101,11 +113,11 @@ class Network(nn.Module) :
                               R200c=batch.R200c if not cfg.NORMALIZE_COORDS else None)
 
         if cfg.NET_ARCH['decoder'] and not cfg.NET_ARCH['batt12'] :
-            return self.scaling * torch.sinh(x)
+            return self.scaling * torch.sinh(x), KLD
         elif cfg.NET_ARCH['decoder'] and cfg.NET_ARCH['batt12'] :
-            return self.__combine(x, b12)
+            return self.__combine(x, b12), KLD
         elif not cfg.NET_ARCH['decoder'] and cfg.NET_ARCH['batt12'] :
-            return b12
+            return b12, KLD
         else :
             raise RuntimeError('Should not happen!')
     #}}}

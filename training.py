@@ -55,11 +55,13 @@ scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, **cfg.ONE_CYCLE_LR_KW
 
 # store all the losses here
 training_loss_arr = []
+training_KLD_arr = []
 training_guess_loss_arr = []
 training_logM_arr = []
 training_idx_arr = []
 
 validation_loss_arr = []
+validation_KLD_arr = []
 validation_guess_loss_arr = []
 validation_logM_arr = []
 validation_idx_arr = []
@@ -70,6 +72,7 @@ for epoch in range(cfg.EPOCHS) :
     print('epoch %d'%epoch)
 
     this_training_loss_arr = []
+    this_training_KLD_arr = []
     this_training_guess_loss_arr = []
     this_training_logM_arr = []
     this_training_idx_arr = []
@@ -84,9 +87,9 @@ for epoch in range(cfg.EPOCHS) :
         with torch.no_grad() :
             guess = batt12(data.M200c, data.TNG_radii, R200c=data.R200c if not cfg.NORMALIZE_COORDS else None)
 
-        _, loss_list_guess = loss_fn(guess, data.TNG_Pth, w=None)
+        _, loss_list_guess, _ = loss_fn(guess, data.TNG_Pth, w=None)
 
-        prediction = model(data)
+        prediction, KLD = model(data)
 
         if cfg.mpi_env_type is MPIEnvTypes.NOGPU :
             # FIXME diagnostics on head node
@@ -110,10 +113,11 @@ for epoch in range(cfg.EPOCHS) :
                 np.savez('test_%s_%d_%d.npz'%(cfg.ID, epoch, t),
                          r=r_npy, g=g_npy, p=p_npy, t=t_npy)
 
-        loss, loss_list = loss_fn(prediction, data.TNG_Pth, w=None)
+        loss, loss_list, KLD_list = loss_fn(prediction, data.TNG_Pth, KLD, w=None)
 
-        this_training_loss_arr.extend([l.item() for l in loss_list])
-        this_training_guess_loss_arr.extend([l.item() for l in loss_list_guess])
+        this_training_loss_arr.extend(loss_list)
+        this_training_KLD_arr.extend(KLD_list)
+        this_training_guess_loss_arr.extend(loss_list_guess)
         this_training_logM_arr.extend(np.log(data.M200c.cpu().detach().numpy()))
         this_training_idx_arr.extend(data.idx)
 
@@ -129,6 +133,7 @@ for epoch in range(cfg.EPOCHS) :
 
     # put the losses for this epoch in the global arrays
     training_loss_arr.append(this_training_loss_arr)
+    training_KLD_arr.append(this_training_KLD_arr)
     training_guess_loss_arr.append(this_training_guess_loss_arr)
     training_logM_arr.append(this_training_logM_arr)
     training_idx_arr.append(this_training_idx_arr)
@@ -137,6 +142,7 @@ for epoch in range(cfg.EPOCHS) :
     model.eval()
     
     this_validation_loss_arr = []
+    this_validation_KLD_arr = []
     this_validation_guess_loss_arr = []
     this_validation_logM_arr = []
     this_validation_idx_arr = []
@@ -147,18 +153,20 @@ for epoch in range(cfg.EPOCHS) :
 
         with torch.no_grad() :
             guess = batt12(data.M200c, data.TNG_radii, R200c=data.R200c if not cfg.NORMALIZE_COORDS else None)
-            prediction = model(data)
+            prediction, KLD = model(data)
 
-            _, loss_list = loss_fn(prediction, data.TNG_Pth, w=None)
-            _, loss_list_guess = loss_fn(guess, data.TNG_Pth, w=None)
+            _, loss_list, KLD_list = loss_fn(prediction, data.TNG_Pth, w=None)
+            _, loss_list_guess, _ = loss_fn(guess, data.TNG_Pth, w=None)
 
-        this_validation_loss_arr.extend([l.item() for l in loss_list])
-        this_validation_guess_loss_arr.extend([l.item() for l in loss_list_guess])
+        this_validation_loss_arr.extend(loss_list)
+        this_validation_KLD_arr.extend(KLD_list)
+        this_validation_guess_loss_arr.extend(loss_list_guess)
         this_validation_logM_arr.extend(np.log(data.M200c.cpu().detach().numpy()))
         this_validation_idx_arr.extend(data.idx)
 
     # put the validation losses in the global arrays
     validation_loss_arr.append(this_validation_loss_arr)
+    validation_KLD_arr.append(this_validation_KLD_arr)
     validation_guess_loss_arr.append(this_validation_guess_loss_arr)
     validation_logM_arr.append(this_validation_logM_arr)
     validation_idx_arr.append(this_validation_idx_arr)
@@ -167,10 +175,12 @@ for epoch in range(cfg.EPOCHS) :
     # save all the losses so far to file 
     np.savez(os.path.join(cfg.RESULTS_PATH, 'loss_%s.npz'%cfg.ID),
              training=np.array(training_loss_arr),
+             training_KLD=np.array(training_KLD_arr),
              training_guess=np.array(training_guess_loss_arr),
              training_logM=np.array(training_logM_arr),
              training_idx=np.array(training_idx_arr, dtype=int),
              validation=np.array(validation_loss_arr),
+             validation_KLD=np.array(validation_KLD_arr),
              validation_guess=np.array(validation_guess_loss_arr),
              validation_logM=np.array(validation_logM_arr),
              validation_idx=np.array(validation_idx_arr, dtype=int))

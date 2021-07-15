@@ -44,7 +44,8 @@ NET_ARCH = dict(origin=True,
                 batt12=True,
                 deformer=True,
                 encoder=True,
-                decoder=True)
+                decoder=True,
+                vae=True)
 
 # can provide a pre-trained network here
 NET_ID = None
@@ -146,6 +147,18 @@ DECODER_DEFAULT_GLOBALS_PASSED = False
 
 # whether we pass the basis to the decoder
 DECODER_DEFAULT_BASIS_PASSED = False
+
+# number of latent variables in the VAE (x2 for variance & mean)
+VAE_NLATENT = 1
+
+# whether the latent variables in the VAE are to be computed or randomly drawn
+VAE_RAND_LATENT = False
+
+# number of layers in VAE MLP
+VAE_NLAYERS = 4
+
+# number of hidden features in VAE MLP
+VAE_NHIDDEN = 128
 
 # how many layers we have in the origin encoder (other settings equal to the usual encoder
 #    at least for now)

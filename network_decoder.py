@@ -19,6 +19,7 @@ class NetworkDecoder(nn.Module) :
                  r_passed=cfg.DECODER_DEFAULT_R_PASSED,
                  basis_passed=cfg.DECODER_DEFAULT_BASIS_PASSED,
                  globals_passed=cfg.DECODER_DEFAULT_GLOBALS_PASSED,
+                 vae_passed=cfg.NET_ARCH['vae'],
                  **MLP_kwargs) :
         """
         k_latent   ... the number of latent space vectors (can be zero, then h should be None in forward)
@@ -26,6 +27,7 @@ class NetworkDecoder(nn.Module) :
         r_passed   ... whether the TNG radial coordinates will be passed
         basis_passed   ... whether the basis vectors will be passed
         globals_passed ... whether the globals will be passed
+        vae_passed ... whether latent space from VAE will be passed
         MLP_kwargs ... to specify the multi-layer perceptron used here
         """
     #{{{
@@ -33,16 +35,18 @@ class NetworkDecoder(nn.Module) :
 
         self.mlp = NetworkMLP(k_latent + r_passed
                               + globals_passed * len(GlobalFields)
-                              + basis_passed * len(Basis),
+                              + basis_passed * len(Basis)
+                              + vae_passed * cfg.VAE_NLATENT,
                               k_out, **MLP_kwargs)
 
         self.r_passed = r_passed
         self.globals_passed = globals_passed
         self.basis_passed = basis_passed
+        self.vae_passed = vae_passed
     #}}}
 
 
-    def forward(self, x, h=None, r=None, u=None, basis=None) :
+    def forward(self, x, h=None, r=None, u=None, basis=None, vae=None) :
         """
         x ... the positions where to evaluate, of shape [batch, Nvects, 3]
               or a list of length batch and shapes [1, Nvectsi, 3]
@@ -52,6 +56,8 @@ class NetworkDecoder(nn.Module) :
         u ... the global vector, of shape [batch, Nglobals]
         basis ... the basis vectors to use -- either None if no basis is provided
                   or of shape [batch, Nbasis, 3]
+        vae ... the latent representation in the vae -- either None if no VAE is used
+                or of shape [batch, Nlatent]
         """
     #{{{
         if isinstance(x, list) :
@@ -59,7 +65,8 @@ class NetworkDecoder(nn.Module) :
                          xi,
                          r=r[ii] if r is not None else r,
                          u=u[ii, ...].unsqueeze(0) if u is not None else u,
-                         basis=basis[ii, ...].unsqueeze(0) if basis is not None else basis)
+                         basis=basis[ii, ...].unsqueeze(0) if basis is not None else basis,
+                         vae=vae[ii, ...].unsqueeze(0) if vae is not None else vae)
                     for ii, xi in enumerate(x)]
 
         scalars = None
@@ -81,7 +88,7 @@ class NetworkDecoder(nn.Module) :
             assert self.basis_passed and len(Basis) != 0
             basis_projections = torch.einsum('bid,bnd->bin', x, basis)
             scalars = torch.cat((scalars, basis_projections), dim=-1) if scalars is not None \
-                          else basis_projections
+                      else basis_projections
         else :
             assert not self.basis_passed or len(Basis) == 0
 
@@ -94,6 +101,16 @@ class NetworkDecoder(nn.Module) :
                       else u_expanded
         else :
             assert not self.globals_passed or len(GlobalFields) == 0
+
+        # concatenate with the VAE latent variables if requested
+        if vae is not None :
+            assert self.vae_passed
+            vae_expanded = vae.unsqueeze(1).expand(-1, x.shape[1], -1)
+            scalars = torch.cat((vae_expanded, scalars), dim=-1) \
+                      if scalars is not None \
+                      else vae_expanded
+        else :
+            assert not self.vae_passed
 
         # pass through the MLP, transform scalars -> scalars
         return self.mlp(scalars)
