@@ -32,7 +32,6 @@ if cfg.NET_ID is not None :
 
 for n, p in model.named_parameters() :
     if any(n.startswith(s) for s in cfg.NET_FREEZE) :
-        print('Freezing %s'%n)
         p.requires_grad = False
     else :
         p.requires_grad = True
