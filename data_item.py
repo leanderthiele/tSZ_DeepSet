@@ -8,22 +8,24 @@ class DataItem :
     represents one data item, i.e. a collection of network input and target
 
     Upon construction, the instance has the fields:
-        halo         ... the Halo instance this data item is associated with
-        DM_coords    ... the coordinates of the dark matter particles
-        TNG_coords   ... the coordinates of the gas particles
-        TNG_Pth      ... the electron pressure at the position of those gas particles
-        TNG_radii    ... the radial coordinates of the gas particles (with the last dimension length 1)
+        halo          ... the Halo instance this data item is associated with
+        DM_coords     ... the coordinates of the dark matter particles
+        TNG_coords    ... the coordinates of the gas particles
+        TNG_Pth       ... the electron pressure at the position of those gas particles
+        TNG_radii     ... the radial coordinates of the gas particles (with the last dimension length 1)
+        TNG_residuals ... the Pth residuals with respect to a simple model, binned and normalized
     """
 
     def __init__(self, halo, mode,
                        load_DM=True, load_TNG=True,
-                       compute_TNG_radii=True) :
+                       compute_TNG_radii=True, load_TNG_residuals=True) :
         """
         halo     ... a Halo instance for the current halo
         mode     ... the mode this item was loaded in
         load_DM  ... whether to load the dark matter particles
         load_TNG ... whether to load the TNG particles
         compute_TNG_radii ... whether the radial positions of the TNG particles are to be computed
+        load_TNG_residuals ... whether the TNG residuals are to be loaded
         
         (we do not want to open the halo catalog file for each construction,
          also maybe the caller wants to modify it in some way)
@@ -35,6 +37,7 @@ class DataItem :
         self.has_DM = load_DM
         self.has_TNG = load_TNG
         self.has_TNG_radii = compute_TNG_radii
+        self.has_TNG_residuals = load_TNG_residuals
 
         if load_DM :
             self.DM_coords, self.DM_vels = self.__get_DM()
@@ -95,7 +98,11 @@ class DataItem :
         coords = np.fromfile(self.halo.storage_TNG['coords'], dtype=np.float32)
         coords = coords.reshape((len(coords)//3, 3))
         Pth = np.fromfile(self.halo.storage_TNG['Pth'], dtype=np.float32)
-        residuals = np.fromfile(self.halo.storage_TNG['residuals'], dtype=np.float32)
+
+        if self.has_TNG_residuals :
+            residuals = np.fromfile(self.halo.storage_TNG['residuals'], dtype=np.float32)
+        else :
+            residuals = None
 
         # remove the origin
         coords -= self.halo.pos

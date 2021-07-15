@@ -37,6 +37,8 @@ class DataBatch :
         assert all(self.has_TNG == d.has_TNG for d in data_items)
         self.has_TNG_radii = data_items[0].has_TNG_radii
         assert all(self.has_TNG_radii == d.has_TNG_radii for d in data_items)
+        self.has_TNG_residuals = data_items[0].has_TNG_residuals
+        assert all(self.has_TNG_residuals == d.has_TNG_residuals for d in data_items)
         self.mode = data_items[0].mode
         assert all(self.mode is d.mode for d in data_items)
 
@@ -57,7 +59,8 @@ class DataBatch :
         if self.has_TNG :
             self.TNG_coords = batch('TNG_coords')
             self.TNG_Pth = batch('TNG_Pth')
-            self.TNG_residuals = batch('TNG_residuals')
+            if self.has_TNG_residuals :
+                self.TNG_residuals = batch('TNG_residuals')
             if self.has_TNG_radii :
                 self.TNG_radii = batch('TNG_radii')
 
