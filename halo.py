@@ -32,7 +32,8 @@ class Halo :
         res_str = '%d_'%cfg.TNG_RESOLUTION if cfg.TNG_RESOLUTION != 256 else ''
 
         self.storage_TNG = dict(coords=cfg._STORAGE_FILES['TNG']%(halo_index, 'box_%scoords'%res_str),
-                                Pth=cfg._STORAGE_FILES['TNG']%(halo_index, 'box_%sPth'%res_str))
+                                Pth=cfg._STORAGE_FILES['TNG']%(halo_index, 'box_%sPth'%res_str),
+                                residuals=cfg._STORAGE_FILES['TNG']%(halo_index, 'residuals'))
 
         self.idx = halo_index
     #}}}

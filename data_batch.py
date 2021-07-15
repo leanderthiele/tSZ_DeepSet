@@ -57,6 +57,7 @@ class DataBatch :
         if self.has_TNG :
             self.TNG_coords = batch('TNG_coords')
             self.TNG_Pth = batch('TNG_Pth')
+            self.TNG_residuals = batch('TNG_residuals')
             if self.has_TNG_radii :
                 self.TNG_radii = batch('TNG_radii')
 

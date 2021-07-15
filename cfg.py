@@ -246,7 +246,6 @@ _OMEGA_M = 0.3089
 # '%s' is placeholder for some string, which can be
 #   globals    [DM & TNG]
 #   coords     [DM & TNG]
-#   masses     [TNG only]
 #   Pth        [TNG only]
 #   residuals  [TNG only]
 #   velocities [DM only]

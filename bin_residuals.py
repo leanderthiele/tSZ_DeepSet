@@ -64,4 +64,4 @@ data /= np.std(training_data, axis=0, keepdims=True)
 
 # now save to files
 for ii in range(len(data)) :
-    data[ii].tofile(cfg._STORAGE_FILES%(ii, 'residuals'))
+    data[ii].astype(np.float32).tofile(cfg._STORAGE_FILES%(ii, 'residuals'))

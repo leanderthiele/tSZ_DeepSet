@@ -42,7 +42,7 @@ class DataItem :
                    or (self.DM_vels is not None and cfg.USE_VELOCITIES)
 
         if load_TNG :
-            self.TNG_coords, self.TNG_Pth = self.__get_TNG()
+            self.TNG_coords, self.TNG_Pth, self.TNG_residuals = self.__get_TNG()
 
             if compute_TNG_radii :
                 # compute the scalar distances if coordinates are already in the correct frame
@@ -95,6 +95,7 @@ class DataItem :
         coords = np.fromfile(self.halo.storage_TNG['coords'], dtype=np.float32)
         coords = coords.reshape((len(coords)//3, 3))
         Pth = np.fromfile(self.halo.storage_TNG['Pth'], dtype=np.float32)
+        residuals = np.fromfile(self.halo.storage_TNG['residuals'], dtype=np.float32)
 
         # remove the origin
         coords -= self.halo.pos
@@ -109,7 +110,7 @@ class DataItem :
         # normalize the thermal pressure
         Pth /= self.halo.P200c
 
-        return coords, Pth[:, None]
+        return coords, Pth[:, None], residuals
     #}}}
 
 
