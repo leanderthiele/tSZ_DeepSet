@@ -20,5 +20,5 @@ class DefaultFromCfg :
 
     def __call__(self) :
     #{{{ 
-        return eval('cfg.%s'%name)
+        return eval('cfg.%s'%self.name)
     #}}}
