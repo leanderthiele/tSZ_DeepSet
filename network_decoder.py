@@ -4,7 +4,7 @@ import torch.nn as nn
 from network_mlp import NetworkMLP
 from global_fields import GlobalFields
 from basis import Basis
-from default_from_cfg import DefaultFromCfg, SetDefaults
+from default_from_cfg import DefaultFromCfg
 import cfg
 
 
@@ -32,7 +32,14 @@ class NetworkDecoder(nn.Module) :
         MLP_kwargs ... to specify the multi-layer perceptron used here
         """
     #{{{
-        exec(SetDefaults(locals()))
+        if isinstance(r_passed, DefaultFromCfg) :
+            r_passed = r_passed()
+        if isinstance(basis_passed, DefaultFromCfg) :
+            basis_passed = basis_passed()
+        if isinstance(globals_passed, DefaultFromCfg) :
+            globals_passed = globals_passed()
+        if isinstance(vae_passed, DefaultFromCfg) :
+            vae_passed = vae_passed()
 
         super().__init__()
 

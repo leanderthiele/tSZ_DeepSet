@@ -4,7 +4,7 @@ from collections import OrderedDict
 import torch
 import torch.nn as nn
 
-from default_from_cfg import DefaultFromCfg, SetDefaults
+from default_from_cfg import DefaultFromCfg
 import cfg
 
 
@@ -21,7 +21,12 @@ class _MLPLayer(nn.Sequential) :
         set dropout to None if not desired
         """
     #{{{ 
-        exec(SetDefaults(locals()))
+        if isinstance(layernorm, DefaultFromCfg) :
+            layernorm = layernorm()
+        if isinstance(dropout, DefaultFromCfg) :
+            dropout = dropout()
+        if isinstance(bias_init, DefaultFromCfg) :
+            bias_init = bias_init()
 
         # NOTE apparently the ordering here is not that well explored, but I found at least
         #      one source that says a Google network has dropout after layer normalization
@@ -68,7 +73,10 @@ class NetworkMLP(nn.Sequential) :
                               in layer_kwargs_dict
         """
     #{{{
-        exec(SetDefaults(locals()))
+        if isinstance(MLP_Nlayers, DefaultFromCfg) :
+            MLP_Nlayers = MLP_Nlayers()
+        if isinstance(MLP_Nhidden, DefaultFromCfg) :
+            MLP_Nhidden = MLP_Nhidden()
 
         super().__init__(*[_MLPLayer(Nin if ii==0 else MLP_Nhidden,
                                      Nout if ii==MLP_Nlayers else MLP_Nhidden,

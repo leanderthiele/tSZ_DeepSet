@@ -1,5 +1,5 @@
 from network_encoder import NetworkEncoder
-from default_from_cfg import DefaultFromCfg, SetDefaults
+from default_from_cfg import DefaultFromCfg
 import cfg
 
 
@@ -10,7 +10,8 @@ class NetworkOrigin(NetworkEncoder) :
 
     def __init__(self, Nlayers=DefaultFromCfg('ORIGIN_DEFAULT_NLAYERS')) :
     #{{{
-        exec(SetDefaults(locals()))
+        if isinstance(Nlayers, DefaultFromCfg) :
+            Nlayers = Nlayers()
 
         super().__init__(1, # predict exactly one vector
                          # do not have an activation function before the final output

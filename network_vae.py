@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 from network_mlp import NetworkMLP
-from default_from_cfg import DefaultFromCfg, SetDefaults
+from default_from_cfg import DefaultFromCfg
 import cfg
 
 class NetworkVAE(nn.Module) :
@@ -12,7 +12,10 @@ class NetworkVAE(nn.Module) :
                  rand_latent=DefaultFromCfg('VAE_RAND_LATENT'),
                  **MLP_kwargs) :
     #{{{
-        exec(SetDefaults(locals()))
+        if isinstance(Nlatent, DefaultFromCfg) :
+            Nlatent = Nlatent()
+        if isinstance(rand_latent, DefaultFromCfg) :
+            rand_latent = rand_latent()
 
         super().__init__()
 
