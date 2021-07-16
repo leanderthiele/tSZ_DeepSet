@@ -15,5 +15,9 @@ def ArchiveCfg() :
             if k.startswith('__') :
                 continue
 
+            # we want strings in the output to be quoted
+            if isinstance(v, str) :
+                v = '"%s"'%v
+
             f.write(f'{k} = {v}\n')
 #}}}
