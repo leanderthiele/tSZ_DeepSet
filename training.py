@@ -31,7 +31,7 @@ if cfg.NET_ID is not None :
     model.load_state_dict(checkpoint, strict=False)
 
 for n, p in model.named_parameters() :
-    if any(n.startswith(s) for s in cfg.NET_FREEZE) :
+    if cfg.NET_FREEZE is not None and any(n.startswith(s) for s in cfg.NET_FREEZE) :
         p.requires_grad = False
     else :
         p.requires_grad = True
