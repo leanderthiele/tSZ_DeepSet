@@ -48,6 +48,7 @@ NET_ARCH = dict(origin=True,
                 vae=True)
 
 # can list parts of the network architecture that should be frozen
+# set to None for no freezing
 NET_FREEZE = None
 
 # can provide a pre-trained network here
