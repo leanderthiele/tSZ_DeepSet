@@ -16,7 +16,7 @@ def ArchiveCfg() :
                 continue
 
             # do not print the internal variables
-            if k.toupper() != k :
+            if k.upper() != k :
                 continue
 
             # do not print the constant variables
