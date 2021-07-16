@@ -26,7 +26,7 @@ with np.load(os.path.join(cfg.RESULTS_PATH, 'loss_%s.npz'%ID)) as f :
     t = f['training'][epoch,:]
     tg = f['training_guess'][epoch,:]
     tkld = f['training_KLD'][epoch,:]
-    tkldmean = np.median(f['training_KLD'], axis=-1)
+    tkldmean = np.mean(f['training_KLD'], axis=-1)
     tlogm = f['training_logM'][epoch,:]
     tidx = f['training_idx'][epoch,:]
     tmean = np.median(f['training'], axis=-1)
@@ -40,7 +40,7 @@ with np.load(os.path.join(cfg.RESULTS_PATH, 'loss_%s.npz'%ID)) as f :
     vidx = f['validation_idx'][epoch,:]
     vmean = np.median(f['validation'], axis=-1)
     vgmean = np.median(f['validation_guess'], axis=-1)
-    vkldmean = np.median(f['validation_KLD'], axis=-1)
+    vkldmean = np.mean(f['validation_KLD'], axis=-1)
 
 # over all masses, log(M200_CM)
 vmin = 8.518
