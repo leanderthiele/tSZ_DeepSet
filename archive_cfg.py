@@ -15,6 +15,14 @@ def ArchiveCfg() :
             if k.startswith('__') :
                 continue
 
+            # do not print the internal variables
+            if k.toupper() != k :
+                continue
+
+            # do not print the constant variables
+            if k.startswith('_') :
+                continue
+
             # we want strings in the output to be quoted
             if isinstance(v, str) :
                 v = '"%s"'%v
