@@ -151,6 +151,12 @@ DECODER_DEFAULT_GLOBALS_PASSED = True
 # whether we pass the basis to the decoder
 DECODER_DEFAULT_BASIS_PASSED = False
 
+# how many layers to have in the decoder
+DECODER_DEFAULT_NLAYERS = 4
+
+# how many hidden features to have in the decoder
+DECODER_DEFAULT_NHIDDEN = 128
+
 # number of latent variables in the VAE (x2 for variance & mean)
 VAE_NLATENT = 1
 

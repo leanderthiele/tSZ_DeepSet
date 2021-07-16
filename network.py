@@ -33,6 +33,8 @@ class Network(nn.Module) :
                 k_latent = 0
 
             self.decoder = NetworkDecoder(k_latent, k_out=cfg.OUTPUT_NFEATURES,
+                                          MLP_Nlayers=cfg.DECODER_DEFAULT_NLAYERS,
+                                          MLP_Nhidden=cfg.DECODER_DEFAULT_NHIDDEN,
                                           # do not have an activation function before the final output
                                           # since we generally want to map to the entire real line
                                           # we also initialize the last bias to zero because our base model
