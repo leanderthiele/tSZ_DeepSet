@@ -12,18 +12,18 @@ ROOT = '/scratch/gpfs/lthiele/tSZ_DeepSet_pca'
 
 halo_catalog = dict(np.load(cfg.HALO_CATALOG))
 
-RBINS = np.linspace(cfg.BINNING_RMIN, cfg.BINNING_RMAX, num=cfg.BINNING_NBINS+1)
+RBINS = np.linspace(cfg.RESIDUALS_RMIN, cfg.RESIDUALS_RMAX, num=cfg.RESIDUALS_NBINS+1)
 RCENTERS = 0.5*(RBINS[:-1] + RBINS[1:])
 
 def get_binned(x, indices) :
-    out = np.empty(cfg.BINNING_NBINS)
-    for ii in range(cfg.BINNING_NBINS) :
+    out = np.empty(cfg.RESIDUALS_NBINS)
+    for ii in range(cfg.RESIDUALS_NBINS) :
         out[ii] = np.mean(x[indices==ii])
     return out
 
 if RECOMPUTE or not os.path.isfile(os.path.join(ROOT, 'data.npy')) :
 
-    data = np.empty((halo_catalog['Nobjects'], cfg.BINNING_NBINS))
+    data = np.empty((halo_catalog['Nobjects'], cfg.RESIDUALS_NBINS))
 
     for ff in range(halo_catalog['Nobjects']) :
 

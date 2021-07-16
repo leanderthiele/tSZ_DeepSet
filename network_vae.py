@@ -20,7 +20,7 @@ class NetworkVAE(nn.Module) :
         super().__init__()
 
         if not rand_latent :
-            self.mlp = NetworkMLP(cfg.BINNING_NBINS, 2*Nlatent, **MLP_kwargs)
+            self.mlp = NetworkMLP(cfg.RESIDUALS_NBINS, 2*Nlatent, **MLP_kwargs)
 
         self.Nlatent = Nlatent
         self.rand_latent = rand_latent

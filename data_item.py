@@ -138,16 +138,17 @@ class DataItem :
     #}}}
 
 
-    def sample_particles(self, indices) :
+    def sample_particles(self, indices, TNG_residuals_noise_rng=None) :
         """
         returns a copy of this data item with only a subset of the particles randomly sampled.
         (this instance is not modified!)
         indices ... a dict with keys 'DM', 'TNG', each an array of integers corresponding to the particle
                     indices
+        Also gives the option to add noise to the TNG residuals, by passing a numpy rng.
         """
     #{{{
         # construct a new DataItem without any data
-        out = DataItem(self.halo, self.mode, load_DM=False, load_TNG=False)
+        out = DataItem(self.halo, self.mode, load_DM=False, load_TNG=False, load_TNG_residuals=False)
 
         # copy our fields
         out.has_DM = self.has_DM
@@ -168,6 +169,12 @@ class DataItem :
 
             if self.has_TNG_radii :
                 out.TNG_radii = self.TNG_radii[indices['TNG']]
+
+        if self.has_TNG_residuals :
+            out.TNG_residuals = self.TNG_residuals
+            if TNG_residuals_noise_rng is not None and cfg.RESIDUALS_NOISE is not None :
+                out.TNG_residuals += TNG_residuals_noise_rng.normal(scale=cfg.RESIDUALS_NOISE,
+                                                                    size=cfg.RESIDUALS_NBINS)
 
         # give this instance some unique hash depending on the random indices passed
         # NOTE this hash is not necessarily positive, as the sums may well overflow

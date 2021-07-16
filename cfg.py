@@ -61,9 +61,13 @@ SAMPLE_FRACTIONS = dict(validation=0.2,
                         testing=0.1)
 
 # binning of the pressure residuals with respect to a simple network
-BINNING_RMIN = 0.0
-BINNING_RMAX = 2.5
-BINNING_NBINS = 32
+RESIDUALS_RMIN = 0.0
+RESIDUALS_RMAX = 2.5
+RESIDUALS_NBINS = 32
+
+# noise on the pressure residuals (absolute value, data has stddev=1)
+# Set to None for no noise
+RESIDUALS_NOISE = None
 
 # seed that we use whenever we need something to be consistent between runs
 CONSISTENT_SEED = 137
