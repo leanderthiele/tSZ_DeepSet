@@ -15,7 +15,7 @@ class TrainingLoss :
     #}}}
 
 
-    def __call__(self, x, y, KLD=None, w=None) :
+    def __call__(self, x, y, KLD=None, w=None, epoch=None) :
         """
         x, y ... either tensors of shape [batch, <shape>]
                  or lists of length batch and shapes <shapei>
@@ -27,9 +27,21 @@ class TrainingLoss :
         l = [self.mse(x[ii], y[ii]) * (w[ii] if w is not None else 1) \
              for ii in range(len(x))]
         
+        if epoch is None or not cfg.KLD_ANNEALING :
+            kld_scaling = cfg.KLD_SCALING
+        else :
+            if epoch < cfg.KLD_ANNEALING_START * cfg.EPOCHS :
+                kld_scaling = 0
+            elif epoch > cfg.KLD_ANNEALING_END * cfg.EPOCHS :
+                kld_scaling = cfg.KLD_SCALING
+            else :
+                kld_scaling = cfg.KLD_SCALING \
+                              * (epoch/cfg.EPOCHS - cfg.KLD_ANNEALING_START) \
+                              / (cfg.KLD_ANNEALING_END - cfg.KLD_ANNEALING_START) \
+        
         # TODO we may want to introduce some relative scaling here,
         #      perhaps with the loss w.r.t. B12
-        return (sum(l) + cfg.KLD_SCALING * KLD.sum() if KLD is not None else 0) / len(l), \
+        return (sum(l) + kld_scaling * KLD.sum() if KLD is not None else 0) / len(l), \
                [_l.item() for _l in l], \
                [_kld.item() for _kld in KLD] if KLD is not None else None
     #}}}

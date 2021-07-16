@@ -177,6 +177,15 @@ VAE_NHIDDEN = 128
 # scaling of the KL divergence loss
 KLD_SCALING = 1e-5
 
+# KLD annealing (if True, we anneal from an AE to a VAE with the given KLD scaling)
+KLD_ANNEALING = True
+
+# when to start KLD annealing (in units of # epochs)
+KLD_ANNEALING_START = 0.2
+
+# when to finish KLD annealing (in units of # epochs)
+KLD_ANNEALING_END = 0.8
+
 # how many layers we have in the origin encoder (other settings equal to the usual encoder
 #    at least for now)
 ORIGIN_DEFAULT_NLAYERS = 3
