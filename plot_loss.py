@@ -100,7 +100,7 @@ ax_mean_loss.set_ylim(None, 1)
 ax_mean_kld.plot(e, tkldmean, label='training')
 ax_mean_kld.plot(e, vkldmean, label='validation')
 ax_mean_kld.set_xlabel('epoch')
-ax_mean_kld.set_ylabel('median(KLD)')
+ax_mean_kld.set_ylabel('mean(KLD)')
 ax_mean_kld.set_xlim(0, epochs-1)
 ax_mean_kld.legend(frameon=False)
 
