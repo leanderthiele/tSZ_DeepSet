@@ -78,6 +78,7 @@ ax_epoch_loss.text(0.95, 0.05, 'epoch %d'%(epoch), transform=ax_epoch_loss.trans
 
 ax_epoch_kld.scatter(tg, tkld, label='training', s=3+20*(tlogm-vmin)/(vmax-vmin))
 ax_epoch_kld.scatter(vg, vkld, label='validation', s=3+20*(vlogm-vmin)/(vmax-vmin))
+ax_epoch_kld.set_xlim(1e-3, 1e0)
 ax_epoch_kld.set_xscale('log')
 ax_epoch_kld.set_xlabel('B12 loss')
 ax_epoch_kld.set_ylabel('KLD')
