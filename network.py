@@ -46,6 +46,9 @@ class Network(nn.Module) :
         if cfg.NET_ARCH['vae'] :
             assert cfg.NET_ARCH['decoder']
             self.vae = NetworkVAE(MLP_Nlayers=cfg.VAE_NLAYERS, MLP_Nhidden=cfg.VAE_NHIDDEN,
+                                  # apparently it is a bad idea to have dropout in VAE encoder,
+                                  # which sort of makes sense
+                                  dropout=None,
                                   layer_kwargs_dict=dict(last={'bias_init': 'zeros_(%s)'}))
 
         if cfg.NET_ARCH['encoder'] :
