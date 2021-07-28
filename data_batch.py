@@ -152,7 +152,8 @@ class DataBatch :
                 if k.startswith('__') :
                     # make sure we don't do anything to any internals
                     continue
-                elif isinstance(v, torch.Tensor) :
+
+                if isinstance(v, torch.Tensor) :
                     setattr(self, k, v.to(cfg.device_idx))
                 elif isinstance(v, list) and isinstance(v[0], torch.Tensor) :
                     setattr(self, k, [t.to(cfg.device_idx) for t in v])

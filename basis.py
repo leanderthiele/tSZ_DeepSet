@@ -24,7 +24,7 @@ class Basis(np.ndarray, metaclass=FixedLenVec) :
     #{{{    
         assert isinstance(halo, Halo)
 
-        w, v = LA.eigh(halo.inertia)
+        _, v = LA.eigh(halo.inertia)
         v = v.T # more intuitive
 
         projections = v @ halo.ang_mom

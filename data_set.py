@@ -84,8 +84,8 @@ class DataSet(torch_DataSet) :
                            TNG=self.__get_indices(self.data_items[idx].halo, 'TNG'))
 
             return self.data_items[idx].sample_particles(indices, TNG_residuals_noise_rng=self.rng)
-        else :
-            return self.data_items[idx]
+
+        return self.data_items[idx]
     #}}}
 
 
@@ -101,8 +101,8 @@ class DataSet(torch_DataSet) :
             # return the next larger integer that is divisible by the batch size
             bs = cfg.DATALOADER_ARGS['batch_size']
             return n + bs - n % bs
-        else :
-            return len(self.data_items)
+
+        return len(self.data_items)
     #}}}
 
 

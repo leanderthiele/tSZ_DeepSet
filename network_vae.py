@@ -38,7 +38,7 @@ class NetworkVAE(nn.Module) :
     #{{{ 
         if self.rand_latent :
             # draw random latent space variables
-            return torch.randn(x.shape[0], Nlatent, device=x.device), None
+            return torch.randn(x.shape[0], self.Nlatent, device=x.device), None
 
         # pass through the network
         h = self.mlp(x)

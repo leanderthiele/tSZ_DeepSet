@@ -7,8 +7,6 @@ from network_origin import NetworkOrigin
 from network_deformer import NetworkDeformer
 from network_batt12 import NetworkBatt12
 from network_vae import NetworkVAE
-from global_fields import GlobalFields
-from basis import Basis
 from data_batch import DataBatch
 import cfg
 
@@ -150,6 +148,8 @@ class Network(nn.Module) :
         elif cfg.OUTPUT_NFEATURES == 2 :
             return b12 * (1 + x[..., 0].unsqueeze(-1)) \
                    + self.scaling * torch.sinh(x[..., 1].unsqueeze(-1))
+        else :
+            raise RuntimeError(f'Invalid cfg.OUTPUT_NFEATURES: {cfg.OUTPUT_NFEATURES}')
     #}}}
 
 

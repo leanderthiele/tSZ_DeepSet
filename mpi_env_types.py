@@ -72,6 +72,6 @@ class MPIEnvTypes(Enum) :
             return 0
         elif self is MPIEnvTypes.MULTIGPU_MULTIRANK :
             return mpi_local_rank
-        elif self is MULTIGPU_SINGLERANK :
+        elif self is MPIEnvTypes.MULTIGPU_SINGLERANK :
             return local_rank
     #}}}

@@ -1,6 +1,3 @@
-import cfg
-
-
 class DefaultFromCfg :
     """
     Since default arguments are evaluated when parsing, and many of them
