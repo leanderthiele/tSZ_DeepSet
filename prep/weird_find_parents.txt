@@ -1,0 +1,94 @@
+#ID DescID M200c Vmax Vrms R200c Rs Np X Y Z VX VY VZ JX JY JZ Spin rs_klypin M200c_all Mvir M200b M500c M2500c Xoff Voff spin_bullock b_to_a c_to_a A[x] A[y] A[z] b_to_a(500c) c_to_a(500c) A[x](500c) A[y](500c) A[z](500c) T/|U| M_pe_Behroozi M_pe_Diemer PID
+
+X th->id
+X th->descid
+X th->mvir
+X th->vmax
+X th->vrms
+X th->rvir
+X th->rs
+X th->np
+X th->pos[0]
+X th->pos[1]
+X th->pos[2]
+X th->vel[0]
+X th->vel[1]
+X th->vel[2]
+X th->J[0]
+X th->J[1]
+X th->J[2]
+X th->spin
+X th->klypin_rs
+X th->m_all
+X th->alt_m[0]
+X th->alt_m[1]
+X th->alt_m[2]
+X th->alt_m[3]
+X th->Xoff
+X th->Voff
+X th->bullock_spin
+X th->b_to_a
+X th->c_to_a
+X th->A[0]
+X th->A[1]
+X th->A[2]
+[b_to_a(500c)]
+[c_to_a(500c)]
+[A[x](500c)]
+[A[y](500c)]
+[A[z](500c)]
+X th->kin_to_pot
+[M_pe_Behroozi]
+[M_pe_Diemer]
+X th->pid
+
+
+1176 -1 4.1831e+11
+
+
+woutparents
+X 1176
+X -1
+X 4.1831e+11
+X 159.54
+X 150.00
+X 121.626
+X 8.071
+X 11676
+X 2.29223
+X 7.34321
+X 31.56877
+X 311.07
+X -306.82
+X 651.35
+X 1.061e+10
+X -1.698e+10
+X 4.901e+10
+X 0.00705
+X 8.54007
+X 4.5069e+11
+X 5.1285e+11
+X 5.6910e+11
+X 3.7359e+11
+X 2.3229e+11
+X 2.19377
+X 4.56
+X 0.00489
+X 0.93871
+X 0.86279
+X 2.74822
+X 5.08210
+X -1.96022
+X 0.93618
+
+0.86179
+2.32755
+4.80110
+-1.74498
+0.5300
+6.684e+11
+1.839e+11
+
+
+wparents
+1176 -1 4.183e+11 159.54 150.00 121.626 8.071 11676 2.29223 7.34321 31.56877 311.07 -306.82 651.35 1.061e+10 -1.698e+10 4.901e+10 0.00705 8.54007 4.5069e+11 5.1285e+11 5.6910e+11 3.7359e+11 2.3229e+11 2.19377 4.56 0.00489 0.93871 0.      86279 2.74822 5.08210 -1.96022 0.9362 -1

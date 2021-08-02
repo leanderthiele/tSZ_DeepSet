@@ -3,7 +3,7 @@ This script produces the file halo_catalog.npz which is a useful
 compression of the data we need for training.
 
 Since we are now using the Rockstar halos, the pre-filtering of halos
-has already been done in rockstar_halos/collect_particles.cpp,
+has already been done in prep/collect_particles.cpp,
 so the previous filtering function of this script no longer applies.
 
 However, it is still useful to collect some global properties of our halos.
