@@ -288,6 +288,7 @@ _OMEGA_M = 0.3089
 #   Pth        [TNG only]
 #   residuals  [TNG only]
 #   velocities [DM only]
+#   offsets    [DM only]
 _STORAGE_FILES = dict(DM='/scratch/gpfs/lthiele/tSZ_DeepSet_halos/rockstar/DM_%d_%s.bin',
                       TNG='/scratch/gpfs/lthiele/tSZ_DeepSet_halos/rockstar/TNG_%d_%s.bin')
 

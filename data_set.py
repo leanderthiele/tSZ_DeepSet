@@ -38,16 +38,6 @@ class DataSet(torch_DataSet) :
 
         self.data_items = [DataItem(h, mode, **data_item_kwargs) for h in self.halo_catalog]
 
-        if self.mode is not DataModes.TRAINING :
-
-            # for validation and testing, we want consistent particle sampling
-            self.rng = np.random.default_rng(cfg.CONSISTENT_SEED)
-
-            for ii in range(len(self.data_items)) :
-                indices = dict(DM=self.__get_indices(self.data_items[ii].halo, 'DM'),
-                               TNG=self.__get_indices(self.data_items[ii].halo, 'TNG'))
-                self.data_items[ii] = self.data_items[ii].sample_particles(indices)
-        
         if self.mode is DataModes.TRAINING :
             # check that our hack works
             assert len(self) % cfg.DATALOADER_ARGS['batch_size'] == 0
@@ -59,8 +49,7 @@ class DataSet(torch_DataSet) :
         to be called from worker_init_fn to initialize the random number generator for this worker
         """
     #{{{
-        if self.mode is DataModes.TRAINING :
-            self.rng = np.random.default_rng(seed % 2**32)
+        self.rng = np.random.default_rng(seed % 2**32)
     #}}}
 
 
@@ -72,20 +61,16 @@ class DataSet(torch_DataSet) :
                  divisible by the WORLD_SIZE)
         """
     #{{{
-        if self.mode is DataModes.TRAINING :
+        if idx >= len(self.data_items) :
+            # we have hit some duplicate sample -- we take a random one now
+            # in order to avoid always having the same duplicate samples in the training set
+            # NOTE that at this point we have an rng available
+            idx = self.rng.integers(len(self.data_items))
 
-            if idx >= len(self.data_items) :
-                # we have hit some duplicate sample -- we take a random one now
-                # in order to avoid always having the same duplicate samples in the training set
-                # NOTE that at this point we have an rng available
-                idx = self.rng.integers(len(self.data_items))
+        indices = dict(DM=self.__get_indices(self.data_items[idx].halo, 'DM'),
+                       TNG=self.__get_indices(self.data_items[idx].halo, 'TNG'))
 
-            indices = dict(DM=self.__get_indices(self.data_items[idx].halo, 'DM'),
-                           TNG=self.__get_indices(self.data_items[idx].halo, 'TNG'))
-
-            return self.data_items[idx].sample_particles(indices, TNG_residuals_noise_rng=self.rng)
-
-        return self.data_items[idx]
+        return self.data_items[idx].sample_particles(indices, TNG_residuals_noise_rng=self.rng)
     #}}}
 
 
@@ -129,6 +114,6 @@ class DataSet(torch_DataSet) :
                    else int(cfg.PRT_FRACTION[ptype])
 
         # here we allow the possibility for duplicate entries
-        # in practice, this should not be an issue and will make the code faster
+        # in practice, this should not be an issue and will make the sampling a lot faster
         return self.rng.integers(Nprt, size=Nindices)
     #}}}
