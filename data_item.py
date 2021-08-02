@@ -45,6 +45,12 @@ class DataItem :
         if load_TNG :
             self.TNG_coords, self.TNG_Pth = self.__get_TNG()
             self.TNG_radii = np.linalg.norm(self.TNG_coords, axis=-1, keepdims=True)
+            if cfg.RMAX is not None :
+                mask = self.TNG_radii < (cfg.RMAX if cfg.NORMALIZE_COORDS else cfg.RMAX * self.halo.R200c)
+                self.TNG_coords = self.TNG_coords[mask]
+                self.TNG_Pth = self.TNG_Pth[mask]
+                self.TNG_radii = self.TNG_radii[mask]
+                del mask
 
         if load_TNG_residuals :
             self.TNG_residuals = self.__get_TNG_residuals()
@@ -193,6 +199,10 @@ class DataItem :
         out.has_DM = self.has_DM
         out.has_TNG = self.has_TNG
         out.has_TNG_residuals = self.has_TNG_residuals
+
+        # clamp the indices to the allowed range
+        indices['DM'] %= len(self.DM_coords)
+        indices['TNG'] %= len(self.TNG_coords)
 
         # now fill in the sampled particles
 

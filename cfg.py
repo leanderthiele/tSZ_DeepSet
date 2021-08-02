@@ -33,6 +33,10 @@ TNG_RESOLUTION = 128
 # in the particle list for those halos, which should be ok.
 PRT_FRACTION = dict(DM=1e4, TNG=1e5)
 
+# how far (in units of R200c) to go out when choosing TNG particles
+# (set to None for no cutoff)
+RMAX = 2.0
+
 # how many local DM particles to use around each TNG position
 N_LOCAL = 1e2
 

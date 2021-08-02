@@ -115,5 +115,7 @@ class DataSet(torch_DataSet) :
 
         # here we allow the possibility for duplicate entries
         # in practice, this should not be an issue and will make the sampling a lot faster
-        return self.rng.integers(Nprt, size=Nindices)
+        # NOTE that we do not restrict to Nprt -- we can just as well mod this later.
+        # NOTE if we replace by 2**32, it doesn't work anymore (only zeros) -- is this a numpy bug?
+        return self.rng.integers(2**34, size=Nindices)
     #}}}
