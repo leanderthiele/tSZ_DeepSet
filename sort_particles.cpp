@@ -15,15 +15,21 @@
 #include <vector>
 #include <utility>
 
+
+// ---------------- constants ----------------------
+
 // where to find the files
 // replace: %lu   halo index 0 ... something
 //          %s    [in]  "coords",
 //                      "velocities"
 //                [out] "offsets" -- these files store the offsets in the sorted arrays
-static const char storage[] = "/scratch/gpfs/lthiele/tSZ_DeepSet_halos/rockstar/DM_%lu_%s.bin";
+const char storage[] = "/scratch/gpfs/lthiele/tSZ_DeepSet_halos/rockstar/DM_%lu_%s.bin";
 
 // how many cells we want to use
-static constexpr size_t Nside = 32;
+constexpr size_t Nside = 32;
+
+// the global box size
+const float box_size = 205000.0;
 
 
 // ---------- globals --------------
@@ -41,7 +47,7 @@ size_t N;
 float ul_corner[3];
 
 // the local box size
-float box_size;
+float extent;
 
 // store the particle indices here
 // -- first entry is particle index in original order,
@@ -72,7 +78,7 @@ int main (int, char **argv)
     for (size_t ii=0; ii != 3; ++ii)
         ul_corner[ii] = (float)std::atof(argv[2+ii]);
 
-    box_size = (float)std::atof(argv[5]);
+    extent = (float)std::atof(argv[5]);
 
 
     get_N();
@@ -124,8 +130,15 @@ void create_indices ()
         for (size_t jj=0; jj != 3; ++jj)
             x[ii*3UL+jj] -= ul_corner[jj];
 
+    // implement periodic boundary conditions
+    for (size_t ii=0; ii != N * 3UL; ++ii)
+        if (x[ii] > +0.5*box_size)
+            x[ii] -= box_size;
+        else if (x[ii] < -0.5*box_size)
+            x[ii] += box_size;
+
     // the cell sidelength
-    float acell = box_size / Nside;
+    float acell = extent / Nside;
 
     #define GRID(r, dir) (std::min((size_t)(r[dir]/acell), Nside-1UL))
 
