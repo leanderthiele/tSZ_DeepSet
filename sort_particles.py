@@ -1,5 +1,6 @@
 import subprocess
 import shutil
+import os.path
 
 import numpy as np
 
@@ -8,17 +9,20 @@ import cfg
 idx = 0
 
 while True :
+
+    print(idx)
     
     try :
         globals_DM = eval(open(cfg._STORAGE_FILES['DM']%(idx, 'globals'), 'r').readline())
     except FileNotFoundError :
-        print('Found %d halos')
+        print('Found %d halos'%idx)
         break
 
-    # make safety copy of data
+    # make safety copy of data if it does not already exist
     for s in ['coords', 'velocities', ] :
-        shutil.copyfile(cfg._STORAGE_FILES['DM']%(idx, s),
-                        cfg._STORAGE_FILES['DM']%(idx, '%s_backup'%s))
+        if not os.path.isfile(cfg._STORAGE_FILES['DM']%(idx, '%s_backup'%s)) :
+            shutil.copyfile(cfg._STORAGE_FILES['DM']%(idx, s),
+                            cfg._STORAGE_FILES['DM']%(idx, '%s_backup'%s))
 
     # get the geometry
     R200c = globals_DM['R200c']

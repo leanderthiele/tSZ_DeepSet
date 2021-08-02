@@ -36,3 +36,6 @@ for training etc.
 
 11) bin the residuals, using bin_residuals.py
     Now we have the input for the VAE part of the larger architecture.
+
+12) sort the DM particles, using sort_particles.py
+    Now we have the format needed for the local part of the architecture.

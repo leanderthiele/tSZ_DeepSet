@@ -12,7 +12,8 @@ from matplotlib import pyplot as plt
 
 import cfg
 
-ID = argv[1]
+ID = argv[1].strip('training_').strip('.sbatch')
+
 epoch = int(argv[2])
 
 # for how many halos we want to insert the index
