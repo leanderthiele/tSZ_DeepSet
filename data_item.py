@@ -1,3 +1,5 @@
+import ctypes as ct
+
 import numpy as np
 
 import cfg
@@ -15,6 +17,21 @@ class DataItem :
         TNG_radii     ... the radial coordinates of the gas particles (with the last dimension length 1)
         TNG_residuals ... the Pth residuals with respect to a simple model, binned and normalized
     """
+
+    libprtfinder = ct.CDLL('./libprtfinder.so')
+    prtfinder = libprtfinder.prtfinder
+
+    # returns pointer to the particle indices
+    prtfinder.restype = ct.POINTER(ct.c_uint64)
+
+    # arguments (some are return values)
+    prtfinder.argtypes = [np.ctypeslib.ndpointer(dtype=ct.c_float, ndim=2, flags='C_CONTIGUOUS'), # coordinates
+                          ct.c_uint64, # number of particles
+                          np.ctypeslib.ndpointer(dtype=ct.c_float, ndim=1, flags='C_CONTIGUOUS'), # ul_corner
+                          ct.c_float, # extent
+                          ct.POINTER(ct.c_uint64), # length of the returned array
+                          ct.POINTER(ct.c_int), # error flag
+                         ]
 
     def __init__(self, halo, mode,
                        load_DM=True, load_TNG=True, load_TNG_residuals=True) :
