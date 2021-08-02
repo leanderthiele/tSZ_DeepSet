@@ -33,6 +33,12 @@ TNG_RESOLUTION = 128
 # in the particle list for those halos, which should be ok.
 PRT_FRACTION = dict(DM=1e4, TNG=1e5)
 
+# how many local DM particles to use around each TNG position
+N_LOCAL = 1e2
+
+# how large the local spheres are (in kpc)
+R_LOCAL = 50.0
+
 # whether to divide the coordinates by R200c
 NORMALIZE_COORDS = True
 
@@ -45,7 +51,8 @@ NET_ARCH = dict(origin=True,
                 deformer=True,
                 encoder=True,
                 decoder=True,
-                vae=True)
+                vae=True,
+                local=True)
 
 # can list parts of the network architecture that should be frozen
 # set to None for no freezing

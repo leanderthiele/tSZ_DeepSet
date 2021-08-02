@@ -35,8 +35,6 @@ class DataBatch :
         assert all(self.has_DM_velocities == (d.DM_vels is not None) for d in data_items)
         self.has_TNG = data_items[0].has_TNG
         assert all(self.has_TNG == d.has_TNG for d in data_items)
-        self.has_TNG_radii = data_items[0].has_TNG_radii
-        assert all(self.has_TNG_radii == d.has_TNG_radii for d in data_items)
         self.has_TNG_residuals = data_items[0].has_TNG_residuals
         assert all(self.has_TNG_residuals == d.has_TNG_residuals for d in data_items)
         self.mode = data_items[0].mode
@@ -59,10 +57,9 @@ class DataBatch :
         if self.has_TNG :
             self.TNG_coords = batch('TNG_coords')
             self.TNG_Pth = batch('TNG_Pth')
+            self.TNG_radii = batch('TNG_radii')
             if self.has_TNG_residuals :
                 self.TNG_residuals = batch('TNG_residuals')
-            if self.has_TNG_radii :
-                self.TNG_radii = batch('TNG_radii')
 
         # get a random number generator if noise is required
         rng = np.random.default_rng(sum(d.hash for d in data_items) % 2**32) if self.mode is DataModes.TRAINING else None
@@ -106,7 +103,7 @@ class DataBatch :
     #}}}
 
 
-    def add_origin(self, origin, compute_TNG_radii=True) :
+    def add_origin(self, origin) :
         """
         CAUTION this function modifies the instance in-place
                 (it also returns the altered object)
@@ -116,9 +113,6 @@ class DataBatch :
                    be in those normalized units
                    (this origin is in the coordinate system that was used to center the particles
                     initially)
-        compute_TNG_radii ... whether the radial positions of the TNG particles
-                              are to be computed (with respect to the new origin)
-
         """
     #{{{
         # NOTE it is possible that we have to allocate new tensors here since otherwise we are doing
@@ -132,9 +126,7 @@ class DataBatch :
         #      speaking never necessary.
         #      The good thing about this is that everything stays differentiable!
 
-        if compute_TNG_radii :
-            self.TNG_radii = torch.linalg.norm(self.TNG_coords, dim=-1, keepdim=True)
-            self.has_TNG_radii = True
+        self.TNG_radii = torch.linalg.norm(self.TNG_coords, dim=-1, keepdim=True)
 
         return self
     #}}}

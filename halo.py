@@ -27,7 +27,8 @@ class Halo :
         self.V200c = Halo.__V200c(self.M200c, self.R200c)
 
         self.storage_DM = dict(coords=cfg._STORAGE_FILES['DM']%(halo_index, 'coords'),
-                               velocities=cfg._STORAGE_FILES['DM']%(halo_index, 'velocities'))
+                               velocities=cfg._STORAGE_FILES['DM']%(halo_index, 'velocities'),
+                               offsets=cfg._STORAGE_FILES['DM']%(halo_index, 'offsets'))
         
         res_str = '%d_'%cfg.TNG_RESOLUTION if cfg.TNG_RESOLUTION != 256 else ''
 

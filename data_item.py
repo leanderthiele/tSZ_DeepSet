@@ -17,14 +17,12 @@ class DataItem :
     """
 
     def __init__(self, halo, mode,
-                       load_DM=True, load_TNG=True,
-                       compute_TNG_radii=True, load_TNG_residuals=True) :
+                       load_DM=True, load_TNG=True, load_TNG_residuals=True) :
         """
         halo     ... a Halo instance for the current halo
         mode     ... the mode this item was loaded in
         load_DM  ... whether to load the dark matter particles
         load_TNG ... whether to load the TNG particles
-        compute_TNG_radii ... whether the radial positions of the TNG particles are to be computed
         load_TNG_residuals ... whether the TNG residuals are to be loaded (these files are small
                                so we load them regarless of load_TNG)
         
@@ -37,20 +35,16 @@ class DataItem :
 
         self.has_DM = load_DM
         self.has_TNG = load_TNG
-        self.has_TNG_radii = compute_TNG_radii
         self.has_TNG_residuals = load_TNG_residuals
 
         if load_DM :
-            self.DM_coords, self.DM_vels = self.__get_DM()
+            self.DM_coords, self.DM_vels, self.__DM_offsets = self.__get_DM()
             assert (self.DM_vels is None and not cfg.USE_VELOCITIES) \
                    or (self.DM_vels is not None and cfg.USE_VELOCITIES)
 
         if load_TNG :
             self.TNG_coords, self.TNG_Pth = self.__get_TNG()
-
-            if compute_TNG_radii :
-                # compute the scalar distances if coordinates are already in the correct frame
-                self.TNG_radii = np.linalg.norm(self.TNG_coords, axis=-1, keepdims=True)
+            self.TNG_radii = np.linalg.norm(self.TNG_coords, axis=-1, keepdims=True)
 
         if load_TNG_residuals :
             self.TNG_residuals = self.__get_TNG_residuals()
@@ -88,7 +82,12 @@ class DataItem :
             if vels is not None :
                 vels /= self.halo.V200c
 
-        return coords, vels
+        if cfg.NET_ARCH['local'] :
+            offsets = np.fromfile(self.halo.storage_DM['offsets'], dtype=np.int64)
+        else :
+            offsets = None
+
+        return coords, vels, offsets
     #}}}
 
 
@@ -125,6 +124,46 @@ class DataItem :
     #}}}
 
 
+    def __get_DM_local_indices(self, x_TNG) :
+        """
+        returns indices of all DM particles within a certain distance of x_TNG
+        """
+    #{{{
+        R = cfg.R_LOCAL
+        if cfg.NORMALIZE_COORDS :
+            # all the coordinates are already normalized by R200c, so we need to do the same here
+            R /= self.halo.R200c
+
+        # TODO -- the main question is whether we can do this efficiently in pure python or whether
+        #         we need to call a compiled module here
+    #}}}
+
+
+    def __get_DM_local(self, TNG_coords, rng) :
+        """
+        get local dark matter around the given TNG coordinates
+        returns Nparticles, coordinates, velocities
+        """
+    #{{{
+        assert isinstance(rng, np.random.generator.Generator)
+
+        N = np.empty(len(TNG_coords), dtype=np.float32)
+        x = np.empty((len(TNG_coords), int(cfg.N_LOCAL), 3), dtype=np.float32)
+        v = np.empty((len(TNG_coords), int(cfg.N_LOCAL), 3), dtype=np.float32)
+
+        for ii, x_TNG in enumerate(TNG_coords) :
+            prt_indices = self.__get_DM_local_indices(x_TNG)
+            N[ii] = len(prt_indices)
+
+            prt_indices = prt_indices[rng.integers(N[ii], size=int(cfg.N_LOCAL))]
+
+            x[ii, ...] = self.DM_coords[prt_indices]
+            v[ii, ...] = self.DM_vels[prt_indices]
+        
+        return N, x, v
+    #}}}
+
+
     @staticmethod
     def __periodicize(x) :
         """
@@ -138,7 +177,7 @@ class DataItem :
     #}}}
 
 
-    def sample_particles(self, indices, TNG_residuals_noise_rng=None) :
+    def sample_particles(self, indices, TNG_residuals_noise_rng=None, local_rng=None) :
         """
         returns a copy of this data item with only a subset of the particles randomly sampled.
         (this instance is not modified!)
@@ -153,7 +192,6 @@ class DataItem :
         # copy our fields
         out.has_DM = self.has_DM
         out.has_TNG = self.has_TNG
-        out.has_TNG_radii = self.has_TNG_radii
         out.has_TNG_residuals = self.has_TNG_residuals
 
         # now fill in the sampled particles
@@ -166,15 +204,17 @@ class DataItem :
         if self.has_TNG :
             out.TNG_coords = self.TNG_coords[indices['TNG']]
             out.TNG_Pth = self.TNG_Pth[indices['TNG']]
-
-            if self.has_TNG_radii :
-                out.TNG_radii = self.TNG_radii[indices['TNG']]
+            out.TNG_radii = self.TNG_radii[indices['TNG']]
 
         if self.has_TNG_residuals :
             out.TNG_residuals = self.TNG_residuals
             if TNG_residuals_noise_rng is not None and cfg.RESIDUALS_NOISE is not None :
                 out.TNG_residuals += TNG_residuals_noise_rng.normal(scale=cfg.RESIDUALS_NOISE,
                                                                     size=cfg.RESIDUALS_NBINS)
+
+        if self.has_DM and self.has_TNG and cfg.NET_ARCH['local'] :
+            out.DM_N_local, out.DM_coords_local, out.DM_vels_local \
+                = self.__get_DM_local(out.TNG_coords, local_rng)
 
         # give this instance some unique hash depending on the random indices passed
         # NOTE this hash is not necessarily positive, as the sums may well overflow
