@@ -70,7 +70,7 @@ for halo_idx, halo in enumerate(halos) :
         data.append(Nout)
 
         r = np.linalg.norm(x - x0, axis=-1)
-        Nout_reference = np.count_nonzero(r < R)
+        Nout_reference = np.count_nonzero(r < cfg.R_LOCAL)
         print('Nout=%d -- Nout_reference=%d'%(Nout, Nout_reference))
 
         prtfinder.myfree(ptr)
