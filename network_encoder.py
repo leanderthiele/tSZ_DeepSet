@@ -56,6 +56,7 @@ class NetworkEncoder(nn.Module) :
             [NetworkLayer(0 if ii==0 \
                           else Nhidden if isinstance(Nhidden, int) \
                           else Nhidden[str(ii-1)] if str(ii-1) in Nhidden \
+                          else Nhidden['first'] if 'first' in Nhidden and ii==1
                           else cfg.ENCODER_DEFAULT_NHIDDEN,
                           k_latent if ii==Nlayers \
                           else Nhidden if isinstance(Nhidden, int) \

@@ -1,7 +1,6 @@
-import ctypes as ct
-
 import numpy as np
 
+import prtfinder
 import cfg
 
 
@@ -17,34 +16,6 @@ class DataItem :
         TNG_radii     ... the radial coordinates of the gas particles (with the last dimension length 1)
         TNG_residuals ... the Pth residuals with respect to a simple model, binned and normalized
     """
-
-    # ---- interaction with the compiled library -----
-
-    libprtfinder = ct.CDLL('./libprtfinder.so')
-
-    # the main function
-    prtfinder = libprtfinder.prtfinder
-
-    # returns pointer to the particle indices
-    prtfinder.restype = ct.POINTER(ct.c_uint64)
-
-    # arguments (some are return values)
-    prtfinder.argtypes = [np.ctypeslib.ndpointer(dtype=ct.c_float, ndim=1, flags='C_CONTIGUOUS'), # TNG coordinates
-                          ct.c_float, # radius of the sphere
-                          np.ctypeslib.ndpointer(dtype=ct.c_float, ndim=2, flags='C_CONTIGUOUS'), # DM coordinates
-                          ct.c_uint64, # number of particles
-                          np.ctypeslib.ndpointer(dtype=ct.c_float, ndim=1, flags='C_CONTIGUOUS'), # ul_corner
-                          ct.c_float, # extent
-                          np.ctypeslib.ndpointer(dtype=ct.c_uint64, ndim=1, flags='C_CONTIGUOUS'), # offsets
-                          ct.POINTER(ct.c_uint64), # length of the returned array
-                          ct.POINTER(ct.c_int), # error flag
-                         ]
-
-    # to free memory
-    myfree = libprtfinder.myfree
-    myfree.restype = None
-    myfree.argtypes = [ct.POINTER(ct.c_uint64), ]
-
 
 
 
@@ -179,10 +150,10 @@ class DataItem :
         extent = 2 * 2.51 * (1 if cfg.NORMALIZE_COORDS else self.halo.R200c)
 
         # call the compiled library
-        ptr = DataItem.prtfinder(x_TNG, R,
-                                 self.DM_coords, len(self.DM_coords),
-                                 ul_corner, extent, self.__DM_offsets,
-                                 ct.byref(Nout), ct.byref(err))
+        ptr = prtfinder.prtfinder(x_TNG, R,
+                                  self.DM_coords, len(self.DM_coords),
+                                  ul_corner, extent, self.__DM_offsets,
+                                  ct.byref(Nout), ct.byref(err))
 
         # convert to native python
         err = err.value
@@ -221,7 +192,7 @@ class DataItem :
             prt_indices = prt_indices[rng.integers(N[ii], size=int(cfg.N_LOCAL))]
 
             # now we can safely free the memory
-            DataItem.myfree(raw_ptr)
+            prtfinder.myfree(raw_ptr)
 
             x[ii, ...] = self.DM_coords[prt_indices]
             v[ii, ...] = self.DM_vels[prt_indices]
