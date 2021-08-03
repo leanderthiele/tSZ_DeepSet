@@ -163,11 +163,6 @@ class DataItem :
         if err != 0 :
             raise RuntimeError('prtfinder returned with err=%d'%err)
 
-        # FIXME debugging check
-        r = np.linalg.norm(self.DM_coords - x_TNG[None,:], axis=-1)
-        Nout_reference = np.count_nonzero(r < R)
-        print('Nout=%d -- Nout_reference=%d'%(Nout, Nout_reference))
-
         # convert raw pointer into numpy array
         return ptr, np.ctypeslib.as_array(ptr, shape=(Nout,))
     #}}}
