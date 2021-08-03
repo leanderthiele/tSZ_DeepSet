@@ -1,5 +1,7 @@
 import ctypes as ct
 
+import numpy as np
+
 _libprtfinder = ct.CDLL('./libprtfinder.so')
 
 # the main function

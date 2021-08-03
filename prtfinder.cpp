@@ -1,7 +1,10 @@
 // compile to shared library, exports only the prtfinder function as a symbol
+//
+// $ g++ --std=c++17 --shared -fPIC -Wall -Wextra -O3 -o libprtfinder.so prtfinder.cpp
 
 #include <cstdlib>
 #include <cstdint>
+#include <cstdio>
 #include <algorithm>
 #include <vector>
 #include <utility>
@@ -110,14 +113,14 @@ prtfinder_(const float *x0, // origin around which to find particles [3]
     auto idx_ranges = find_idx_ranges(x0, R, Nin, ul_corner, extent, offsets, &tmp_err);
     if (tmp_err)
     {
-        *err = 1;
+        *err = 1000 + tmp_err;
         return nullptr;
     }
 
     auto out = find_indices(x0, R, x, Nout, &idx_ranges, &tmp_err);
     if (tmp_err)
     {
-        *err = 2;
+        *err = 2000 + tmp_err;
         return nullptr;
     }
 
@@ -169,7 +172,7 @@ find_idx_ranges (const float *x0,
 
                 float cub[] = { (float)xx, (float)yy, (float)zz };
 
-                if (sph_cub_intersect(x0, cub, Rsq_normalized)
+                if (sph_cub_intersect(x0_normalized, cub, Rsq_normalized)
                     && offsets[idx] < Nin)
                 {
                     std::pair<size_t, size_t> idx_range { offsets[idx], Nin };
@@ -194,17 +197,17 @@ find_idx_ranges (const float *x0,
 
 static uint64_t *
 find_indices (const float *x0,
-              float Rsq,
+              float R,
               const float *x,
               uint64_t *Nout,
               const std::vector<std::pair<size_t, size_t>> *idx_ranges,
               int *err
              )
 {// {{{
-    // this case is pathological
     if (idx_ranges->empty())
     {
-        *err = -1;
+        *err = 0;
+        *Nout = 0UL;
         return nullptr;
     }
 
@@ -213,11 +216,12 @@ find_indices (const float *x0,
     size_t Nalloc = Ninit;
     uint64_t *out = (uint64_t *)std::malloc(Nalloc * sizeof(uint64_t));
 
+    float Rsq = R * R;
+
     for (const auto &idx_range : *idx_ranges)
         for (size_t ii=idx_range.first; ii != idx_range.second; ++ii)
-            #define SQU(x_) (x_*x_)
-            if (SQU(x[ii*3+0]-x0[0]) + SQU(x[ii*3+1]-x0[1]) + SQU(x[ii*3+2]-x0[2])
-                < Rsq)
+            #define SQU(var) ((var)*(var))
+            if (SQU(x[ii*3+0]-x0[0]) + SQU(x[ii*3+1]-x0[1]) + SQU(x[ii*3+2]-x0[2]) < Rsq)
             #undef SQU
             {
                 // check if we need to make more space
@@ -230,8 +234,9 @@ find_indices (const float *x0,
                 out[(*Nout)++] = ii;
             }
 
-    // shrink to correct size
-    out = (uint64_t *)std::realloc(out, (*Nout) * sizeof(uint64_t));
+    // shrink to correct size -- make sure we don't realloc to zero as subsequent frees
+    //                           may be buggy
+    out = (uint64_t *)std::realloc(out, std::max(1UL, *Nout) * sizeof(uint64_t));
     
     *err = 0;
     return out;
@@ -255,7 +260,7 @@ sph_cub_intersect (const float *x0,
     mod_translations(x0, cub);
     mod_reflections(cub);
 
-    #define SQU(x_) (x_*x_)
+    #define SQU(var) ((var)*(var))
     return SQU(std::max(0.0F, cub[0])) + SQU(std::max(0.0F, cub[1])) + SQU(std::max(0.0F, cub[2]))
            < Rsq;
     #undef SQU

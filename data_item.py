@@ -94,7 +94,7 @@ class DataItem :
                 vels /= self.halo.V200c
 
         if cfg.NET_ARCH['local'] :
-            offsets = np.fromfile(self.halo.storage_DM['offsets'], dtype=np.int64)
+            offsets = np.fromfile(self.halo.storage_DM['offsets'], dtype=np.uint)
         else :
             offsets = None
 
@@ -148,7 +148,7 @@ class DataItem :
         Nout = ct.c_uint64(0) # length of the returned array
 
         # geometry
-        ul_corner = -2.51 * (1 if cfg.NORMALIZE_COORDS else self.halo.R200c)
+        ul_corner = np.full(3, -2.51 * (1 if cfg.NORMALIZE_COORDS else self.halo.R200c), dtype=np.float32)
         extent = 2 * 2.51 * (1 if cfg.NORMALIZE_COORDS else self.halo.R200c)
 
         # call the compiled library
