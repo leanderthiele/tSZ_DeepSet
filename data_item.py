@@ -18,7 +18,11 @@ class DataItem :
         TNG_residuals ... the Pth residuals with respect to a simple model, binned and normalized
     """
 
+    # ---- interaction with the compiled library -----
+
     libprtfinder = ct.CDLL('./libprtfinder.so')
+
+    # the main function
     prtfinder = libprtfinder.prtfinder
 
     # returns pointer to the particle indices
@@ -35,6 +39,14 @@ class DataItem :
                           ct.POINTER(ct.c_uint64), # length of the returned array
                           ct.POINTER(ct.c_int), # error flag
                          ]
+
+    # to free memory
+    myfree = libprtfinder.myfree
+    myfree.restype = None
+    myfree.argtypes = [ct.POINTER(ct.c_uint64), ]
+
+
+
 
     def __init__(self, halo, mode,
                        load_DM=True, load_TNG=True, load_TNG_residuals=True) :
@@ -153,6 +165,7 @@ class DataItem :
     def __get_DM_local_indices(self, x_TNG) :
         """
         returns indices of all DM particles within a certain distance of x_TNG
+        (both as raw pointer and numpy array)
         """
     #{{{
         R = cfg.R_LOCAL / (self.halo.R200c if cfg.NORMALIZE_COORDS else 1)
@@ -185,7 +198,7 @@ class DataItem :
         print('Nout=%d -- Nout_reference=%d'%(Nout, Nout_reference))
 
         # convert raw pointer into numpy array
-        return np.ctypeslib.as_array(ptr, shape=(Nout,))
+        return ptr, np.ctypeslib.as_array(ptr, shape=(Nout,))
     #}}}
 
 
@@ -202,10 +215,13 @@ class DataItem :
         v = np.empty((len(TNG_coords), int(cfg.N_LOCAL), 3), dtype=np.float32)
 
         for ii, x_TNG in enumerate(TNG_coords) :
-            prt_indices = self.__get_DM_local_indices(x_TNG)
+            raw_ptr, prt_indices = self.__get_DM_local_indices(x_TNG)
             N[ii] = len(prt_indices)
 
             prt_indices = prt_indices[rng.integers(N[ii], size=int(cfg.N_LOCAL))]
+
+            # now we can safely free the memory
+            DataIte.myfree(raw_ptr)
 
             x[ii, ...] = self.DM_coords[prt_indices]
             v[ii, ...] = self.DM_vels[prt_indices]

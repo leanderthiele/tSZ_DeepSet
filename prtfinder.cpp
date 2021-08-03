@@ -83,6 +83,11 @@ extern "C"
     {
         return prtfinder_(x0, R, x, Nin, ul_corner, extent, offsets, Nout, err);
     }
+
+    void myfree (uint64_t *data)
+    {
+        std::free(data);
+    }
 } // extern "C"
 
 
