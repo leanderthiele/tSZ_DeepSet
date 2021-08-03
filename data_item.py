@@ -221,7 +221,7 @@ class DataItem :
             prt_indices = prt_indices[rng.integers(N[ii], size=int(cfg.N_LOCAL))]
 
             # now we can safely free the memory
-            DataIte.myfree(raw_ptr)
+            DataItem.myfree(raw_ptr)
 
             x[ii, ...] = self.DM_coords[prt_indices]
             v[ii, ...] = self.DM_vels[prt_indices]
