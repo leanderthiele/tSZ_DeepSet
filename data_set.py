@@ -70,7 +70,9 @@ class DataSet(torch_DataSet) :
         indices = dict(DM=self.__get_indices(self.data_items[idx].halo, 'DM'),
                        TNG=self.__get_indices(self.data_items[idx].halo, 'TNG'))
 
-        return self.data_items[idx].sample_particles(indices, TNG_residuals_noise_rng=self.rng)
+        return self.data_items[idx].sample_particles(indices,
+                                                     TNG_residuals_noise_rng=self.rng,
+                                                     local_rng=self.rng)
     #}}}
 
 
