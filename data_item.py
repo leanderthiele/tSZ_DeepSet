@@ -25,10 +25,13 @@ class DataItem :
     prtfinder.restype = ct.POINTER(ct.c_uint64)
 
     # arguments (some are return values)
-    prtfinder.argtypes = [np.ctypeslib.ndpointer(dtype=ct.c_float, ndim=2, flags='C_CONTIGUOUS'), # coordinates
+    prtfinder.argtypes = [np.ctypeslib.ndpointer(dtype=ct.c_float, ndim=1, flags='C_CONTIGUOUS'), # TNG coordinates
+                          ct.c_float, # radius of the sphere
+                          np.ctypeslib.ndpointer(dtype=ct.c_float, ndim=2, flags='C_CONTIGUOUS'), # DM coordinates
                           ct.c_uint64, # number of particles
                           np.ctypeslib.ndpointer(dtype=ct.c_float, ndim=1, flags='C_CONTIGUOUS'), # ul_corner
                           ct.c_float, # extent
+                          np.ctypeslib.ndpointer(dtype=ct.c_uint64, ndim=1, flags='C_CONTIGUOUS'), # offsets
                           ct.POINTER(ct.c_uint64), # length of the returned array
                           ct.POINTER(ct.c_int), # error flag
                          ]
@@ -152,13 +155,37 @@ class DataItem :
         returns indices of all DM particles within a certain distance of x_TNG
         """
     #{{{
-        R = cfg.R_LOCAL
-        if cfg.NORMALIZE_COORDS :
-            # all the coordinates are already normalized by R200c, so we need to do the same here
-            R /= self.halo.R200c
+        R = cfg.R_LOCAL / (self.halo.R200c if cfg.NORMALIZE_COORDS else 1)
+        
+        # passed by reference
+        err = ct.c_int(0) # error status
+        Nout = ct.c_uint64(0) # length of the returned array
 
-        # TODO -- the main question is whether we can do this efficiently in pure python or whether
-        #         we need to call a compiled module here
+        # geometry
+        ul_corner = -2.51 * (1 if cfg.NORMALIZE_COORDS else self.halo.R200c)
+        extent = 2 * 2.51 * (1 if cfg.NORMALIZE_COORDS else self.halo.R200c)
+
+        # call the compiled library
+        ptr = DataItem.prtfinder(x_TNG, R,
+                                 self.DM_coords, len(self.DM_coords),
+                                 ul_corner, extent, self.__DM_offsets,
+                                 ct.byref(Nout), ct.byref(err))
+
+        # convert to native python
+        err = err.value
+        Nout = Nout.value
+
+        # check if error occured
+        if err != 0 :
+            raise RuntimeError('prtfinder returned with err=%d'%err)
+
+        # FIXME debugging check
+        r = np.linalg.norm(self.DM_coords - x_TNG[None,:], axis=-1)
+        Nout_reference = np.count_nonzero(r < R)
+        print('Nout=%d -- Nout_reference=%d'%(Nout, Nout_reference))
+
+        # convert raw pointer into numpy array
+        return np.ctypeslib.as_array(ptr, shape=(Nout,))
     #}}}
 
 
