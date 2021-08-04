@@ -44,25 +44,8 @@ class NetworkLayer(nn.Module) :
     #}}}
 
 
-    def forward(self, x, v=None, u=None, basis=None) :
-        """
-        x     ... the input positions tensor, of shape [batch, Nvecs, 3]
-                  or a list of length batch with shapes [1, Nvecs[ii], 3]
-        v     ... the input velocities tensor, of shape [batch, Nvecs, 3]
-                  or a list of length batch with shapes [1, Nvecs[ii], 3]
-        u     ... the global tensor -- assumed to be a vector, i.e. of shape [batch, Nglobals]
-        basis ... the basis vectors to use -- either None if no basis is provided
-                  or of shape [batch, Nbasis, 3]
-        """
+    def create_scalars(self, x, v=None, u=None, basis=None) :
     #{{{
-        if isinstance(x, list) :
-            assert not self.x_is_latent # this can only happen for the variable size initial inputs
-            return torch.cat([self(xi,
-                                   v[ii],
-                                   u[ii, ...].unsqueeze(0) if u is not None else u,
-                                   basis[ii, ...].unsqueeze(0) if basis is not None else basis)
-                              for ii, xi in enumerate(x)])
-
         # we know that the last dimension is the real space one
         norms = torch.linalg.norm(x, dim=-1, keepdim=True)
 
@@ -101,6 +84,31 @@ class NetworkLayer(nn.Module) :
             if basis is not None :
                 basis_projections = torch.einsum('bid,bnd->bin', v, basis) / norms
                 scalars = torch.cat((scalars, basis_projections), dim=-1)
+
+        return scalars
+    # }}}
+
+
+    def forward(self, x, v=None, u=None, basis=None) :
+        """
+        x     ... the input positions tensor, of shape [batch, Nvecs, 3]
+                  or a list of length batch with shapes [1, Nvecs[ii], 3]
+        v     ... the input velocities tensor, of shape [batch, Nvecs, 3]
+                  or a list of length batch with shapes [1, Nvecs[ii], 3]
+        u     ... the global tensor -- assumed to be a vector, i.e. of shape [batch, Nglobals]
+        basis ... the basis vectors to use -- either None if no basis is provided
+                  or of shape [batch, Nbasis, 3]
+        """
+    #{{{
+        if isinstance(x, list) :
+            assert not self.x_is_latent # this can only happen for the variable size initial inputs
+            return torch.cat([self(xi,
+                                   v[ii],
+                                   u[ii, ...].unsqueeze(0) if u is not None else u,
+                                   basis[ii, ...].unsqueeze(0) if basis is not None else basis)
+                              for ii, xi in enumerate(x)])
+
+        scalars = self.create_scalars(x, v, u, basis)
 
         # pass through the MLP, transform scalars -> scalars
         fk = self.mlp(scalars)

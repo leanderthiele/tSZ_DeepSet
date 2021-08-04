@@ -65,34 +65,8 @@ class NetworkLocal(nn.Module) :
     #}}}
 
 
-    def forward(self, x0, x, N, basis, v=None) :
-        """
-        x0    ... the TNG positions around which we are evaluating,
-                  of shape [batch, N_TNG, 3] or a list of length batch with shapes [1, N_TNG[ii], 3]
-        x     ... the DM positions (in the halo frame),
-                  of shape [batch, N_TNG, N_DM, 3] or a list of length batch with shapes [1, N_TNG[ii], N_DM, 3]
-        N     ,.. number of DM particles in vicinity of TNG position [not identical to len(x)!],
-                  of shape [batch, N_TNG] or a list of length batch with shapes [1, N_TNG[ii]]
-        basis ... the usual global vectors,
-                  of shape [batch, Nbasis, 3]
-        v     ... the DM velocities (in the halo frame),
-                  of shape [batch, N_TNG, N_DM, 3] or a list of length batch with shapes [1, N_TNG[ii], N_DM, 3]
-
-        NOTE we currently limit this function to the case that for each halo the number of DM particles N_DM per
-             TNG particle is identical
-        """
+    def create_scalars(self, x0, x, N, basis, v=None) :
     #{{{
-        if isinstance(x0, list) :
-            return [self(x0i,
-                         x[ii],
-                         N[ii],
-                         basis[ii].unsqueeze(0),
-                         v=v[ii] if v is not None else v)
-                    for ii, x0i in enumerate(x0)]
-
-        assert (v is None and not cfg.USE_VELOCITIES) \
-               or (v is not None and cfg.USE_VELOCITIES)
-
         # get some shape information
         N_TNG = x.shape[1]
         N_DM  = x.shape[2]
@@ -137,8 +111,39 @@ class NetworkLocal(nn.Module) :
         if cfg.USE_VELOCITIES :
             scalars = torch.cat((scalars, torch.linalg.norm(v, dim=-1, keepdim=True)), dim=-1)
 
+        return scalars
+    #}}}
 
-        # ---------- now pass through the network -------------
+    def forward(self, x0, x, N, basis, v=None) :
+        """
+        x0    ... the TNG positions around which we are evaluating,
+                  of shape [batch, N_TNG, 3] or a list of length batch with shapes [1, N_TNG[ii], 3]
+        x     ... the DM positions (in the halo frame),
+                  of shape [batch, N_TNG, N_DM, 3] or a list of length batch with shapes [1, N_TNG[ii], N_DM, 3]
+        N     ,.. number of DM particles in vicinity of TNG position [not identical to len(x)!],
+                  of shape [batch, N_TNG] or a list of length batch with shapes [1, N_TNG[ii]]
+        basis ... the usual global vectors,
+                  of shape [batch, Nbasis, 3]
+        v     ... the DM velocities (in the halo frame),
+                  of shape [batch, N_TNG, N_DM, 3] or a list of length batch with shapes [1, N_TNG[ii], N_DM, 3]
+
+        NOTE we currently limit this function to the case that for each halo the number of DM particles N_DM per
+             TNG particle is identical
+        """
+    #{{{
+        if isinstance(x0, list) :
+            return [self(x0i,
+                         x[ii],
+                         N[ii],
+                         basis[ii].unsqueeze(0),
+                         v=v[ii] if v is not None else v)
+                    for ii, x0i in enumerate(x0)]
+
+        assert (v is None and not cfg.USE_VELOCITIES) \
+               or (v is not None and cfg.USE_VELOCITIES)
+
+        scalars = self.create_scalars(x0, x, N, basis, v)
+
         for ii, l in enumerate(self.layers) :
             
             scalars = l(scalars)

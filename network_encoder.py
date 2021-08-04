@@ -75,6 +75,16 @@ class NetworkEncoder(nn.Module) :
     #}}}
 
 
+    def create_scalars(self, x, v=None, u=None, basis=None)
+        """
+        auxiliary function calling the first layer's create_scalars() method,
+        useful to construct normalization magic numbers
+        """
+    #{{{
+        return self.layers[0].create_scalars(x, v, u, basis)
+    #}}}
+
+
     def forward(self, x, v=None, u=None, basis=None) :
         """
         x     ... the input position tensor, of shape [batch, Nvecs, 3]
