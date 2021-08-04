@@ -189,8 +189,13 @@ class DataItem :
         # when no DM particles are in the vicinity
         # (the choice of N=1 is good because it prevents anything from blowing up)
         N = np.ones(len(TNG_coords), dtype=np.float32)
+
         x = np.zeros((len(TNG_coords), int(cfg.N_LOCAL), 3), dtype=np.float32)
-        v = np.zeros((len(TNG_coords), int(cfg.N_LOCAL), 3), dtype=np.float32)
+
+        if self.DM_vels is not None :
+            v = np.zeros((len(TNG_coords), int(cfg.N_LOCAL), 3), dtype=np.float32)
+        else :
+            v = None
 
 
         for ii, x_TNG in enumerate(TNG_coords) :
@@ -206,7 +211,9 @@ class DataItem :
                 prt_indices = prt_indices[rng.integers(N[ii], size=int(cfg.N_LOCAL))]
 
                 x[ii, ...] = self.DM_coords[prt_indices]
-                v[ii, ...] = self.DM_vels[prt_indices]
+
+                if self.DM_vels is not None :
+                    v[ii, ...] = self.DM_vels[prt_indices]
 
             # now we can safely free the memory
             prtfinder.myfree(raw_ptr)

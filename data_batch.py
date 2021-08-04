@@ -61,6 +61,14 @@ class DataBatch :
             if self.has_TNG_residuals :
                 self.TNG_residuals = batch('TNG_residuals')
 
+        if self.has_DM and self.has_TNG and cfg.NET_ARCH['local'] :
+            self.DM_N_local = batch('DM_N_local')
+            self.DM_coords_local = batch('DM_coords_local')
+            if self.has_DM_velocities :
+                self.DM_vels_local = batch('DM_vels_local')
+            else :
+                self.DM_vels_local = None
+
         # get a random number generator if noise is required
         rng = np.random.default_rng(sum(d.hash for d in data_items) % 2**32) if self.mode is DataModes.TRAINING else None
 
@@ -86,6 +94,7 @@ class DataBatch :
         # store the offset scale for the origin network
         self.Xoff = halo_to_tensor('Xoff')
 
+        # store the halo position
         self.pos  = halo_to_tensor('pos')
 
         # store the halo indices in the global data set, useful for debugging
