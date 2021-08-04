@@ -46,17 +46,22 @@ class NetworkLayer(nn.Module) :
 
     def create_scalars(self, x, v=None, u=None, basis=None) :
     #{{{
+        # descriptive string
+        desc = 'input to NetworkLayer: '
+
         # we know that the last dimension is the real space one
         norms = torch.linalg.norm(x, dim=-1, keepdim=True)
 
         # this tensor will collect all scalar quantities
         scalars = norms.clone()
+        desc += '|x| [1]; '
 
         # concatenate with the basis projections if required
         if basis is not None :
             assert self.basis_passed and len(Basis) != 0
             basis_projections = torch.einsum('bid,bnd->bin', x, basis) / norms
             scalars = torch.cat((scalars, basis_projections), dim=-1)
+            desc += 'x.basis [%d]; '%len(Basis)
         else :
             assert not self.basis_passed or len(Basis) == 0
 
@@ -64,14 +69,16 @@ class NetworkLayer(nn.Module) :
             # compute the mutual dot products
             dots = torch.einsum('bid,bjd->bij', x, x)
             scalars = torch.cat((scalars, dots), dim=-1)
+            desc += 'x.x [%d]; '%x.shape[-1]
         else :
             # we are in the very first layer and need to normalize the vector
             x = x / norms
 
-        # concatenate with the global vector if requested
+        # concatenate with the global scalars if requested
         if u is not None :
             assert self.globals_passed and len(GlobalFields) != 0
             scalars = torch.cat((u.unsqueeze(1).expand(-1, scalars.shape[1], -1), scalars), dim=-1)
+            desc += 'u [%d]; '%len(GlobalFields)
         else :
             assert not self.globals_passed or len(GlobalFields) == 0
 
@@ -81,11 +88,13 @@ class NetworkLayer(nn.Module) :
             assert self.velocities_passed and cfg.USE_VELOCITIES
             norms = torch.linalg.norm(v, dim=-1, keepdim=True)
             scalars = torch.cat((scalars, norms), dim=-1)
+            desc += '|v| [1]; '
             if basis is not None :
                 basis_projections = torch.einsum('bid,bnd->bin', v, basis) / norms
                 scalars = torch.cat((scalars, basis_projections), dim=-1)
+                desc += 'v.basis [%d]'%len(Basis)
 
-        return scalars
+        return scalars, desc
     # }}}
 
 
@@ -108,7 +117,7 @@ class NetworkLayer(nn.Module) :
                                    basis[ii, ...].unsqueeze(0) if basis is not None else basis)
                               for ii, xi in enumerate(x)])
 
-        scalars = self.create_scalars(x, v, u, basis)
+        scalars, _ = self.create_scalars(x, v, u, basis)
 
         # pass through the MLP, transform scalars -> scalars
         fk = self.mlp(scalars)

@@ -66,6 +66,9 @@ class NetworkLocal(nn.Module) :
 
     def create_scalars(self, x0, x, N, basis, v=None) :
     #{{{
+        # descriptive string identifying the scalars
+        desc = 'input to NetworkLocal: '
+
         # get some shape information
         N_DM  = x.shape[2]
 
@@ -78,38 +81,49 @@ class NetworkLocal(nn.Module) :
 
         # measure of number of DM particles in vicinity, has shape [batch, N_TNG, N_DM, 1]
         scalars = N.unsqueeze(-1).unsqueeze(-1).expand(-1, -1, N_DM, -1)
+        desc += 'N [1]; '
 
         # concatenate with projections of x0, vbulk on global basis vectors [batch, N_TNG, Nbasis]
         scalars = torch.cat((scalars,
                              torch.einsum('bid,bjd->bij', x0, basis).unsqueeze(2).expand(-1, -1, N_DM, -1)),
                             dim=-1)
+        desc += 'x0.basis [%d]; '%len(Basis)
 
         if cfg.USE_VELOCITIES :
             scalars = torch.cat((scalars,
                                  torch.einsum('bid,bjd->bij', vbulk, basis).unsqueeze(2).expand(-1, -1, N_DM, -1)),
                                 dim=-1)
+            desc += 'vbulk.basis [%d]; '%len(Basis)
 
         # concatenate with moduli of x0, vbulk [batch, N_TNG]
         scalars = torch.cat((scalars,
                              torch.linalg.norm(x0, dim=-1).unsqueeze(-1).unsqueeze(-1).expand(-1, -1, N_DM, -1)),
                             dim = -1)
+        desc += '|x0| [1]; '
         
         if cfg.USE_VELOCITIES :
             scalars = torch.cat((scalars,
                                  torch.linalg.norm(vbulk, dim=-1).unsqueeze(-1).unsqueeze(-1).expand(-1, -1, N_DM, -1)),
                                 dim = -1)
+            desc += '|vbulk| [1]; '
 
         # concatenate with projections of x, v on global basis vectors [batch, N_TNG, N_DM, Nbasis]
         scalars = torch.cat((scalars, torch.einsum('bijd,bkd->bijk', x, basis)), dim=-1)
+        desc += 'x.basis [%d]; '%len(Basis)
+
         if cfg.USE_VELOCITIES :
             scalars = torch.cat((scalars, torch.einsum('bijd,bkd->bijk', v, basis)), dim=-1)
+            desc += 'v.basis [%d]; '%len(Basis)
 
         # concatenate with moduli of x, v [batch, N_TNG, N_DM, 1]
         scalars = torch.cat((scalars, torch.linalg.norm(x, dim=-1, keepdim=True)), dim=-1)
+        desc += '|x| [1]; '
+
         if cfg.USE_VELOCITIES :
             scalars = torch.cat((scalars, torch.linalg.norm(v, dim=-1, keepdim=True)), dim=-1)
+            desc += '|v| [1]; '
 
-        return scalars
+        return scalars, desc
     #}}}
 
 
@@ -141,7 +155,7 @@ class NetworkLocal(nn.Module) :
         assert (v is None and not cfg.USE_VELOCITIES) \
                or (v is not None and cfg.USE_VELOCITIES)
 
-        scalars = self.create_scalars(x0, x, N, basis, v)
+        scalars, _ = self.create_scalars(x0, x, N, basis, v)
 
         for ii, l in enumerate(self.layers) :
             
