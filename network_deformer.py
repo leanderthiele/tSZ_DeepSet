@@ -29,6 +29,25 @@ class NetworkDeformer(nn.Module) :
 
 
     def create_scalars(self, x, r, u=None, basis=None) :
+    #{{{ 
+        desc = 'input to NetworkDeformer: '
+
+        scalars = r.clone()
+        desc += 'r [1]; '
+
+        # concatenate with the basis projections if required
+        if basis is not None :
+            basis_projections = torch.einsum('bid,bnd->bin', x, basis) / r
+            scalars = torch.cat((scalars, basis_projections), dim=-1)
+            desc += 'x.basis [%d]; '%len(Basis)
+
+        # concatenate with the global features if required
+        if u is not None :
+            scalars = torch.cat((u.unsqueeze(1).expand(-1, scalars.shape[1], -1), scalars), dim=-1)
+            desc += 'u [%d]; '%len(GlobalFields)
+
+        return scalars, desc
+    #}}}
 
 
     def forward(self, x, r, u=None, basis=None) :
@@ -49,16 +68,7 @@ class NetworkDeformer(nn.Module) :
                          basis[ii, ...].unsqueeze(0) if basis is not None else basis)
                     for ii, xi in enumerate(x)]
 
-        scalars = r.clone()
-
-        # concatenate with the basis projections if required
-        if basis is not None :
-            basis_projections = torch.einsum('bid,bnd->bin', x, basis) / r
-            scalars = torch.cat((scalars, basis_projections), dim=-1)
-
-        # concatenate with the global features if required
-        if u is not None :
-            scalars = torch.cat((u.unsqueeze(1).expand(-1, scalars.shape[1], -1), scalars), dim=-1)
+        scalars, _ = self.create_scalars(x, r, u, basis)
 
         # pass through the MLP
         scalars = self.mlp(scalars)

@@ -25,7 +25,15 @@ class NetworkVAE(nn.Module) :
         self.Nlatent = Nlatent
         self.rand_latent = rand_latent
     #}}}
+
+
+    def create_scalars(self, x) :
+    #{{{ 
+        desc = 'input to NetworkVAE: x [%d]; '%cfg.RESIDUALS_NBINS
+        return x, desc
+    #}}}
     
+
     def forward(self, x) :
         """
         x ... the input, of shape [batch, Nbins]. 
@@ -40,8 +48,10 @@ class NetworkVAE(nn.Module) :
             # draw random latent space variables
             return torch.randn(x.shape[0], self.Nlatent, device=x.device), None
 
+        scalars, _ = self.create_scalars(x)
+
         # pass through the network
-        h = self.mlp(x)
+        h = self.mlp(scalars)
         mu = h[:, :self.Nlatent]
         logvar = h[:, self.Nlatent:]
 
