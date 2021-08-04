@@ -23,9 +23,14 @@ from data_batch import DataBatch
 from data_modes import DataModes
 
 from init_proc import InitProc
+from mpi_env_types import MPIEnvTypes
+
 import cfg
 
 InitProc(0)
+
+if cfg.mpi_env_type is MPIEnvTypes.NOGPU :
+    torch.set_num_threads(5)
 
 
 # construct the network instances
