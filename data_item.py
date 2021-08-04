@@ -11,12 +11,47 @@ class DataItem :
     represents one data item, i.e. a collection of network input and target
 
     Upon construction, the instance has the fields:
+        [reference]
         halo          ... the Halo instance this data item is associated with
+        mode          ... the mode argument from the init call
+
+        [bool]
+        has_DM
+        has_TNG
+        has_TNG_residuals
+
+        [data]
         DM_coords     ... the coordinates of the dark matter particles
+        DM_vels       ... the velocities of the dark matter particles
         TNG_coords    ... the coordinates of the gas particles
         TNG_Pth       ... the electron pressure at the position of those gas particles
         TNG_radii     ... the radial coordinates of the gas particles (with the last dimension length 1)
         TNG_residuals ... the Pth residuals with respect to a simple model, binned and normalized
+    These fields are NOT ready for use yet, usable DataItem instances are always
+    constructed using the sample_particles() method.
+
+    Calling sample_particles() returns a DataItem instance with usable fields:
+        [reference]
+        halo
+        mode
+
+        [bool]
+        has_DM
+        has_TNG
+        has_TNG_residuals
+        has_DM_local
+
+        [data]
+        DM_coords
+        DM_vels
+        TNG_coords
+        TNG_Pth
+        TNG_radii
+        TNG_residuals
+        DM_N_local
+        DM_coords_local
+        DM_vels_local
+    In particular, except for the `local' data everything is normalized by 200c quantities now!
     """
 
 
@@ -87,11 +122,6 @@ class DataItem :
         else :
             vels = None
 
-        # divide by R200c
-        coords /= self.halo.R200c
-        if vels is not None :
-            vels /= self.halo.V200c
-
         if cfg.NET_ARCH['local'] :
             offsets = np.fromfile(self.halo.storage_DM['offsets'], dtype=np.uint)
         else :
@@ -117,12 +147,6 @@ class DataItem :
         # take periodic boundary conditions into account
         coords = DataItem.__periodicize(coords)
 
-        # if required, divide by R200c
-        coords /= self.halo.R200c
-
-        # normalize the thermal pressure
-        Pth /= self.halo.P200c
-
         return coords, Pth[:, None]
     #}}}
 
@@ -139,18 +163,16 @@ class DataItem :
         (both as raw pointer and numpy array)
         """
     #{{{
-        R = cfg.R_LOCAL / self.halo.R200c
-        
         # passed by reference
         err = ct.c_int(0) # error status
         Nout = ct.c_uint64(0) # length of the returned array
 
         # geometry
-        ul_corner = np.full(3, -2.51, dtype=np.float32)
-        extent = 2 * 2.51
+        ul_corner = np.full(3, -2.51 * self.halo.R200c, dtype=np.float32)
+        extent = 2 * 2.51 * self.halo.R200c
 
         # call the compiled library
-        ptr = prtfinder.prtfinder(x_TNG, R,
+        ptr = prtfinder.prtfinder(x_TNG, cfg.R_LOCAL,
                                   self.DM_coords, len(self.DM_coords),
                                   ul_corner, extent, self.__DM_offsets,
                                   ct.byref(Nout), ct.byref(err))
@@ -248,6 +270,7 @@ class DataItem :
         out.has_DM = self.has_DM
         out.has_TNG = self.has_TNG
         out.has_TNG_residuals = self.has_TNG_residuals
+        out.has_DM_local = self.has_DM and self.has_TNG and cfg.NET_ARCH['local']
 
         # clamp the indices to the allowed range
         indices['DM'] %= len(self.DM_coords)
@@ -255,25 +278,61 @@ class DataItem :
 
         # now fill in the sampled particles
 
-        if self.has_DM :
+        if out.has_DM :
             out.DM_coords = self.DM_coords[indices['DM']]
             if self.DM_vels is not None :
                 out.DM_vels = self.DM_vels[indices['DM']]
+            else :
+                out.DM_vels = None
 
-        if self.has_TNG :
+        if out.has_TNG :
             out.TNG_coords = self.TNG_coords[indices['TNG']]
             out.TNG_Pth = self.TNG_Pth[indices['TNG']]
             out.TNG_radii = self.TNG_radii[indices['TNG']]
 
-        if self.has_TNG_residuals :
+        if out.has_TNG_residuals :
             out.TNG_residuals = self.TNG_residuals
             if TNG_residuals_noise_rng is not None and cfg.RESIDUALS_NOISE is not None :
                 out.TNG_residuals += TNG_residuals_noise_rng.normal(scale=cfg.RESIDUALS_NOISE,
                                                                     size=cfg.RESIDUALS_NBINS)
 
-        if self.has_DM and self.has_TNG and cfg.NET_ARCH['local'] :
+        if out.has_DM_local :
             out.DM_N_local, out.DM_coords_local, out.DM_vels_local \
                 = self.__get_DM_local(out.TNG_coords, local_rng)
+
+        # normalize the local quantities by some reasonable values to get them to O(1),
+        # the standard-normal thing is done later
+        # NOTE it is important that this happens before the 200c normalization below
+        #      because we need to use the kpc-unit TNG coordinates
+        if out.has_DM_local :
+            
+            # this was calibrated using cfg.R_LOCAL=100 kpc/h and gives a pretty good standard normal,
+            # need to re-calibrate the magic numbers for different setups using
+            # ./create_Nlocal_statistics.py
+            out.DM_N_local = ( np.log(out.DM_N_local) - 5.5019 ) / 1.4
+
+            # take DM coordinates relative to TNG position
+            out.DM_coords_local -= out.TNG_coords[:, None, :]
+
+            # get DM coordinates to O(1)
+            out.DM_coords_local /= cfg.R_LOCAL
+
+            # get DM velocities to O(1) dispersion
+            if out.DM_vels_local is not None :
+                out.DM_vels_local /= 300.0 # km/s, this is a guess!
+
+        # normalize the halo-wide quantities by self-similar scales
+        if out.has_DM :
+            out.DM_coords /= self.halo.R200c
+            if out.DM_vels is not None :
+                out.DM_vels /= self.halo.V200c
+
+        if out.has_TNG :
+            out.TNG_coords /= self.halo.R200c
+            out.TNG_radii /= self.halo.R200c
+            out.TNG_Pth /= self.halo.P200c
+
+        # NOTE the TNG residuals are directly from file and already normalized by P200c
 
         # give this instance some unique hash depending on the random indices passed
         # NOTE this hash is not necessarily positive, as the sums may well overflow

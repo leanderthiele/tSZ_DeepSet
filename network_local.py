@@ -97,19 +97,10 @@ class NetworkLocal(nn.Module) :
         N_TNG = x.shape[1]
         N_DM  = x.shape[2]
 
-        # normalize the number of particles to standard normal
-        # (the magic numbers below were obtained with cfg.R_LOCAL=100 kpc/h,
-        #  they would need to be adjusted for different radii; use create_Nlocal_statistics.py
-        #  for this)
-        N = ( torch.log(N) - 5.5019 ) / 1.4
-
         if cfg.USE_VELOCITIES :
             # compute bulk motion and subtract from the velocities
             vbulk = torch.mean(v, dim=2) # [batch, N_TNG, 3]
             v -= vbulk.unsqueeze(2)
-
-        # take DM positions relative to the TNG position
-        x -= x0.unsqueeze(2)
 
         # ---------- now compute the input scalars ----------------
 
