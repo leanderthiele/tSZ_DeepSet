@@ -28,6 +28,9 @@ class NetworkDeformer(nn.Module) :
     #}}}
 
 
+    def create_scalars(self, x, r, u=None, basis=None) :
+
+
     def forward(self, x, r, u=None, basis=None) :
         """
         x ... the TNG particle coordinates, either of shape [batch, Npart, 3]
