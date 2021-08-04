@@ -71,8 +71,8 @@ class NetworkDecoder(nn.Module) :
         """
     #{{{
         if isinstance(x, list) :
-            return [self(h[ii, ...].unsqueeze(0),
-                         xi,
+            return [self(xi,
+                         h[ii, ...].unsqueeze(0),
                          r=r[ii] if r is not None else r,
                          u=u[ii, ...].unsqueeze(0) if u is not None else u,
                          basis=basis[ii, ...].unsqueeze(0) if basis is not None else basis,

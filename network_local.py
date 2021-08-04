@@ -82,5 +82,89 @@ class NetworkLocal(nn.Module) :
              TNG particle is identical
         """
     #{{{
-        # TODO
+        if isinstance(x0, list) :
+            return [self(x0i,
+                         x[ii],
+                         N[ii],
+                         basis[ii].unsqueeze(0),
+                         v=v[ii] if v is not None else v)
+                    for ii, x0i in enumerate(x0)]
+
+        assert (v is None and not cfg.USE_VELOCITIES) \
+               or (v is not None and cfg.USE_VELOCITIES)
+
+        # get some shape information
+        N_TNG = x.shape[1]
+        N_DM  = x.shape[2]
+
+        # normalize the number of particles to standard normal
+        # (the magic numbers below were obtained with cfg.R_LOCAL=100 kpc/h,
+        #  they would need to be adjusted for different radii; use create_Nlocal_statistics.py
+        #  for this)
+        N = ( torch.log(N) - 5.5019 ) / 1.4
+
+        if cfg.USE_VELOCITIES :
+            # compute bulk motion and subtract from the velocities
+            vbulk = torch.mean(v, dim=2) # [batch, N_TNG, 3]
+            v -= vbulk.unsqueeze(2)
+
+        # take DM positions relative to the TNG position
+        x -= x0.unsqueeze(2)
+
+        # ---------- now compute the input scalars ----------------
+
+        # measure of number of DM particles in vicinity, has shape [batch, N_TNG, N_DM, 1]
+        scalars = N.unsqueeze(-1).unsqueeze(-1).expand(-1, -1, N_DM, -1)
+
+        # concatenate with projections of x0, vbulk on global basis vectors [batch, N_TNG, Nbasis]
+        scalars = torch.cat((scalars,
+                             torch.einsum('bid,bjd->bij', x0, basis).unsqueeze(2).expand(-1, -1, N_DM, -1)),
+                            dim=-1)
+
+        if cfg.USE_VELOCITIES :
+            scalars = torch.cat((scalars,
+                                 torch.einsum('bid,bjd->bij', vbulk, basis).unsqueeze(2).expand(-1, -1, N_DM, -1)),
+                                dim=-1)
+
+        # concatenate with moduli of x0, vbulk [batch, N_TNG]
+        scalars = torch.cat((scalars,
+                             torch.linalg.norm(x0, dim=-1).unsqueeze(-1).unsqueeze(-1).expand(-1, -1, N_DM, -1)),
+                            dim = -1)
+        
+        if cfg.USE_VELOCITIES :
+            scalars = torch.cat((scalars,
+                                 torch.linalg.norm(vbulk, dim=-1).unsqueeze(-1).unsqueeze(-1).expand(-1, -1, N_DM, -1)),
+                                dim = -1)
+
+        # concatenate with projections of x, v on global basis vectors [batch, N_TNG, N_DM, Nbasis]
+        scalars = torch.cat((scalars, torch.einsum('bijd,bkd->bijk', x, basis)), dim=-1)
+        if cfg.USE_VELOCITIES :
+            scalars = torch.cat((scalars, torch.einsum('bijd,bkd->bijk', v, basis)), dim=-1)
+
+        # concatenate with moduli of x, v [batch, N_TNG, N_DM, 1]
+        scalars = torch.cat((scalars, torch.linalg.norm(x, dim=-1, keepdim=True)), dim=-1)
+        if cfg.USE_VELOCITIES :
+            scalars = torch.cat((scalars, torch.linalg.norm(v, dim=-1, keepdim=True)), dim=-1)
+
+
+        # ---------- now pass through the network -------------
+        for ii, l in enumerate(self.layers) :
+            
+            scalars = l(scalars)
+
+            if ii == 0 :
+                # in this case we also need a pooling operation
+                scalars = self.__pool(scalars)
+
+        return scalars
+    #}}}
+
+
+    def __pool(self, x) :
+        """
+        input tensor is of shape [batch, N_TNG, N_DM, N_features]
+        --> we return [batch, N_TNG, N_features]
+        """
+    #{{{
+        return torch.mean(x, dim=2)
     #}}}
