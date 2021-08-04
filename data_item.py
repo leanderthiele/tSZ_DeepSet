@@ -148,7 +148,9 @@ class DataItem :
         Nout = ct.c_uint64(0) # length of the returned array
 
         # geometry
-        ul_corner = np.full(3, -2.51 * (1 if cfg.NORMALIZE_COORDS else self.halo.R200c), dtype=np.float32)
+        ul_corner = np.full(3,
+                            -2.51 * (1 if cfg.NORMALIZE_COORDS else self.halo.R200c),
+                            dtype=np.float32)
         extent = 2 * 2.51 * (1 if cfg.NORMALIZE_COORDS else self.halo.R200c)
 
         # call the compiled library
@@ -165,6 +167,11 @@ class DataItem :
         if err != 0 :
             raise RuntimeError('prtfinder returned with err=%d'%err)
 
+        if Nout == 0 :
+            # pathological case: we have no DM particles in the vicinity
+            # (for reasonable choices of cfg.R_LOCAL, this is a permille event)
+            return ptr, None
+
         # convert raw pointer into numpy array
         return ptr, np.ctypeslib.as_array(ptr, shape=(Nout,))
     #}}}
@@ -178,21 +185,32 @@ class DataItem :
     #{{{
         assert isinstance(rng, np.random.generator.Generator)
 
-        N = np.empty(len(TNG_coords), dtype=np.float32)
-        x = np.empty((len(TNG_coords), int(cfg.N_LOCAL), 3), dtype=np.float32)
-        v = np.empty((len(TNG_coords), int(cfg.N_LOCAL), 3), dtype=np.float32)
+        # initialize these arrays such that the initial values make sense for the case
+        # when no DM particles are in the vicinity
+        # (the choice of N=1 is good because it prevents anything from blowing up)
+        N = np.ones(len(TNG_coords), dtype=np.float32)
+        x = np.zeros((len(TNG_coords), int(cfg.N_LOCAL), 3), dtype=np.float32)
+        v = np.zeros((len(TNG_coords), int(cfg.N_LOCAL), 3), dtype=np.float32)
+
 
         for ii, x_TNG in enumerate(TNG_coords) :
-            raw_ptr, prt_indices = self.__get_DM_local_indices(x_TNG)
-            N[ii] = len(prt_indices)
 
-            prt_indices = prt_indices[rng.integers(N[ii], size=int(cfg.N_LOCAL))]
+            raw_ptr, prt_indices = self.__get_DM_local_indices(x_TNG)
+
+            if prt_indices is not None :
+                # there are DM particles in the vicinity (this is the 99+% case),
+                # so we sample some of them
+
+                N[ii] = len(prt_indices)
+
+                prt_indices = prt_indices[rng.integers(N[ii], size=int(cfg.N_LOCAL))]
+
+                x[ii, ...] = self.DM_coords[prt_indices]
+                v[ii, ...] = self.DM_vels[prt_indices]
 
             # now we can safely free the memory
             prtfinder.myfree(raw_ptr)
 
-            x[ii, ...] = self.DM_coords[prt_indices]
-            v[ii, ...] = self.DM_vels[prt_indices]
         
         return N, x, v
     #}}}
