@@ -3,7 +3,6 @@ import torch.nn as nn
 
 from network_mlp import NetworkMLP
 from basis import Basis
-from global_fields import GlobalFields
 from default_from_cfg import DefaultFromCfg
 import cfg
 
@@ -35,7 +34,7 @@ class NetworkLocal(nn.Module) :
         if isinstance(Nhidden, DefaultFromCfg) :
             Nhidden = Nhidden()
 
-        assert isinstance(Nhidden, int) or isinstance(Nhidden, dict)
+        assert isinstance(Nhidden, (int, dict))
 
         super().__init__()
 
@@ -68,7 +67,6 @@ class NetworkLocal(nn.Module) :
     def create_scalars(self, x0, x, N, basis, v=None) :
     #{{{
         # get some shape information
-        N_TNG = x.shape[1]
         N_DM  = x.shape[2]
 
         if cfg.USE_VELOCITIES :
@@ -113,6 +111,7 @@ class NetworkLocal(nn.Module) :
 
         return scalars
     #}}}
+
 
     def forward(self, x0, x, N, basis, v=None) :
         """

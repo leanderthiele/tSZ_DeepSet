@@ -142,6 +142,13 @@ DROPOUT = None
 # dropout rate (for the visible neurons) -- set to None if not wanted
 VISIBLE_DROPOUT = None
 
+# default number of hidden layers in the local network
+# (I believe anything apart from 0, 1 doesn't make much sense)
+LOCAL_DEFAULT_NLAYERS = 1
+
+# default number of hidden neurons in the local network
+LOCAL_DEFAULT_NHIDDEN = 128
+
 # default number of hidden layers in the encoder
 ENCODER_DEFAULT_NLAYERS = 1
 

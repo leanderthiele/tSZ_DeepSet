@@ -45,7 +45,7 @@ class NetworkEncoder(nn.Module) :
         if isinstance(globals_max_layer, DefaultFromCfg) :
             globals_max_layer = globals_max_layer()
 
-        assert isinstance(Nhidden, int) or isinstance(Nhidden, dict)
+        assert isinstance(Nhidden, (dict, int))
 
         super().__init__()
 
@@ -75,7 +75,7 @@ class NetworkEncoder(nn.Module) :
     #}}}
 
 
-    def create_scalars(self, x, v=None, u=None, basis=None)
+    def create_scalars(self, x, v=None, u=None, basis=None) :
         """
         auxiliary function calling the first layer's create_scalars() method,
         useful to construct normalization magic numbers
