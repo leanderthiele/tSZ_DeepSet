@@ -101,10 +101,10 @@ for t, data in enumerate(loader) :
     append_samples(scalars_vae, scalars_vae_)
 
 np.savez('normalization_data.npz',
-         scalars_encoder=scalars_encoder,
-         scalars_local=scalars_local,
-         scalars_deformer=scalars_deformer,
-         scalars_vae=scalars_vae,
+         scalars_encoder=np.array(scalars_encoder),
+         scalars_local=np.array(scalars_local),
+         scalars_deformer=np.array(scalars_deformer),
+         scalars_vae=np.array(scalars_vae),
          desc_encoder=desc_encoder,
          desc_local=desc_local,
          desc_deformer=desc_deformer,
