@@ -86,7 +86,8 @@ class DataItem :
             self.TNG_coords, self.TNG_Pth = self.__get_TNG()
             self.TNG_radii = np.linalg.norm(self.TNG_coords, axis=-1, keepdims=True)
             if cfg.RMAX is not None :
-                mask = self.TNG_radii < cfg.RMAX
+                # remember that TNG_radii has a singleton dimension
+                mask = self.TNG_radii.flatten() < cfg.RMAX
                 self.TNG_coords = self.TNG_coords[mask]
                 self.TNG_Pth = self.TNG_Pth[mask]
                 self.TNG_radii = self.TNG_radii[mask]
@@ -201,8 +202,6 @@ class DataItem :
         returns Nparticles, coordinates, velocities
         """
     #{{{
-        assert isinstance(rng, np.random.generator.Generator)
-
         # initialize these arrays such that the initial values make sense for the case
         # when no DM particles are in the vicinity
         # (the choice of N=1 is good because it prevents anything from blowing up)

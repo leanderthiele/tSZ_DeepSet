@@ -31,12 +31,17 @@ InitProc(0)
 # construct the network instances
 # -- the specific architecture is not important
 encoder = NetworkEncoder(1)
+print('Constructed Encoder')
 local = NetworkLocal(1)
+print('Constructed Local')
 deformer = NetworkDeformer()
+print('Constructed Deformer')
 vae = NetworkVAE()
+print('Constructed VAE')
 
 # construct the data loader
 loader = DataLoader(DataModes.TRAINING)
+print('Constructed loader')
 
 # the descriptive strings
 desc_encoder = None
@@ -56,7 +61,11 @@ def append_samples(l, s) :
     assert isinstance(s, torch.Tensor)
     l.extend(s.cpu().detach().numpy().reshape(-1, s.shape[-1]))
 
+length = len(loader)
+
 for t, data in enumerate(loader) :
+
+    print('%d / %d'%(t, length))
 
     assert isinstance(data, DataBatch)
 

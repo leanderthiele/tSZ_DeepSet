@@ -55,7 +55,6 @@ class NetworkLocal(nn.Module) :
                         else Nhidden['first'] if 'first' in Nhidden and ii==0 \
                         else Nhidden['last'] if 'last' in Nhidden and ii==Nlayers-1 \
                         else cfg.LOCAL_DEFAULT_NHIDDEN,
-                        input_is_hidden=ii != 0,
                         **(MLP_kwargs_dict[str(ii)] if str(ii) in MLP_kwargs_dict \
                            else MLP_kwargs_dict['first'] if 'first' in MLP_kwargs_dict and ii==0 \
                            else MLP_kwargs_dict['last'] if 'last' in MLP_kwargs_dict and ii==Nlayers \

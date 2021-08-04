@@ -1,8 +1,3 @@
-
-
-
-source pytorch_env.sh
-
 python -u create_normalization.py \
   --'NET_ARCH=dict(origin=True, batt12=True, deformer=True, encoder=True, decoder=True, vae=True, local=True)' \
   --'PRT_FRACTION["TNG"]=256' \
