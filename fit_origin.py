@@ -78,8 +78,7 @@ for epoch in range(500) :
         prediction = prediction.squeeze(dim=1)
 
         target = data.pos_TNG - data.CM_DM
-        if cfg.NORMALIZE_COORDS :
-            target /= data.R200c.unsqueeze(-1)
+        target /= data.R200c.unsqueeze(-1)
 
         loss = loss_fn(prediction, target)
 
@@ -125,8 +124,7 @@ for epoch in range(500) :
         prediction = prediction.squeeze(dim=1)
 
         target = data.pos_TNG - data.CM_DM
-        if cfg.NORMALIZE_COORDS :
-            target /= data.R200c.unsqueeze(-1)
+        target /= data.R200c.unsqueeze(-1)
 
         validation_loss = torch.linalg.norm(prediction-target, dim=-1).cpu().detach().numpy()
         guess_loss = torch.linalg.norm(target, dim=-1).cpu().detach().numpy()

@@ -51,7 +51,7 @@ class DataItem :
             self.TNG_coords, self.TNG_Pth = self.__get_TNG()
             self.TNG_radii = np.linalg.norm(self.TNG_coords, axis=-1, keepdims=True)
             if cfg.RMAX is not None :
-                mask = self.TNG_radii < (cfg.RMAX if cfg.NORMALIZE_COORDS else cfg.RMAX * self.halo.R200c)
+                mask = self.TNG_radii < cfg.RMAX
                 self.TNG_coords = self.TNG_coords[mask]
                 self.TNG_Pth = self.TNG_Pth[mask]
                 self.TNG_radii = self.TNG_radii[mask]
@@ -87,11 +87,10 @@ class DataItem :
         else :
             vels = None
 
-        # if required, divide by R200c
-        if cfg.NORMALIZE_COORDS :
-            coords /= self.halo.R200c
-            if vels is not None :
-                vels /= self.halo.V200c
+        # divide by R200c
+        coords /= self.halo.R200c
+        if vels is not None :
+            vels /= self.halo.V200c
 
         if cfg.NET_ARCH['local'] :
             offsets = np.fromfile(self.halo.storage_DM['offsets'], dtype=np.uint)
@@ -119,8 +118,7 @@ class DataItem :
         coords = DataItem.__periodicize(coords)
 
         # if required, divide by R200c
-        if cfg.NORMALIZE_COORDS :
-            coords /= self.halo.R200c
+        coords /= self.halo.R200c
 
         # normalize the thermal pressure
         Pth /= self.halo.P200c
@@ -141,17 +139,15 @@ class DataItem :
         (both as raw pointer and numpy array)
         """
     #{{{
-        R = cfg.R_LOCAL / (self.halo.R200c if cfg.NORMALIZE_COORDS else 1)
+        R = cfg.R_LOCAL / self.halo.R200c
         
         # passed by reference
         err = ct.c_int(0) # error status
         Nout = ct.c_uint64(0) # length of the returned array
 
         # geometry
-        ul_corner = np.full(3,
-                            -2.51 * (1 if cfg.NORMALIZE_COORDS else self.halo.R200c),
-                            dtype=np.float32)
-        extent = 2 * 2.51 * (1 if cfg.NORMALIZE_COORDS else self.halo.R200c)
+        ul_corner = np.full(3, -2.51, dtype=np.float32)
+        extent = 2 * 2.51
 
         # call the compiled library
         ptr = prtfinder.prtfinder(x_TNG, R,

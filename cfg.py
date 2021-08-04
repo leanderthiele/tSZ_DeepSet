@@ -43,9 +43,6 @@ N_LOCAL = 1e2
 # how large the local spheres are (in kpc)
 R_LOCAL = 100.0
 
-# whether to divide the coordinates by R200c
-NORMALIZE_COORDS = True
-
 # which components to include in the network architecture
 # if batt12 is False, the deformer setting has no consequence
 # one of batt12, decoder must be True and decoder must be True if encoder is True

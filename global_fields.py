@@ -60,13 +60,13 @@ class GlobalFields(np.ndarray, metaclass=FixedLenVec) :
         vel_dispersion_dot_ang_mom[vel_dispersion_dot_ang_mom < 0] *= -1
         vel_dispersion_dot_inertia[vel_dispersion_dot_inertia < 0] *= -1
 
-        if cfg.NORMALIZE_COORDS :
-            ang_mom_norm /= halo.R200c * halo.V200c * halo.M200c
-            Xoff /= halo.R200c
-            Voff /= halo.V200c
-            CM_norm /= halo.R200c
-            eigval_inertia *= cfg._UNIT_MASS / (halo.R200c**2 * halo.M200c)
-            eigval_vel_dispersion *= cfg._UNIT_MASS / (halo.V200c**2 * halo.M200c)
+        # convert to self-similar units
+        ang_mom_norm /= halo.R200c * halo.V200c * halo.M200c
+        Xoff /= halo.R200c
+        Voff /= halo.V200c
+        CM_norm /= halo.R200c
+        eigval_inertia *= cfg._UNIT_MASS / (halo.R200c**2 * halo.M200c)
+        eigval_vel_dispersion *= cfg._UNIT_MASS / (halo.V200c**2 * halo.M200c)
 
         out = []
 

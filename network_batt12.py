@@ -35,24 +35,18 @@ class NetworkBatt12(nn.Module) :
     #}}}
     
 
-    def forward(self, M200c, r, R200c=None) :
+    def forward(self, M200c, r) :
         """
         M200c ... shape [batch]
         r     ... shape [batch, Nvecs, 1] or list of length batch with shapes [1, Nvecsi, 1]
+                  (assumed normalized by R200c)
 
         Returns thermal pressure at r in units of P200c, in the same shape as r
-        if R200c is not None, we assume that the radii are not normalized yet
-        (then it should be of shape [batch]
         """
     #{{{
         if isinstance(r, list) :
-            return [self(torch.tensor([M200c[ii],], requires_grad=False), ri,
-                         R200c=None if R200c is None else torch.tensor([R200c[ii], ], requires_grad=False))
+            return [self(torch.tensor([M200c[ii],], requires_grad=False), ri)
                     for ii, ri in enumerate(r)]
-
-        if R200c is not None :
-            assert not cfg.NORMALIZE_COORDS
-            r /= R200c[:,None,None]
 
         P0 = self.__primitive(M200c, 'P0')
         xc = self.__primitive(M200c, 'xc')
