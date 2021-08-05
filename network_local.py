@@ -90,7 +90,7 @@ class NetworkLocal(nn.Module) :
 
         if cfg.USE_VELOCITIES :
             scalars = torch.cat((scalars,
-                                 torch.einsum('bid,bjd->bij', vbulk, basis).unsqueeze(2).expand(-1, -1, N_DM, -1)),
+                                 torch.einsum('bid,bjd->bij', vbulk/0.106, basis).unsqueeze(2).expand(-1, -1, N_DM, -1)),
                                 dim=-1)
             desc += 'vbulk.basis [%d]; '%len(Basis)
 

@@ -308,7 +308,7 @@ class DataItem :
             # need to re-calibrate the magic numbers for different setups using
             # ./create_Nlocal_statistics.py
             # TODO there is a problem with this one!
-            out.DM_N_local = ( np.log(out.DM_N_local) - 5.5019 ) / 1.4
+            out.DM_N_local = np.log(out.DM_N_local)
 
             # take DM coordinates relative to TNG position
             out.DM_coords_local -= out.TNG_coords[:, None, :]
@@ -318,7 +318,7 @@ class DataItem :
 
             # get DM velocities to O(1) dispersion
             if out.DM_vels_local is not None :
-                out.DM_vels_local /= 300.0 # km/s, this is a guess!
+                out.DM_vels_local /= 510.0 # km/s, calibrated
 
         # normalize the halo-wide quantities by self-similar scales
         if out.has_DM :
