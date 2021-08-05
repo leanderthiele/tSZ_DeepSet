@@ -63,8 +63,7 @@ def TNG_radii(x) :
     """
     transform the TNG radii (passed in units of R200c)
     """
-    # TODO
-    return x**3
+    return (x**3 - 4.0) / 2.3
 
 
 def local_v0(x) :
@@ -78,7 +77,7 @@ def local_x(x) :
     """
     transform the local DM radii
     """
-    return x**3
+    return (x**3 - 0.50) / 0.29
 
 
 def local_v(x) :
