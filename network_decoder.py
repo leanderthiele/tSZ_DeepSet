@@ -81,9 +81,21 @@ class NetworkDecoder(nn.Module) :
 
         scalars = None
 
+        if r is not None :
+            x_norm = r + 1e-5
+        else :
+            x_norm = torch.linalg.norm(x, dim=-1, keepdim=True) + 1e-5
+
         if h is not None :
+            # compute the moduli of the latent vectors
+            h_norm = torch.linalg.norm(h, dim=-1, keepdim=True)
+            scalars = h_norm.clone()
+
             # compute the projections of shape [batch, Nvects, latent feature]
-            scalars = torch.einsum('bvd,bld->bvl', x, h)
+            # TODO whether to normalize to unit vectors here is a hyperparameter we should explore!!!
+            scalars = torch.cat((scalars,
+                                 torch.einsum('bvd,bld->bvl', x / x_norm, h / (h_norm + 1e-5))),
+                                dim=-1)
 
         # concatenate with the radial distances if needed
         if r is not None :
@@ -98,7 +110,7 @@ class NetworkDecoder(nn.Module) :
             assert self.basis_passed and len(Basis) != 0
              # NOTE one of the TNG particles in each halo sits directly at the origin,
              #      so we need to make sure we don't get a divergence here!
-            basis_projections = torch.einsum('bid,bnd->bin', x / (r + 1e-5), basis)
+            basis_projections = torch.einsum('bid,bnd->bin', x / x_norm, basis)
             scalars = torch.cat((scalars, basis_projections), dim=-1) if scalars is not None \
                       else basis_projections
         else :
