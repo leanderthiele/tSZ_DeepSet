@@ -43,7 +43,7 @@ class NetworkDeformer(nn.Module) :
 
         # concatenate with the global features if required
         if u is not None :
-            scalars = torch.cat((u.unsqueeze(1).expand(-1, scalars.shape[1], -1), scalars), dim=-1)
+            scalars = torch.cat((scalars, u.unsqueeze(1).expand(-1, scalars.shape[1], -1)), dim=-1)
             desc += 'u [%d]; '%len(GlobalFields)
 
         return scalars, desc
