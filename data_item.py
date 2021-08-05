@@ -235,7 +235,6 @@ class DataItem :
             # now we can safely free the memory
             prtfinder.myfree(raw_ptr)
 
-        
         return N, x, v
     #}}}
 
