@@ -51,10 +51,10 @@ class NetworkLayer(nn.Module) :
         desc = 'input to NetworkLayer: '
 
         # we know that the last dimension is the real space one
-        x_norm = torch.linalg.norm(x, dim=-1, keepdim=True)
+        x_norm = torch.linalg.norm(x, dim=-1, keepdim=True) + 1e-5
 
         # this tensor will collect all scalar quantities
-        scalars = x_norm.clone()
+        scalars = normalization.encoder_x(x_norm)
         desc += '|x| [1]; '
 
         # concatenate with the basis projections if required
@@ -89,8 +89,8 @@ class NetworkLayer(nn.Module) :
         # with the projections on the basis vectors
         if v is not None :
             assert self.velocities_passed and cfg.USE_VELOCITIES
-            v_norm = torch.linalg.norm(v, dim=-1, keepdim=True)
-            scalars = torch.cat((scalars, v_norm), dim=-1)
+            v_norm = torch.linalg.norm(v, dim=-1, keepdim=True) + 1e-5
+            scalars = torch.cat((scalars, normalization.encoder_v(v_norm)), dim=-1)
             desc += '|v| [1]; '
             if basis is not None :
                 scalars = torch.cat((scalars,
