@@ -3,6 +3,7 @@ import torch.nn as nn
 
 from network_mlp import NetworkMLP
 from basis import Basis
+import normalization
 from default_from_cfg import DefaultFromCfg
 import cfg
 
@@ -90,9 +91,9 @@ class NetworkLocal(nn.Module) :
         desc += '|x0| [1]; '
 
         scalars = torch.cat((scalars,
-                             torch.einsum('bid,bjd->bij',
-                                          x0/x0_norm,
-                                          basis).unsqueeze(2).expand(-1, -1, N_DM, -1)),
+                             normalization.unit_contraction(torch.einsum('bid,bjd->bij',
+                                                            x0/x0_norm,
+                                                            basis)).unsqueeze(2).expand(-1, -1, N_DM, -1)),
                             dim=-1)
         desc += 'x0.basis [%d]; '%len(Basis)
 
@@ -104,16 +105,16 @@ class NetworkLocal(nn.Module) :
             desc += '|v0| [1]; '
 
             scalars = torch.cat((scalars,
-                                 torch.einsum('bid,bjd->bij',
-                                              v0/v0_norm,
-                                              basis).unsqueeze(2).expand(-1, -1, N_DM, -1)),
+                                 normalization.unit_contraction(torch.einsum('bid,bjd->bij',
+                                                                v0/v0_norm,
+                                                                basis)).unsqueeze(2).expand(-1, -1, N_DM, -1)),
                                 dim=-1)
             desc += 'v0.basis [%d]; '%len(Basis)
 
             scalars = torch.cat((scalars,
-                                 torch.einsum('bid,bid->bi',
-                                              x0/x0_norm,
-                                              v0/v0_norm).unsqueeze(-1).unsqueeze(-1).expand(-1, -1, N_DM, -1)),
+                                 normalization.unit_contraction(torch.einsum('bid,bid->bi',
+                                                                x0/x0_norm,
+                                                                v0/v0_norm)).unsqueeze(-1).unsqueeze(-1).expand(-1, -1, N_DM, -1)),
                                 dim=-1)
             desc += 'x0.v0 [1]; '
 
@@ -122,7 +123,11 @@ class NetworkLocal(nn.Module) :
         scalars = torch.cat((scalars, x_norm), dim=-1)
         desc += '|x| [1]; '
 
-        scalars = torch.cat((scalars, torch.einsum('bijd,bkd->bijk', x/x_norm, basis)), dim=-1)
+        scalars = torch.cat((scalars,
+                             normalization.unit_contraction(torch.einsum('bijd,bkd->bijk',
+                                                                         x/x_norm,
+                                                                         basis))),
+                            dim=-1)
         desc += 'x.basis [%d]; '%len(Basis)
 
         if cfg.USE_VELOCITIES :
@@ -130,11 +135,17 @@ class NetworkLocal(nn.Module) :
             scalars = torch.cat((scalars, v_norm), dim=-1)
             desc += '|v| [1]; '
 
-            scalars = torch.cat((scalars, torch.einsum('bijd,bkd->bijk', v/v_norm, basis)), dim=-1)
+            scalars = torch.cat((scalars,
+                                 normalization.unit_contraction(torch.einsum('bijd,bkd->bijk',
+                                                                             v/v_norm,
+                                                                             basis))),
+                                dim=-1)
             desc += 'v.basis [%d]; '%len(Basis)
 
             scalars = torch.cat((scalars,
-                                 torch.einsum('bijd,bijd->bij', x/x_norm, v/v_norm).unsqueeze(-1)),
+                                 normalization.unit_contraction(torch.einsum('bijd,bijd->bij',
+                                                                             x/x_norm,
+                                                                             v/v_norm)).unsqueeze(-1)),
                                 dim=-1)
             desc += 'x.v [1]; '
 

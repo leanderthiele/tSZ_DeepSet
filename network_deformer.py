@@ -5,6 +5,7 @@ import torch.nn as nn
 from network_mlp import NetworkMLP
 from basis import Basis
 from global_fields import GlobalFields
+import normalization
 import cfg
 
 
@@ -37,8 +38,11 @@ class NetworkDeformer(nn.Module) :
 
         # concatenate with the basis projections if required
         if basis is not None :
-            basis_projections = torch.einsum('bid,bnd->bin', x, basis) / r
-            scalars = torch.cat((scalars, basis_projections), dim=-1)
+            scalars = torch.cat((scalars,
+                                 normalization.unit_contraction(torch.einsum('bid,bnd->bin',
+                                                                             x/(r + 1e-5),
+                                                                             basis))),
+                                dim=-1)
             desc += 'x.basis [%d]; '%len(Basis)
 
         # concatenate with the global features if required

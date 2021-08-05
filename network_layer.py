@@ -4,6 +4,7 @@ import torch.nn as nn
 from network_mlp import NetworkMLP
 from global_fields import GlobalFields
 from basis import Basis
+import normalization
 import cfg
 
 
@@ -50,29 +51,31 @@ class NetworkLayer(nn.Module) :
         desc = 'input to NetworkLayer: '
 
         # we know that the last dimension is the real space one
-        norms = torch.linalg.norm(x, dim=-1, keepdim=True)
+        x_norm = torch.linalg.norm(x, dim=-1, keepdim=True)
 
         # this tensor will collect all scalar quantities
-        scalars = norms.clone()
+        scalars = x_norm.clone()
         desc += '|x| [1]; '
 
         # concatenate with the basis projections if required
         if basis is not None :
             assert self.basis_passed and len(Basis) != 0
-            basis_projections = torch.einsum('bid,bnd->bin', x, basis) / norms
-            scalars = torch.cat((scalars, basis_projections), dim=-1)
+            scalars = torch.cat((scalars,
+                                 normalization.unit_contraction(torch.einsum('bid,bnd->bin',
+                                                                             x/x_norm,
+                                                                             basis))),
+                                dim=-1)
             desc += 'x.basis [%d]; '%len(Basis)
         else :
             assert not self.basis_passed or len(Basis) == 0
 
         if self.x_is_latent :
             # compute the mutual dot products
-            dots = torch.einsum('bid,bjd->bij', x, x)
-            scalars = torch.cat((scalars, dots), dim=-1)
+            scalars = torch.cat((scalars, torch.einsum('bid,bjd->bij', x, x)), dim=-1)
             desc += 'x.x [%d]; '%x.shape[-1]
         else :
             # we are in the very first layer and need to normalize the vector
-            x = x / norms
+            x = x / x_norm
 
         # concatenate with the global scalars if requested
         if u is not None :
@@ -86,12 +89,15 @@ class NetworkLayer(nn.Module) :
         # with the projections on the basis vectors
         if v is not None :
             assert self.velocities_passed and cfg.USE_VELOCITIES
-            norms = torch.linalg.norm(v, dim=-1, keepdim=True)
-            scalars = torch.cat((scalars, norms), dim=-1)
+            v_norm = torch.linalg.norm(v, dim=-1, keepdim=True)
+            scalars = torch.cat((scalars, v_norm), dim=-1)
             desc += '|v| [1]; '
             if basis is not None :
-                basis_projections = torch.einsum('bid,bnd->bin', v, basis) / norms
-                scalars = torch.cat((scalars, basis_projections), dim=-1)
+                scalars = torch.cat((scalars,
+                                     normalization.unit_contraction(torch.einsum('bid,bnd->bin',
+                                                                                 v/v_norm,
+                                                                                 basis))),
+                                    dim=-1)
                 desc += 'v.basis [%d]'%len(Basis)
 
         return scalars, desc
