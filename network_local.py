@@ -102,7 +102,7 @@ class NetworkLocal(nn.Module) :
         if cfg.USE_VELOCITIES :
             v0_norm = torch.linalg.norm(v0, dim=-1, keepdim=True)
             scalars = torch.cat((scalars,
-                                 normalization.local_v0(v0)_norm.unsqueeze(-1).expand(-1, -1, N_DM, -1)),
+                                 normalization.local_v0(v0_norm).unsqueeze(-1).expand(-1, -1, N_DM, -1)),
                                 dim = -1)
             desc += '|v0| [1]; '
 
