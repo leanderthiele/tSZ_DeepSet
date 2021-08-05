@@ -1,8 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 
-nets = ['encoder', 'local', 'vae', ]
-# deformer has nans, deal with this later
+nets = ['encoder', 'local', 'vae', 'deformer', ]
 
 scalars = dict()
 desc = dict()

@@ -30,6 +30,8 @@ class NetworkLocal(nn.Module) :
                             in MLP_kwargs_dict
         """
     #{{{
+        if isinstance(Nlatent, DefaultFromCfg) :
+            Nlatent = Nlatent()
         if isinstance(Nlayers, DefaultFromCfg) :
             Nlayers = Nlayers()
         if isinstance(Nhidden, DefaultFromCfg) :
