@@ -144,10 +144,10 @@ VISIBLE_DROPOUT = None
 
 # default number of hidden layers in the local network
 # (I believe anything apart from 0, 1 doesn't make much sense)
-LOCAL_DEFAULT_NLAYERS = 1
+LOCAL_NLAYERS = 1
 
 # default number of hidden neurons in the local network
-LOCAL_DEFAULT_NHIDDEN = 128
+LOCAL_NHIDDEN = 128
 
 # how many local features to compress to
 LOCAL_NLATENT = 32

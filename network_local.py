@@ -14,9 +14,9 @@ class NetworkLocal(nn.Module) :
     """
 
 
-    def __init__(self, k_latent,
-                       Nlayers=DefaultFromCfg('LOCAL_DEFAULT_NLAYERS'),
-                       Nhidden=DefaultFromCfg('LOCAL_DEFAULT_NHIDDEN'),
+    def __init__(self, Nlatent=DefaultFromCfg('LOCAL_NLATENT'),
+                       Nlayers=DefaultFromCfg('LOCAL_NLAYERS'),
+                       Nhidden=DefaultFromCfg('LOCAL_NHIDDEN'),
                        MLP_kwargs_dict=dict(),
                        **MLP_kwargs) :
         """
@@ -50,13 +50,13 @@ class NetworkLocal(nn.Module) :
                         else Nhidden if isinstance(Nhidden, int) \
                         else Nhidden[str(ii-1)] if str(ii-1) in Nhidden \
                         else Nhidden['first'] if 'first' in Nhidden and ii==1 \
-                        else cfg.LOCAL_DEFAULT_NHIDDEN,
+                        else cfg.LOCAL_NHIDDEN,
                         k_latent if ii==Nlayers \
                         else Nhidden if isinstance(Nhidden, int) \
                         else Nhidden[str(ii)] if str(ii) in Nhidden \
                         else Nhidden['first'] if 'first' in Nhidden and ii==0 \
                         else Nhidden['last'] if 'last' in Nhidden and ii==Nlayers-1 \
-                        else cfg.LOCAL_DEFAULT_NHIDDEN,
+                        else cfg.LOCAL_NHIDDEN,
                         **(MLP_kwargs_dict[str(ii)] if str(ii) in MLP_kwargs_dict \
                            else MLP_kwargs_dict['first'] if 'first' in MLP_kwargs_dict and ii==0 \
                            else MLP_kwargs_dict['last'] if 'last' in MLP_kwargs_dict and ii==Nlayers \

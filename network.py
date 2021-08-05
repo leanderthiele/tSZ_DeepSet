@@ -6,6 +6,7 @@ from network_decoder import NetworkDecoder
 from network_origin import NetworkOrigin
 from network_deformer import NetworkDeformer
 from network_batt12 import NetworkBatt12
+from network_local import NetworkLocal
 from network_vae import NetworkVAE
 from data_batch import DataBatch
 import cfg
@@ -40,6 +41,12 @@ class Network(nn.Module) :
                                           layer_kwargs_dict=dict(last={'activation' : False,
                                                                        'dropout' : None,
                                                                        'bias_init': 'zeros_(%s)'}))
+
+        if cfg.NET_ARCH['local'] :
+            assert cfg.NET_ARCH['decoder']
+            self.local = NetworkLocal(MLP_kwargs_dict=dict(\
+                last=dict(layer_kwargs_dict=dict(\
+                    last={'bias_init': 'zeros_(%s)'))))
 
         if cfg.NET_ARCH['vae'] :
             assert cfg.NET_ARCH['decoder']
@@ -76,6 +83,10 @@ class Network(nn.Module) :
     #{{{ 
         assert isinstance(batch, DataBatch)
 
+        if cfg.NET_ARCH['local'] :
+            l = self.local(batch.TNG_coords, batch.DM_coords_local,
+                           batch.DM_N_local, batch.basis, batch.DM_vels_local)
+
         if cfg.NET_ARCH['origin'] :
             # first find the shifted origin
             o_norm = self.origin(batch.DM_coords, v=batch.DM_vels, u=batch.u, basis=batch.basis)
@@ -103,6 +114,7 @@ class Network(nn.Module) :
                              r=batch.TNG_radii if self.decoder.r_passed else None,
                              u=batch.u if self.decoder.globals_passed else None,
                              basis=batch.basis if self.decoder.basis_passed else None,
+                             local=l if self.decoder.local_passed else None,
                              vae=z if cfg.NET_ARCH['vae'] else None)
 
         if cfg.NET_ARCH['batt12'] :
