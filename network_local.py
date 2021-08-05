@@ -73,8 +73,8 @@ class NetworkLocal(nn.Module) :
 
         if cfg.USE_VELOCITIES :
             # compute bulk motion and subtract from the velocities
-            vbulk = torch.mean(v, dim=2) # [batch, N_TNG, 3]
-            v -= vbulk.unsqueeze(2)
+            v0 = torch.mean(v, dim=2) # [batch, N_TNG, 3]
+            v -= v0.unsqueeze(2)
 
         # ---------- now compute the input scalars ----------------
 
@@ -96,18 +96,26 @@ class NetworkLocal(nn.Module) :
         desc += 'x0.basis [%d]; '%len(Basis)
 
         if cfg.USE_VELOCITIES :
-            vbulk_norm = torch.linalg.norm(vbulk, dim=-1, keepdim=True)
+            v0_norm = torch.linalg.norm(v0, dim=-1, keepdim=True)
             scalars = torch.cat((scalars,
-                                 vbulk_norm.unsqueeze(-1).expand(-1, -1, N_DM, -1)),
+                                 v0_norm.unsqueeze(-1).expand(-1, -1, N_DM, -1)),
                                 dim = -1)
-            desc += '|vbulk| [1]; '
+            desc += '|v0| [1]; '
 
             scalars = torch.cat((scalars,
                                  torch.einsum('bid,bjd->bij',
-                                              vbulk/vbulk_norm,
+                                              v0/v0_norm,
                                               basis).unsqueeze(2).expand(-1, -1, N_DM, -1)),
                                 dim=-1)
-            desc += 'vbulk.basis [%d]; '%len(Basis)
+            desc += 'v0.basis [%d]; '%len(Basis)
+
+            scalars = torch.cat((scalars,
+                                 torch.einsum('bid,bid->bi',
+                                              x0/x0_norm,
+                                              v0/v0_norm).unsqueeze(-1).unsqueeze(-1).expand(-1, -1, N_DM, -1)),
+                                dim=-1)
+            desc += 'x0.v0 [1]; '
+
 
         x_norm = torch.linalg.norm(x, dim=-1, keepdim=True)
         scalars = torch.cat((scalars, x_norm), dim=-1)
@@ -123,6 +131,11 @@ class NetworkLocal(nn.Module) :
 
             scalars = torch.cat((scalars, torch.einsum('bijd,bkd->bijk', v/v_norm, basis)), dim=-1)
             desc += 'v.basis [%d]; '%len(Basis)
+
+            scalars = torch.cat((scalars,
+                                 torch.einsum('bijd,bijd->bij', x/x_norm, v/v_norm).unsqueeze(-1)),
+                                dim=-1)
+            desc += 'x.v [1]; '
 
         return scalars, desc
     #}}}
