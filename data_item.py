@@ -87,7 +87,7 @@ class DataItem :
             self.TNG_radii = np.linalg.norm(self.TNG_coords, axis=-1, keepdims=True)
             if cfg.RMAX is not None :
                 # remember that TNG_radii has a singleton dimension
-                mask = self.TNG_radii.flatten() < cfg.RMAX
+                mask = self.TNG_radii.flatten() < cfg.RMAX * self.halo.R200c
                 self.TNG_coords = self.TNG_coords[mask]
                 self.TNG_Pth = self.TNG_Pth[mask]
                 self.TNG_radii = self.TNG_radii[mask]
@@ -307,6 +307,7 @@ class DataItem :
             # this was calibrated using cfg.R_LOCAL=100 kpc/h and gives a pretty good standard normal,
             # need to re-calibrate the magic numbers for different setups using
             # ./create_Nlocal_statistics.py
+            # TODO there is a problem with this one!
             out.DM_N_local = ( np.log(out.DM_N_local) - 5.5019 ) / 1.4
 
             # take DM coordinates relative to TNG position

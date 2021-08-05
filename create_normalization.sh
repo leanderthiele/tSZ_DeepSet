@@ -1,5 +1,6 @@
 python -u create_normalization.py \
   --'NET_ARCH=dict(origin=True, batt12=True, deformer=True, encoder=True, decoder=True, vae=True, local=True)' \
+  --'PRT_FRACTION["DM"]=1e3' \
   --'PRT_FRACTION["TNG"]=256' \
   --'GLOBALS_USE["none"]=False' \
   --'GLOBALS_USE["logM"]=True' \
@@ -16,4 +17,5 @@ python -u create_normalization.py \
   --'BASIS_USE["ang_mom"]=True' \
   --'BASIS_USE["CM"]=True' \
   --'BASIS_USE["inertia"]=True' \
-  --'BASIS_USE["vel_dispersion"]=True'
+  --'BASIS_USE["vel_dispersion"]=True' \
+  --'DATALOADER_ARGS["num_workers"]=1'

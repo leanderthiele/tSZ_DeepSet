@@ -74,11 +74,14 @@ for t, data in enumerate(loader) :
 
     assert isinstance(data, DataBatch)
 
+#    print(data.TNG_coords.cpu().detach().numpy())
     scalars_encoder_, desc_encoder_ \
         = encoder.create_scalars(data.DM_coords, data.DM_vels, data.u, data.basis)
+#    print(data.TNG_coords.cpu().detach().numpy())
     scalars_local_, desc_local_ \
         = local.create_scalars(data.TNG_coords, data.DM_coords_local, data.DM_N_local,
                                data.basis, data.DM_vels_local)
+#    print(data.TNG_coords.cpu().detach().numpy())
     scalars_deformer_, desc_deformer_ \
         = deformer.create_scalars(data.TNG_coords, data.TNG_radii, data.u, data.basis)
     scalars_vae_, desc_vae_ \
