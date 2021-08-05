@@ -33,7 +33,7 @@ class NetworkDeformer(nn.Module) :
     #{{{ 
         desc = 'input to NetworkDeformer: '
 
-        scalars = r.clone()
+        scalars = normalization.TNG_radii(r)
         desc += 'r [1]; '
 
         # concatenate with the basis projections if required
