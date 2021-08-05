@@ -100,7 +100,7 @@ class NetworkLocal(nn.Module) :
         desc += 'x0.basis [%d]; '%len(Basis)
 
         if cfg.USE_VELOCITIES :
-            v0_norm = torch.linalg.norm(v0, dim=-1, keepdim=True)
+            v0_norm = torch.linalg.norm(v0, dim=-1, keepdim=True) + 1e-5
             scalars = torch.cat((scalars,
                                  normalization.local_v0(v0_norm).unsqueeze(-1).expand(-1, -1, N_DM, -1)),
                                 dim = -1)
@@ -121,7 +121,7 @@ class NetworkLocal(nn.Module) :
             desc += 'x0.v0 [1]; '
 
 
-        x_norm = torch.linalg.norm(x, dim=-1, keepdim=True)
+        x_norm = torch.linalg.norm(x, dim=-1, keepdim=True) + 1e-5
         scalars = torch.cat((scalars, normalization.local_x(x_norm)), dim=-1)
         desc += '|x| [1]; '
 
@@ -133,7 +133,7 @@ class NetworkLocal(nn.Module) :
         desc += 'x.basis [%d]; '%len(Basis)
 
         if cfg.USE_VELOCITIES :
-            v_norm = torch.linalg.norm(v, dim=-1, keepdim=True)
+            v_norm = torch.linalg.norm(v, dim=-1, keepdim=True) + 1e-5
             scalars = torch.cat((scalars, normalization.local_v(v_norm)), dim=-1)
             desc += '|v| [1]; '
 
