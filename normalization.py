@@ -63,8 +63,8 @@ def TNG_radii(x) :
     """
     transform the TNG radii (passed in units of R200c)
     """
-    l = choose_lib(x)
-    return l.sqrt( l.log(1.5*cfg.RMAX / (x+1e-5)) )
+    # TODO
+    return x**3
 
 
 def local_v0(x) :
