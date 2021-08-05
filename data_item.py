@@ -204,8 +204,8 @@ class DataItem :
     #{{{
         # initialize these arrays such that the initial values make sense for the case
         # when no DM particles are in the vicinity
-        # (the choice of N=1 is good because it prevents anything from blowing up)
-        N = np.ones(len(TNG_coords), dtype=np.float32)
+        # (the choice of N=0.9 is good because it prevents anything from blowing up)
+        N = np.full(len(TNG_coords), 0.9, dtype=np.float32)
 
         x = np.zeros((len(TNG_coords), int(cfg.N_LOCAL), 3), dtype=np.float32)
 
@@ -303,9 +303,13 @@ class DataItem :
         # NOTE it is important that this happens before the 200c normalization below
         #      because we need to use the kpc-unit TNG coordinates
         if out.has_DM_local :
+
+            # where we need to shift the DM coordinates
+            mask = out.DM_N_local >= 1.0
             
             # take DM coordinates relative to TNG position
-            out.DM_coords_local -= out.TNG_coords[:, None, :]
+            # (but only if the coordinates are real, otherwise they are zero'ed and we shouldn't worry
+            out.DM_coords_local[mask] -= out.TNG_coords[mask, None, :]
 
             # get DM coordinates to O(1)
             out.DM_coords_local /= cfg.R_LOCAL
