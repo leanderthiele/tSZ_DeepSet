@@ -77,7 +77,7 @@ class NetworkLayer(nn.Module) :
         # concatenate with the global scalars if requested
         if u is not None :
             assert self.globals_passed and len(GlobalFields) != 0
-            scalars = torch.cat((u.unsqueeze(1).expand(-1, scalars.shape[1], -1), scalars), dim=-1)
+            scalars = torch.cat((scalars, u.unsqueeze(1).expand(-1, scalars.shape[1], -1)), dim=-1)
             desc += 'u [%d]; '%len(GlobalFields)
         else :
             assert not self.globals_passed or len(GlobalFields) == 0
