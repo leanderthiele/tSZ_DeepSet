@@ -9,6 +9,8 @@ since the calling code may depend on this behaviour.
 import torch
 import numpy as np
 
+import cfg
+
 def choose_lib(obj) :
     """
     Utility function to allow concise operation on torch and numpy arrays
@@ -46,32 +48,30 @@ def encoder_x(x) :
     """
     transform the modulus of the DM positions going into the encoder
     """
-    # TODO
-    return tens_copy(x)
+    # TODO this is not ideal
+    return (x - 0.97) / 0.70
 
 
 def encoder_v(x) :
     """
     transform the modulus of the DM velocities going into the encoder
     """
-    # TODO
-    return tens_copy(x)
+    return (x - 1.02) / 0.48
 
 
 def TNG_radii(x) :
     """
-    transform the TNG radii
+    transform the TNG radii (passed in units of R200c)
     """
-    # TODO
-    return tens_copy(x)
+    l = choose_lib(x)
+    return l.sqrt( l.log(1.5*cfg.RMAX / (x+1e-5)) )
 
 
 def local_v0(x) :
     """
     transform the local bulk velocity moduli
     """
-    # TODO
-    return tens_copy(x)
+    return (x - 0.69) / 0.47
 
 
 def local_x(x) :
@@ -86,5 +86,4 @@ def local_v(x) :
     """
     transform the local DM velocity moduli
     """
-    # TODO
-    return tens_copy(x)
+    return (x - 0.92) / 0.56
