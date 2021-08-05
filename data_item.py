@@ -304,12 +304,6 @@ class DataItem :
         #      because we need to use the kpc-unit TNG coordinates
         if out.has_DM_local :
             
-            # this was calibrated using cfg.R_LOCAL=100 kpc/h and gives a pretty good standard normal,
-            # need to re-calibrate the magic numbers for different setups using
-            # ./create_Nlocal_statistics.py
-            # TODO there is a problem with this one!
-            out.DM_N_local = np.log(out.DM_N_local)
-
             # take DM coordinates relative to TNG position
             out.DM_coords_local -= out.TNG_coords[:, None, :]
 

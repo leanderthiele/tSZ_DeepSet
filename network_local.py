@@ -81,7 +81,7 @@ class NetworkLocal(nn.Module) :
         # ---------- now compute the input scalars ----------------
 
         # measure of number of DM particles in vicinity, has shape [batch, N_TNG, N_DM, 1]
-        scalars = N.unsqueeze(-1).unsqueeze(-1).expand(-1, -1, N_DM, -1)
+        scalars = normalization.local_N(N).unsqueeze(-1).unsqueeze(-1).expand(-1, -1, N_DM, -1)
         desc += 'N [1]; '
 
         # one of the TNG particles sits at r = 0, prevent explosions
