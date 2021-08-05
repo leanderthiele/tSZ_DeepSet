@@ -43,7 +43,8 @@ class NetworkDecoder(nn.Module) :
 
         super().__init__()
 
-        self.mlp = NetworkMLP(k_latent + r_passed
+        self.mlp = NetworkMLP(2 * k_latent # one for TNG coord projection, one for modulus
+                              + r_passed
                               + globals_passed * len(GlobalFields)
                               + basis_passed * len(Basis)
                               + vae_passed * cfg.VAE_NLATENT,
