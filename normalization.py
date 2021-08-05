@@ -1,5 +1,9 @@
 """
-A collection of small functions used to normalize various inputs
+A collection of small functions used to normalize various inputs.
+
+It is important that these functions always return a different tensor
+[i.e. if they implement the identity, they should call tens_copy()],
+since the calling code may depend on this behaviour.
 """
 
 import torch
@@ -11,8 +15,14 @@ def choose_lib(obj) :
     """
     if isinstance(obj, torch.Tensor) :
         return torch
-    else :
-        return np
+    return np
+
+
+def tens_copy(obj) :
+    if isinstance(obj, torch.Tensor) :
+        return obj.clone()
+    return obj.copy()
+
 
 
 def local_N(x) :
@@ -32,11 +42,20 @@ def unit_contraction(x) :
     return x / 0.58
 
 
-def encoder_xnorm(x) :
+def encoder_x(x) :
     """
-    transform the modulus of the dark matter positions going into the encoder
+    transform the modulus of the DM positions going into the encoder
     """
     # TODO
+    return tens_copy(x)
+
+
+def encoder_v(x) :
+    """
+    transform the modulus of the DM velocities going into the encoder
+    """
+    # TODO
+    return tens_copy(x)
 
 
 def TNG_radii(x) :
@@ -44,6 +63,7 @@ def TNG_radii(x) :
     transform the TNG radii
     """
     # TODO
+    return tens_copy(x)
 
 
 def local_v0(x) :
@@ -51,6 +71,7 @@ def local_v0(x) :
     transform the local bulk velocity moduli
     """
     # TODO
+    return tens_copy(x)
 
 
 def local_x(x) :
@@ -58,9 +79,12 @@ def local_x(x) :
     transform the local DM radii
     """
     # TODO
+    return tens_copy(x)
 
 
 def local_v(x) :
     """
     transform the local DM velocity moduli
     """
+    # TODO
+    return tens_copy(x)
