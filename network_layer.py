@@ -54,7 +54,7 @@ class NetworkLayer(nn.Module) :
         x_norm = torch.linalg.norm(x, dim=-1, keepdim=True) + 1e-5
 
         # this tensor will collect all scalar quantities
-        scalars = normalization.encoder_x(x_norm)
+        scalars = x_norm.clone() if self.x_is_latent else normalization.encoder_x(x_norm)
         desc += '|x| [1]; '
 
         # concatenate with the basis projections if required
@@ -89,6 +89,7 @@ class NetworkLayer(nn.Module) :
         # with the projections on the basis vectors
         if v is not None :
             assert self.velocities_passed and cfg.USE_VELOCITIES
+            assert not self.x_is_latent
             v_norm = torch.linalg.norm(v, dim=-1, keepdim=True) + 1e-5
             scalars = torch.cat((scalars, normalization.encoder_v(v_norm)), dim=-1)
             desc += '|v| [1]; '
