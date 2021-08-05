@@ -78,8 +78,7 @@ def local_x(x) :
     """
     transform the local DM radii
     """
-    # TODO
-    return tens_copy(x)
+    return x**3
 
 
 def local_v(x) :
