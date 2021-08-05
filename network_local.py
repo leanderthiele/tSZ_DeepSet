@@ -20,7 +20,7 @@ class NetworkLocal(nn.Module) :
                        MLP_kwargs_dict=dict(),
                        **MLP_kwargs) :
         """
-        k_latent ... number of neurons (scalar features) in the output
+        Nlatent  ... number of neurons (scalar features) in the output
         Nlayers  ... number of hidden layers (each layer is an MLP)
         Nhidden  ... number of neurons in hidden layers (either int or dict)
         MLP_kwargs_dict ... a dict indexed by str(layer_index) -- does not need to have all keys
@@ -51,7 +51,7 @@ class NetworkLocal(nn.Module) :
                         else Nhidden[str(ii-1)] if str(ii-1) in Nhidden \
                         else Nhidden['first'] if 'first' in Nhidden and ii==1 \
                         else cfg.LOCAL_NHIDDEN,
-                        k_latent if ii==Nlayers \
+                        Nlatent if ii==Nlayers \
                         else Nhidden if isinstance(Nhidden, int) \
                         else Nhidden[str(ii)] if str(ii) in Nhidden \
                         else Nhidden['first'] if 'first' in Nhidden and ii==0 \
@@ -77,8 +77,6 @@ class NetworkLocal(nn.Module) :
             # compute bulk motion and subtract from the velocities
             v0 = torch.mean(v, dim=2) # [batch, N_TNG, 3]
             v -= v0.unsqueeze(2)
-
-        # ---------- now compute the input scalars ----------------
 
         # measure of number of DM particles in vicinity, has shape [batch, N_TNG, N_DM, 1]
         scalars = normalization.local_N(N).unsqueeze(-1).unsqueeze(-1).expand(-1, -1, N_DM, -1)

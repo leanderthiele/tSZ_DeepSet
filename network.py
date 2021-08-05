@@ -46,7 +46,7 @@ class Network(nn.Module) :
             assert cfg.NET_ARCH['decoder']
             self.local = NetworkLocal(MLP_kwargs_dict=dict(\
                 last=dict(layer_kwargs_dict=dict(\
-                    last={'bias_init': 'zeros_(%s)'))))
+                    last={'bias_init': 'zeros_(%s)'}))))
 
         if cfg.NET_ARCH['vae'] :
             assert cfg.NET_ARCH['decoder']
@@ -168,6 +168,6 @@ class Network(nn.Module) :
     #{{{ 
         if cfg.device_idx is not None :
             return self.to(cfg.device_idx)
-        else :
-            return self
+
+        return self
     #}}}
