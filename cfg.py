@@ -150,7 +150,7 @@ LOCAL_DEFAULT_NLAYERS = 1
 LOCAL_DEFAULT_NHIDDEN = 128
 
 # how many local features to compress to
-LOCAL_DEFAULT_NLATENT = 32
+LOCAL_NLATENT = 32
 
 # default number of hidden layers in the encoder
 ENCODER_DEFAULT_NLAYERS = 1
