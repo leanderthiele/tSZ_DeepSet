@@ -21,6 +21,7 @@ class NetworkDecoder(nn.Module) :
                  r_passed=DefaultFromCfg('DECODER_DEFAULT_R_PASSED'),
                  basis_passed=DefaultFromCfg('DECODER_DEFAULT_BASIS_PASSED'),
                  globals_passed=DefaultFromCfg('DECODER_DEFAULT_GLOBALS_PASSED'),
+                 local_passed=DefaultFromCfg('NET_ARCH["local"]'), 
                  vae_passed=DefaultFromCfg('NET_ARCH["vae"]'),
                  **MLP_kwargs) :
         """
@@ -29,6 +30,7 @@ class NetworkDecoder(nn.Module) :
         r_passed   ... whether the TNG radial coordinates will be passed
         basis_passed   ... whether the basis vectors will be passed
         globals_passed ... whether the globals will be passed
+        local_passed   ... whether the local scalars will be passed
         vae_passed ... whether latent space from VAE will be passed
         MLP_kwargs ... to specify the multi-layer perceptron used here
         """
@@ -39,6 +41,8 @@ class NetworkDecoder(nn.Module) :
             basis_passed = basis_passed()
         if isinstance(globals_passed, DefaultFromCfg) :
             globals_passed = globals_passed()
+        if isinstance(local_passed, DefaultFromCfg) :
+            local_passed = local_passed()
         if isinstance(vae_passed, DefaultFromCfg) :
             vae_passed = vae_passed()
 
@@ -48,17 +52,19 @@ class NetworkDecoder(nn.Module) :
                               + r_passed
                               + globals_passed * len(GlobalFields)
                               + basis_passed * len(Basis)
+                              + local_passed * cfg.LOCAL_DEFAULT_NLATENT
                               + vae_passed * cfg.VAE_NLATENT,
                               k_out, **MLP_kwargs)
 
         self.r_passed = r_passed
         self.globals_passed = globals_passed
         self.basis_passed = basis_passed
+        self.local_passed = local_passed
         self.vae_passed = vae_passed
     #}}}
 
 
-    def forward(self, x, h=None, r=None, u=None, basis=None, vae=None) :
+    def forward(self, x, h=None, r=None, u=None, basis=None, local=None, vae=None) :
         """
         x ... the positions where to evaluate, of shape [batch, Nvects, 3]
               or a list of length batch and shapes [1, Nvectsi, 3]
@@ -68,6 +74,9 @@ class NetworkDecoder(nn.Module) :
         u ... the global vector, of shape [batch, Nglobals]
         basis ... the basis vectors to use -- either None if no basis is provided
                   or of shape [batch, Nbasis, 3]
+        local ... the latent representation of the local environment
+                  -- either None if no local DeepSet is used or of shape
+                     [batch, Nvects, Nfeatures] or a list of length batch and shapes [1, Nvectsi, Nfeatures]
         vae ... the latent representation in the vae -- either None if no VAE is used
                 or of shape [batch, Nlatent]
         """
@@ -78,8 +87,11 @@ class NetworkDecoder(nn.Module) :
                          r=r[ii] if r is not None else r,
                          u=u[ii, ...].unsqueeze(0) if u is not None else u,
                          basis=basis[ii, ...].unsqueeze(0) if basis is not None else basis,
+                         local=local[ii] if local is not None else local,
                          vae=vae[ii, ...].unsqueeze(0) if vae is not None else vae)
                     for ii, xi in enumerate(x)]
+
+        N_TNG = x.shape[1]
 
         scalars = None
 
@@ -89,9 +101,10 @@ class NetworkDecoder(nn.Module) :
             x_norm = torch.linalg.norm(x, dim=-1, keepdim=True) + 1e-5
 
         if h is not None :
-            # compute the moduli of the latent vectors
+            # compute the moduli of the latent vectors, shape [batch, Nfeatures, 1]
             h_norm = torch.linalg.norm(h, dim=-1, keepdim=True)
-            scalars = h_norm.clone()
+
+            scalars = h_norm.unsqueeze(1).squeeze(dim=-1).expand(-1, N_TNG, -1).clone()
 
             # compute the projections of shape [batch, Nvects, latent feature]
             # TODO whether to normalize to unit vectors here is a hyperparameter we should explore!!!
@@ -99,7 +112,7 @@ class NetworkDecoder(nn.Module) :
                                  torch.einsum('bvd,bld->bvl', x / x_norm, h / (h_norm + 1e-5))),
                                 dim=-1)
 
-        # concatenate with the radial distances if needed
+        # concatenate with the radial distances if requested
         if r is not None :
             assert self.r_passed
             r_normed = normalization.TNG_radii(r)
@@ -108,7 +121,7 @@ class NetworkDecoder(nn.Module) :
         else :
             assert not self.r_passed
 
-        # concatenate with the basis projections if needed
+        # concatenate with the basis projections if requested
         if basis is not None :
             assert self.basis_passed and len(Basis) != 0
             basis_projections = normalization.unit_contraction(torch.einsum('bid,bnd->bin',
@@ -122,17 +135,26 @@ class NetworkDecoder(nn.Module) :
         # concatenate with the global vector if requested
         if u is not None :
             assert self.globals_passed and len(GlobalFields) != 0
-            u_expanded = u.unsqueeze(1).expand(-1, x.shape[1], -1)
+            u_expanded = u.unsqueeze(1).expand(-1, N_TNG, -1)
             scalars = torch.cat((scalars, u_expanded), dim=-1) \
                       if scalars is not None \
                       else u_expanded
         else :
             assert not self.globals_passed or len(GlobalFields) == 0
 
+        # concatenate with the local latent variables if requested
+        if local is not None :
+            assert self.local_passed
+            scalars = torch.cat((scalars, local), dim=-1) \
+                      if scalars is not None \
+                      else local
+        else :
+            assert not self.local_passed
+
         # concatenate with the VAE latent variables if requested
         if vae is not None :
             assert self.vae_passed
-            vae_expanded = vae.unsqueeze(1).expand(-1, x.shape[1], -1)
+            vae_expanded = vae.unsqueeze(1).expand(-1, N_TNG, -1)
             scalars = torch.cat((scalars, vae_expanded), dim=-1) \
                       if scalars is not None \
                       else vae_expanded
