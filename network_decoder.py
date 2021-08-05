@@ -106,7 +106,7 @@ class NetworkDecoder(nn.Module) :
         if u is not None :
             assert self.globals_passed and len(GlobalFields) != 0
             u_expanded = u.unsqueeze(1).expand(-1, x.shape[1], -1)
-            scalars = torch.cat((u_expanded, scalars), dim=-1) \
+            scalars = torch.cat((scalars, u_expanded), dim=-1) \
                       if scalars is not None \
                       else u_expanded
         else :
@@ -116,7 +116,7 @@ class NetworkDecoder(nn.Module) :
         if vae is not None :
             assert self.vae_passed
             vae_expanded = vae.unsqueeze(1).expand(-1, x.shape[1], -1)
-            scalars = torch.cat((vae_expanded, scalars), dim=-1) \
+            scalars = torch.cat((scalars, vae_expanded), dim=-1) \
                       if scalars is not None \
                       else vae_expanded
         else :
