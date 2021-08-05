@@ -316,9 +316,8 @@ class DataItem :
             # get DM coordinates to O(1)
             out.DM_coords_local /= cfg.R_LOCAL
 
-            # get DM velocities to O(1) dispersion
             if out.DM_vels_local is not None :
-                out.DM_vels_local /= 510.0 # km/s, calibrated
+                out.DM_vels_local /= 510.0 # km/s, number is meaningless but gives O(1) dispersions
 
         # normalize the halo-wide quantities by self-similar scales
         if out.has_DM :

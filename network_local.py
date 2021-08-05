@@ -84,9 +84,11 @@ class NetworkLocal(nn.Module) :
         scalars = N.unsqueeze(-1).unsqueeze(-1).expand(-1, -1, N_DM, -1)
         desc += 'N [1]; '
 
-        x0_norm = torch.linalg.norm(x0, dim=-1, keepdim=True)
+        # one of the TNG particles sits at r = 0, prevent explosions
+        x0_norm = torch.linalg.norm(x0, dim=-1, keepdim=True) + 1e-5
+
         scalars = torch.cat((scalars,
-                             x0_norm.unsqueeze(-1).expand(-1, -1, N_DM, -1)),
+                             normalization.TNG_radii(x0_norm).unsqueeze(-1).expand(-1, -1, N_DM, -1)),
                             dim = -1)
         desc += '|x0| [1]; '
 
@@ -100,7 +102,7 @@ class NetworkLocal(nn.Module) :
         if cfg.USE_VELOCITIES :
             v0_norm = torch.linalg.norm(v0, dim=-1, keepdim=True)
             scalars = torch.cat((scalars,
-                                 v0_norm.unsqueeze(-1).expand(-1, -1, N_DM, -1)),
+                                 normalization.local_v0(v0)_norm.unsqueeze(-1).expand(-1, -1, N_DM, -1)),
                                 dim = -1)
             desc += '|v0| [1]; '
 
@@ -120,7 +122,7 @@ class NetworkLocal(nn.Module) :
 
 
         x_norm = torch.linalg.norm(x, dim=-1, keepdim=True)
-        scalars = torch.cat((scalars, x_norm), dim=-1)
+        scalars = torch.cat((scalars, normalization.local_x(x_norm)), dim=-1)
         desc += '|x| [1]; '
 
         scalars = torch.cat((scalars,
@@ -132,7 +134,7 @@ class NetworkLocal(nn.Module) :
 
         if cfg.USE_VELOCITIES :
             v_norm = torch.linalg.norm(v, dim=-1, keepdim=True)
-            scalars = torch.cat((scalars, v_norm), dim=-1)
+            scalars = torch.cat((scalars, normalization.local_v(v_norm)), dim=-1)
             desc += '|v| [1]; '
 
             scalars = torch.cat((scalars,
