@@ -4,6 +4,7 @@ import torch.nn as nn
 from network_mlp import NetworkMLP
 from global_fields import GlobalFields
 from basis import Basis
+import normalization
 from default_from_cfg import DefaultFromCfg
 import cfg
 
@@ -101,17 +102,18 @@ class NetworkDecoder(nn.Module) :
         # concatenate with the radial distances if needed
         if r is not None :
             assert self.r_passed
-            scalars = torch.cat((scalars, r), dim=-1) if scalars is not None \
-                      else r.clone()
+            r_normed = normalization.TNG_radii(r)
+            scalars = torch.cat((scalars, r_normed), dim=-1) if scalars is not None \
+                      else r_normed
         else :
             assert not self.r_passed
 
         # concatenate with the basis projections if needed
         if basis is not None :
             assert self.basis_passed and len(Basis) != 0
-             # NOTE one of the TNG particles in each halo sits directly at the origin,
-             #      so we need to make sure we don't get a divergence here!
-            basis_projections = torch.einsum('bid,bnd->bin', x / x_norm, basis)
+            basis_projections = normalization.unit_contraction(torch.einsum('bid,bnd->bin',
+                                                                            x / x_norm,
+                                                                            basis))
             scalars = torch.cat((scalars, basis_projections), dim=-1) if scalars is not None \
                       else basis_projections
         else :
