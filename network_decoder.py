@@ -96,7 +96,9 @@ class NetworkDecoder(nn.Module) :
         # concatenate with the basis projections if needed
         if basis is not None :
             assert self.basis_passed and len(Basis) != 0
-            basis_projections = torch.einsum('bid,bnd->bin', x, basis)
+             # NOTE one of the TNG particles in each halo sits directly at the origin,
+             #      so we need to make sure we don't get a divergence here!
+            basis_projections = torch.einsum('bid,bnd->bin', x / (r + 1e-5), basis)
             scalars = torch.cat((scalars, basis_projections), dim=-1) if scalars is not None \
                       else basis_projections
         else :
