@@ -41,6 +41,7 @@ class NetworkLocal(nn.Module) :
         # figure out the number of input features
         k_in = (len(Basis) * 2 * (1+cfg.USE_VELOCITIES) # projections of DM positions and velocities, TNG position, bulk velocity
                 + 2 * (1+cfg.USE_VELOCITIES) # moduli of DM positions and velocities, TNG position, bulk velocity
+                + 2 * cfg.USE_VELOCITIES # x0.v0 and x.v
                 + 1) # number of particles in the sphere
 
         self.layers = nn.ModuleList(
