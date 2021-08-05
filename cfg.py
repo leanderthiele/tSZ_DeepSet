@@ -38,7 +38,7 @@ PRT_FRACTION = dict(DM=1e4, TNG=1e5)
 RMAX = 2.0
 
 # how many local DM particles to use around each TNG position
-N_LOCAL = 1e2
+N_LOCAL = 128
 
 # how large the local spheres are (in kpc)
 R_LOCAL = 100.0
