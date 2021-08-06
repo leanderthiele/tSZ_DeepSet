@@ -12,6 +12,9 @@ ID = 'default'
 # for how many epochs to train
 EPOCHS = 100
 
+# whether to scale pressure by P200 internally
+SCALE_PTH = True
+
 # weight decay (applied only to weights)
 WEIGHT_DECAY = 1e-4
 

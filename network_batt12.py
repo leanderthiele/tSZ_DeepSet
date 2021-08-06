@@ -35,13 +35,15 @@ class NetworkBatt12(nn.Module) :
     #}}}
     
 
-    def forward(self, M200c, r) :
+    def forward(self, M200c, r, P200c) :
         """
         M200c ... shape [batch]
         r     ... shape [batch, Nvecs, 1] or list of length batch with shapes [1, Nvecsi, 1]
                   (assumed normalized by R200c)
+        P200c ... shape [batch]
 
-        Returns thermal pressure at r in units of P200c, in the same shape as r
+        Returns thermal pressure at r, in the same shape as r
+        (units depend on cfg.SCALE_PTH)
         """
     #{{{
         if isinstance(r, list) :
@@ -57,7 +59,8 @@ class NetworkBatt12(nn.Module) :
         # make sure we don't have a divergence if a particle is directly at the origin
         r += 1e-3
 
-        return P0[:,None,None] * r.pow(-0.3) * ( 1 + r ).pow(-beta[:,None,None])
+        return (1 if cfg.SCALE_PTH else P200c[:, None, None]) \
+               * P0[:, None, None] * r.pow(-0.3) * ( 1 + r ).pow(-beta[:, None, None])
     #}}}
 
 

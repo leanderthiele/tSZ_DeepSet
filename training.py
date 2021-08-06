@@ -98,7 +98,7 @@ for epoch in range(cfg.EPOCHS) :
         data = data.to_device()
 
         with torch.no_grad() :
-            guess = batt12(data.M200c, data.TNG_radii)
+            guess = batt12(data.M200c, data.TNG_radii, data.P200c)
 
         _, loss_list_guess, _ = loss_fn(guess, data.TNG_Pth, w=None)
 
@@ -165,7 +165,7 @@ for epoch in range(cfg.EPOCHS) :
         data = data.to_device()
 
         with torch.no_grad() :
-            guess = batt12(data.M200c, data.TNG_radii)
+            guess = batt12(data.M200c, data.TNG_radii, data.P200c)
             prediction, KLD = model(data)
 
             _, loss_list, KLD_list = loss_fn(prediction, data.TNG_Pth, KLD, w=None, epoch=epoch)

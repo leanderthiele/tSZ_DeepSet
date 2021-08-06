@@ -326,7 +326,8 @@ class DataItem :
         if out.has_TNG :
             out.TNG_coords /= self.halo.R200c
             out.TNG_radii /= self.halo.R200c
-            out.TNG_Pth /= self.halo.P200c
+            if cfg.SCALE_PTH :
+                out.TNG_Pth /= self.halo.P200c
 
         # NOTE the TNG residuals are directly from file and already normalized by P200c
 

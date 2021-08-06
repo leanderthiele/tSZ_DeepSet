@@ -127,7 +127,7 @@ class Network(nn.Module) :
                 r_b12 = batch.TNG_radii
 
             # now evaluate the (modified) Battaglia+2012 model at the deformed radial coordinates
-            b12 = self.batt12(batch.M200c, r_b12)
+            b12 = self.batt12(batch.M200c, r_b12, batch.P200c)
 
         if cfg.NET_ARCH['decoder'] and not cfg.NET_ARCH['batt12'] :
             x = self.scaling * torch.relu(torch.sinh(x))
