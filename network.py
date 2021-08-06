@@ -78,7 +78,7 @@ class Network(nn.Module) :
             assert cfg.OUTPUT_NFEATURES == 1
     #}}}
 
-    
+ 
     def forward(self, batch) :
     #{{{ 
         assert isinstance(batch, DataBatch)
