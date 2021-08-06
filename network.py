@@ -130,13 +130,15 @@ class Network(nn.Module) :
             b12 = self.batt12(batch.M200c, r_b12)
 
         if cfg.NET_ARCH['decoder'] and not cfg.NET_ARCH['batt12'] :
-            return self.scaling * torch.sinh(x), KLD
+            x = self.scaling * torch.relu(torch.sinh(x))
         elif cfg.NET_ARCH['decoder'] and cfg.NET_ARCH['batt12'] :
-            return self.__combine(x, b12), KLD
+            x = self.__combine(x, b12)
         elif not cfg.NET_ARCH['decoder'] and cfg.NET_ARCH['batt12'] :
-            return b12, KLD
+            x = b12
         else :
             raise RuntimeError('Should not happen!')
+
+        return x, KLD
     #}}}
 
 
