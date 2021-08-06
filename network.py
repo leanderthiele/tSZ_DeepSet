@@ -155,12 +155,15 @@ class Network(nn.Module) :
             return [Network.__combine(xi, b12[ii]) for ii, xi in enumerate(x)]
 
         if cfg.OUTPUT_NFEATURES == 1 :
-            return b12 + self.scaling * torch.sinh(x)
+            x = b12 + self.scaling * torch.sinh(x)
         elif cfg.OUTPUT_NFEATURES == 2 :
-            return b12 * (1 + x[..., 0].unsqueeze(-1)) \
-                   + self.scaling * torch.sinh(x[..., 1].unsqueeze(-1))
+            x = b12 * (1 + x[..., 0].unsqueeze(-1)) \
+                + self.scaling * torch.sinh(x[..., 1].unsqueeze(-1))
         else :
             raise RuntimeError(f'Invalid cfg.OUTPUT_NFEATURES: {cfg.OUTPUT_NFEATURES}')
+
+        # map to positive real line
+        return torch.relu(x)
     #}}}
 
 
