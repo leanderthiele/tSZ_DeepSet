@@ -155,6 +155,9 @@ LOCAL_NHIDDEN = 128
 # how many local features to compress to
 LOCAL_NLATENT = 32
 
+# whether to include any information about the relative position and velocity of the local environment
+LOCAL_PASS_RELATIVE_TO_HALO = True
+
 # default number of hidden layers in the encoder
 ENCODER_DEFAULT_NLAYERS = 1
 

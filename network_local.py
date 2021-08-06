@@ -42,10 +42,14 @@ class NetworkLocal(nn.Module) :
         super().__init__()
 
         # figure out the number of input features
-        k_in = (len(Basis) * 2 * (1+cfg.USE_VELOCITIES) # projections of DM positions and velocities, TNG position, bulk velocity
-                + 2 * (1+cfg.USE_VELOCITIES) # moduli of DM positions and velocities, TNG position, bulk velocity
-                + 2 * cfg.USE_VELOCITIES # x0.v0 and x.v
-                + 1) # number of particles in the sphere
+        k_in = (# projections of DM positions and velocities, TNG position, bulk velocity
+                len(Basis) * (1+cfg.LOCAL_PASS_RELATIVE_TO_HALO) * (1+cfg.USE_VELOCITIES)
+                # moduli of DM positions and velocities, TNG position, bulk velocity
+                + (1+cfg.LOCAL_PASS_RELATIVE_TO_HALO) * (1+cfg.USE_VELOCITIES)
+                # x0.v0 and x.v
+                + (1+cfg.LOCAL_PASS_RELATIVE_TO_HALO) * cfg.USE_VELOCITIES
+                # number of particles in the spher
+                + 1)
 
         self.layers = nn.ModuleList(
             [NetworkMLP(k_in if ii==0 \
@@ -87,19 +91,21 @@ class NetworkLocal(nn.Module) :
         # one of the TNG particles sits at r = 0, prevent explosions
         x0_norm = torch.linalg.norm(x0, dim=-1, keepdim=True) + 1e-5
 
-        scalars = torch.cat((scalars,
-                             normalization.TNG_radii(x0_norm).unsqueeze(-1).expand(-1, -1, N_DM, -1)),
-                            dim = -1)
-        desc += '|x0| [1]; '
+        if cfg.LOCAL_PASS_RELATIVE_TO_HALO :
+            scalars = torch.cat((scalars,
+                                 normalization.TNG_radii(x0_norm).unsqueeze(-1).expand(-1, -1, N_DM, -1)),
+                                dim = -1)
+            desc += '|x0| [1]; '
 
-        scalars = torch.cat((scalars,
-                             normalization.unit_contraction(torch.einsum('bid,bjd->bij',
-                                                            x0/x0_norm,
-                                                            basis)).unsqueeze(2).expand(-1, -1, N_DM, -1)),
-                            dim=-1)
-        desc += 'x0.basis [%d]; '%len(Basis)
+        if cfg.LOCAL_PASS_RELATIVE_TO_HALO :
+            scalars = torch.cat((scalars,
+                                 normalization.unit_contraction(torch.einsum('bid,bjd->bij',
+                                                                x0/x0_norm,
+                                                                basis)).unsqueeze(2).expand(-1, -1, N_DM, -1)),
+                                dim=-1)
+            desc += 'x0.basis [%d]; '%len(Basis)
 
-        if cfg.USE_VELOCITIES :
+        if cfg.USE_VELOCITIES and cfg.LOCAL_PASS_RELATIVE_TO_HALO :
             v0_norm = torch.linalg.norm(v0, dim=-1, keepdim=True) + 1e-5
             scalars = torch.cat((scalars,
                                  normalization.local_v0(v0_norm).unsqueeze(-1).expand(-1, -1, N_DM, -1)),
