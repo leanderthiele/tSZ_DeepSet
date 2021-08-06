@@ -11,6 +11,7 @@ from network_batt12 import NetworkBatt12
 from data_loader import DataLoader
 from data_modes import DataModes
 from training_loss import TrainingLoss
+from training_optimizer import TrainingOptimizer
 from data_batch import DataBatch
 from init_proc import InitProc
 from archive_cfg import ArchiveCfg
@@ -39,32 +40,12 @@ for n, p in model.named_parameters() :
 batt12 = NetworkBatt12().to_device() # use this to compute the reference loss
 batt12.eval()
 
-# TODO put the optimizer in a separate module, it is quite complex already
-# solution adopted from
-# https://discuss.pytorch.org/t/weight-decay-only-for-weights-of-nn-linear-and-nn-conv/114348/4
-# We need to do this carefully in order to avoid regularizing the layernorm weights
-wd_params = list()
-no_wd_params = list()
-for n, p in model.named_parameters() :
-    if 'linear' in n and 'weight' in n and p.requires_grad :
-        wd_params.append(p)
-    else :
-        no_wd_params.append(p)
-
-Npars = sum(p.numel() for p in wd_params)
-
-# we normalize the weight decay with the number of parameters it was calibrated for
-optimizer = torch.optim.Adam([{'params': no_wd_params, 'weight_decay': 0},
-                              {'params': wd_params, 'weight_decay': 568192/Npars*cfg.WEIGHT_DECAY}])
-
 loss_fn = TrainingLoss()
 
 training_loader = DataLoader(mode=DataModes.TRAINING)
 validation_loader = DataLoader(mode=DataModes.VALIDATION)
 
-scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, **cfg.ONE_CYCLE_LR_KWARGS,
-                                                steps_per_epoch=len(training_loader),
-                                                epochs=cfg.EPOCHS)
+optimizer = TrainingOptimizer(model, steps_per_epoch=len(training_loader))
 
 # store all the losses here
 training_loss_arr = []
@@ -141,7 +122,7 @@ for epoch in range(cfg.EPOCHS) :
             nn.utils.clip_grad_norm_(model.parameters(), max_norm=cfg.GRADIENT_CLIP)
 
         optimizer.step()
-        scheduler.step()
+        optimizer.lr_step()
 
 
     # put the losses for this epoch in the global arrays
