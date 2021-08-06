@@ -22,9 +22,9 @@ class Network(nn.Module) :
         super().__init__()
 
         assert cfg.NET_ARCH['decoder'] or cfg.NET_ARCH['batt12']
-        
+ 
         if cfg.NET_ARCH['decoder'] :
-            
+ 
             if cfg.NET_ARCH['encoder'] :
                 k_latent = cfg.NETWORK_DEFAULT_NLATENT
                 self.encoder = NetworkEncoder(k_latent)
