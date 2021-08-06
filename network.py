@@ -154,7 +154,7 @@ class Network(nn.Module) :
         """
     #{{{
         if isinstance(x, list) :
-            return [Network.__combine(xi, b12[ii]) for ii, xi in enumerate(x)]
+            return [self.__combine(xi, b12[ii]) for ii, xi in enumerate(x)]
 
         if cfg.OUTPUT_NFEATURES == 1 :
             x = b12 + self.scaling * torch.sinh(x)
