@@ -46,7 +46,7 @@ class _MLPLayer(nn.Sequential) :
                                       ('linear', nn.Linear(Nin, Nout, bias=bias)),
                                       ('activation', eval('nn.%s%s'%(activation_fct, \
                                                                      '()' if '(' not in activation_fct \
-                                                                     else '') \
+                                                                     else '')) \
                                                      if activation else nn.Identity())]))
 
         # NOTE be careful about the indexing here if the sequential order is changed
