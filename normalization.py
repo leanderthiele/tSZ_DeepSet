@@ -30,9 +30,13 @@ def tens_copy(obj) :
 def local_N(x) :
     """
     transform the number of particles around a TNG position.
-    Calibrated for cfg.R_LOCAL=100 kpc/h.
+    Calibrated at cfg.R_LOCAL=100 kpc/h, assumes N is distributed
+    Poissonian with mean <N> \propto R^3 >> 1
+    TODO scale the standard deviation too
     """
-    return (choose_lib(x).log(x) - 5.469) / 1.598
+    mu = 5.469 + 3.0 * np.log(cfg.R_LOCAL / 100.0)
+    sigma = 1.598
+    return (choose_lib(x).log(x) - mu) / sigma
 
 
 def unit_contraction(x) :
