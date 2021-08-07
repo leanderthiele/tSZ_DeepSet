@@ -51,7 +51,8 @@ class _MLPLayer(nn.Sequential) :
 
         # NOTE be careful about the indexing here if the sequential order is changed
         nn.init.kaiming_uniform_(self[2].weight,
-                                 a=self[3].negative_slope if activation else math.sqrt(5))
+                                 a=(self[3].negative_slope if 'LeakyReLU' in activation_fct else 0) \
+                                   if activation else math.sqrt(5))
         if bias :
             exec('nn.init.%s'%(bias_init%'self[2].bias'))
     #}}}
