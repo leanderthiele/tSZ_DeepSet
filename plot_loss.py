@@ -12,7 +12,7 @@ from matplotlib import pyplot as plt
 
 import cfg
 
-ID = argv[1].strip('training_').strip('.sbatch')
+ID = argv[1].replace('training_', '').replace('.sbatch', '')
 
 epoch = int(argv[2])
 
@@ -96,7 +96,7 @@ ax_mean_loss.legend(loc='upper right', frameon=False)
 ax_mean_loss.set_yscale('log')
 ax_mean_loss.plot([epoch, epoch], [0,1], color='green', alpha=0.3, linewidth=1)
 ax_mean_loss.set_xlim(0, epochs-1)
-ax_mean_loss.set_ylim(None, 1)
+#ax_mean_loss.set_ylim(None, 1)
 
 ax_mean_kld.plot(e, tkldmean, label='training')
 ax_mean_kld.plot(e, vkldmean, label='validation')

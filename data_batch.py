@@ -126,8 +126,8 @@ class DataBatch :
     #{{{
         # NOTE it is possible that we have to allocate new tensors here since otherwise we are doing
         #      and in-place operation
-        self.DM_coords -= origin
-        self.TNG_coords -= origin
+        self.DM_coords = self.DM_coords - origin
+        self.TNG_coords = self.TNG_coords - origin
 
         # NOTE technically speaking it would be necessary to impose periodic boundary conditions
         #      again here.
