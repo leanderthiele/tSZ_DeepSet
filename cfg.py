@@ -137,6 +137,10 @@ MLP_DEFAULT_NHIDDEN = 128
 # a string containing one %s which takes the bias and can be concatenated with nn.init. to form a valid statement
 MLP_DEFAULT_BIAS_INIT = 'normal_(%s, mean=0.0, std=0.1)'
 
+# should be such that torch.nn.<string>() is wellformed,
+# or torch.nn.<string> is wellformed (can add arguments in parentheses here)
+MLP_DEFAULT_ACTIVATION = 'LeakyReLU'
+
 # whether to apply layer normalization in the hidden layers
 LAYERNORM = True
 

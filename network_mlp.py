@@ -14,8 +14,11 @@ class _MLPLayer(nn.Sequential) :
     """
 
     def __init__(self, Nin, Nout, input_is_hidden,
-                       bias=True, layernorm=DefaultFromCfg('LAYERNORM'),
-                       activation=True, dropout=DefaultFromCfg('DROPOUT'),
+                       bias=True,
+                       layernorm=DefaultFromCfg('LAYERNORM'),
+                       activation=True,
+                       activation_fct=DefaultFromCfg('MLP_DEFAULT_ACTIVATION'),
+                       dropout=DefaultFromCfg('DROPOUT'),
                        bias_init=DefaultFromCfg('MLP_DEFAULT_BIAS_INIT')) :
         """
         set dropout to None if not desired
@@ -23,6 +26,8 @@ class _MLPLayer(nn.Sequential) :
     #{{{ 
         if isinstance(layernorm, DefaultFromCfg) :
             layernorm = layernorm()
+        if isinstance(activation_fct, DefaultFromCfg) :
+            activation_fct = activation_fct()
         if isinstance(dropout, DefaultFromCfg) :
             dropout = dropout()
         if isinstance(bias_init, DefaultFromCfg) :
@@ -39,7 +44,10 @@ class _MLPLayer(nn.Sequential) :
                                                   else nn.Dropout(p=cfg.VISIBLE_DROPOUT) if dropout is not None and cfg.VISIBLE_DROPOUT is not None \
                                                   else nn.Identity()),
                                       ('linear', nn.Linear(Nin, Nout, bias=bias)),
-                                      ('activation', nn.LeakyReLU() if activation else nn.Identity())]))
+                                      ('activation', eval('nn.%s%s'%(activation_fct, \
+                                                                     '()' if '(' not in activation_fct \
+                                                                     else '') \
+                                                     if activation else nn.Identity())]))
 
         # NOTE be careful about the indexing here if the sequential order is changed
         nn.init.kaiming_uniform_(self[2].weight,
