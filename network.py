@@ -45,8 +45,9 @@ class Network(nn.Module) :
         if cfg.NET_ARCH['local'] :
             assert cfg.NET_ARCH['decoder']
             self.local = NetworkLocal(MLP_kwargs_dict=dict(\
-                last=dict(layer_kwargs_dict=dict(\
-                    last={'bias_init': 'zeros_(%s)'}))))
+                                        last=dict(layer_kwargs_dict=dict(\
+                                           last={'bias_init': 'zeros_(%s)'}))),
+                                      dropout=None)
 
         if cfg.NET_ARCH['vae'] :
             assert cfg.NET_ARCH['decoder']
