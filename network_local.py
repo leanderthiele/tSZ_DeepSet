@@ -71,7 +71,7 @@ class NetworkLocal(nn.Module) :
     #}}}
 
 
-    def create_scalars(self, x0, x, N, basis, v=None) :
+    def create_scalars(self, x0, x, N, basis, v) :
     #{{{
         # descriptive string identifying the scalars
         desc = 'input to NetworkLocal: '
@@ -161,7 +161,7 @@ class NetworkLocal(nn.Module) :
     #}}}
 
 
-    def forward(self, x0, x, N, basis, v=None) :
+    def forward(self, x0, x, N, basis, v, P200c) :
         """
         x0    ... the TNG positions around which we are evaluating,
                   of shape [batch, N_TNG, 3] or a list of length batch with shapes [1, N_TNG[ii], 3]
@@ -173,6 +173,8 @@ class NetworkLocal(nn.Module) :
                   of shape [batch, Nbasis, 3]
         v     ... the DM velocities (in the halo frame),
                   of shape [batch, N_TNG, N_DM, 3] or a list of length batch with shapes [1, N_TNG[ii], N_DM, 3]
+        P200c ... used to divide the network output in the end (if cfg.SCALE_PTH), this way the network doesn't
+                  need to learn anything about the scaling of the pressure. shape [batch]
 
         NOTE we currently limit this function to the case that for each halo the number of DM particles N_DM per
              TNG particle is identical
@@ -183,7 +185,8 @@ class NetworkLocal(nn.Module) :
                          x[ii],
                          N[ii],
                          basis[ii].unsqueeze(0),
-                         v=v[ii] if v is not None else v)
+                         v[ii] if v is not None else v,
+                         torch.tensor([P200c[ii],], requires_grad=False))
                     for ii, x0i in enumerate(x0)]
 
         assert (v is None and not cfg.USE_VELOCITIES) \
@@ -199,7 +202,9 @@ class NetworkLocal(nn.Module) :
                 # in this case we also need a pooling operation
                 scalars = self.__pool(scalars)
 
-        return scalars
+        # return shape [batch, N_TNG, N_features]
+        return (1 if not cfg.SCALE_PTH else (1/P200c)[:, None, None]) \
+               * scalars
     #}}}
 
 

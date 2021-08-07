@@ -85,7 +85,8 @@ class Network(nn.Module) :
 
         if cfg.NET_ARCH['local'] :
             l = self.local(batch.TNG_coords, batch.DM_coords_local,
-                           batch.DM_N_local, batch.basis, batch.DM_vels_local)
+                           batch.DM_N_local, batch.basis, batch.DM_vels_local,
+                           batch.P200c)
 
         if cfg.NET_ARCH['origin'] :
             # first find the shifted origin
