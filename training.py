@@ -14,6 +14,7 @@ from training_loss import TrainingLoss
 from training_optimizer import TrainingOptimizer
 from data_batch import DataBatch
 from init_proc import InitProc
+from init_model import InitModel
 from archive_cfg import ArchiveCfg
 import cfg
 
@@ -27,15 +28,7 @@ if cfg.mpi_env_type is MPIEnvTypes.NOGPU :
 
 model = Network().to_device()
 
-if cfg.NET_ID is not None :
-    checkpoint = torch.load(os.path.join(cfg.RESULTS_PATH, 'model_%s.pt'%cfg.NET_ID))
-    model.load_state_dict(checkpoint, strict=False)
-
-for n, p in model.named_parameters() :
-    if cfg.NET_FREEZE is not None and any(n.startswith(s) for s in cfg.NET_FREEZE) :
-        p.requires_grad = False
-    else :
-        p.requires_grad = True
+InitModel(model)
 
 batt12 = NetworkBatt12().to_device() # use this to compute the reference loss
 batt12.eval()

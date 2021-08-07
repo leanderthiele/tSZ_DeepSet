@@ -62,7 +62,8 @@ NET_ARCH = dict(origin=True,
 # set to None for no freezing
 NET_FREEZE = None
 
-# can provide a pre-trained network here
+# can provide a pre-trained network here (can be a single ID or a list),
+# set to None for no loading
 NET_ID = None
 
 # fraction of samples to use for each mode -- training is inferred
