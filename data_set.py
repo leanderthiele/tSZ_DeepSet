@@ -71,7 +71,9 @@ class DataSet(torch_DataSet) :
                        TNG=self.__get_indices(self.data_items[idx].halo, 'TNG'))
 
         return self.data_items[idx].sample_particles(indices,
-                                                     TNG_residuals_noise_rng=self.rng,
+                                                     TNG_residuals_noise_rng=self.rng \
+                                                                             if self.mode is DataModes.TRAINING \
+                                                                             else None,
                                                      local_rng=self.rng)
     #}}}
 
