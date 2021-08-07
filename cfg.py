@@ -149,11 +149,17 @@ VISIBLE_DROPOUT = None
 # (I believe anything apart from 0, 1 doesn't make much sense)
 LOCAL_NLAYERS = 1
 
-# default number of hidden neurons in the local network
-LOCAL_NHIDDEN = 128
+# default number of hidden neurons in the local network (between the MLPs)
+LOCAL_NHIDDEN = 192
 
 # how many local features to compress to
-LOCAL_NLATENT = 32
+LOCAL_NLATENT = 64
+
+# structure of the MLPs in the local net: # of hidden layers
+LOCAL_MLP_NLAYERS = 4
+
+# structure of the MLPs in the local net: # of hidden neurons
+LOCAL_MLP_NHIDDEN = 192
 
 # whether to include any information about the relative position and velocity of the local environment
 LOCAL_PASS_RELATIVE_TO_HALO = True

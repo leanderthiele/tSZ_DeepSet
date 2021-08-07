@@ -44,14 +44,17 @@ class Network(nn.Module) :
 
         if cfg.NET_ARCH['local'] :
             assert cfg.NET_ARCH['decoder']
-            self.local = NetworkLocal(MLP_kwargs_dict=dict(\
+            self.local = NetworkLocal(MLP_Nlayers=cfg.LOCAL_MLP_NLAYERS,
+                                      MLP_Nhidden=cfg.LOCAL_MLP_NHIDDEN,
+                                      dropout=None, # we'll always have enough training samples here
+                                      MLP_kwargs_dict=dict(\
                                         last=dict(layer_kwargs_dict=dict(\
-                                           last={'bias_init': 'zeros_(%s)'}))),
-                                      dropout=None)
+                                           last={'bias_init': 'zeros_(%s)'}))))
 
         if cfg.NET_ARCH['vae'] :
             assert cfg.NET_ARCH['decoder']
-            self.vae = NetworkVAE(MLP_Nlayers=cfg.VAE_NLAYERS, MLP_Nhidden=cfg.VAE_NHIDDEN,
+            self.vae = NetworkVAE(MLP_Nlayers=cfg.VAE_NLAYERS,
+                                  MLP_Nhidden=cfg.VAE_NHIDDEN,
                                   # apparently it is a bad idea to have dropout in VAE encoder,
                                   # which sort of makes sense
                                   dropout=None,
