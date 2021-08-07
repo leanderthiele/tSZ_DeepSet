@@ -16,7 +16,7 @@ EPOCHS = 100
 SCALE_PTH = True
 
 # weight decay (applied only to weights)
-WEIGHT_DECAY = 1e-4
+WEIGHT_DECAY = 1e-3
 
 # how to construct the learning rate scheduler
 ONE_CYCLE_LR_KWARGS = dict(max_lr=3e-2,
@@ -34,7 +34,7 @@ TNG_RESOLUTION = 128
 # NOTE that if the absolute number is given, it is not a bug to choose it larger than
 # the number of particles in some low-mass halos. This will result in duplicate entries
 # in the particle list for those halos, which should be ok.
-PRT_FRACTION = dict(DM=1e4, TNG=1e5)
+PRT_FRACTION = dict(DM=1e4, TNG=256)
 
 # how far (in units of R200c) to go out when choosing TNG particles
 # (set to None for no cutoff)
@@ -163,7 +163,7 @@ LOCAL_MLP_NLAYERS = 4
 LOCAL_MLP_NHIDDEN = 192
 
 # whether to include any information about the relative position and velocity of the local environment
-LOCAL_PASS_RELATIVE_TO_HALO = True
+LOCAL_PASS_RELATIVE_TO_HALO = False
 
 # default number of hidden layers in the encoder
 ENCODER_DEFAULT_NLAYERS = 1
