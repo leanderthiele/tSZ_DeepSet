@@ -56,11 +56,11 @@ ax_mean_kld = ax[1][1]
 
 ax_epoch_loss.scatter(tg, t, label='training', s=3+20*(tlogm-vmin)/(vmax-vmin))
 ax_epoch_loss.scatter(vg, v, label='validation', s=3+20*(vlogm-vmin)/(vmax-vmin))
-ax_epoch_loss.plot([0,1e3], [0,1e3], linestyle='dashed', color='black')
 ax_epoch_loss.set_yscale('log')
 ax_epoch_loss.set_xscale('log')
-min_lim = min((ax_epoch_loss.get_xlim()[0], ax_epoch_loss.get_ylim()[0]))
-max_lim = max((ax_epoch_loss.get_xlim()[1], ax_epoch_loss.get_ylim()[1]))
+min_lim = 0.9*min((ax_epoch_loss.get_xlim()[0], ax_epoch_loss.get_ylim()[0]))
+max_lim = 1.1*max((ax_epoch_loss.get_xlim()[1], ax_epoch_loss.get_ylim()[1]))
+ax_epoch_loss.plot([min_lim, max_lim], [min_lim, max_lim], linestyle='dashed', color='black')
 ax_epoch_loss.set_xlim(min_lim, max_lim)
 ax_epoch_loss.set_ylim(min_lim, max_lim)
 
