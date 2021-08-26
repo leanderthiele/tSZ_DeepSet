@@ -24,6 +24,11 @@ class NetworkVAE(nn.Module) :
 
         self.Nlatent = Nlatent
         self.rand_latent = rand_latent
+
+        # we initialize this to None so that when the network is put in DDP mode
+        # not the same RNG is copied to all the processes
+        # We simply initialize the RNG on the first forward call
+        self.rng = None
     #}}}
 
 
@@ -44,9 +49,13 @@ class NetworkVAE(nn.Module) :
         where the KL loss is not summed over batch, i.e. a [batch] tensor
         """
     #{{{ 
+        if self.rng is None :
+            # seed with different number for each process
+            self.rng = torch.Generator(device=x.device).manual_seed((cfg.NETWORK_SEED+cfg.rank) % 2**63)
+
         if self.rand_latent :
             # draw random latent space variables
-            return torch.randn(x.shape[0], self.Nlatent, device=x.device), None
+            return torch.randn(x.shape[0], self.Nlatent, device=x.device, generator=self.rng), None
 
         scalars, _ = self.create_scalars(x)
 
@@ -56,7 +65,7 @@ class NetworkVAE(nn.Module) :
         logvar = h[:, self.Nlatent:]
 
         # compute the latent space variables
-        z = mu + torch.exp(0.5*logvar) * torch.randn(x.shape[0], self.Nlatent, device=x.device)
+        z = mu + torch.exp(0.5*logvar) * torch.randn(x.shape[0], self.Nlatent, device=x.device, generator=self.rng)
 
         # compute negative KL divergence
         KLD = -0.5 * torch.sum(1 + logvar - mu.square() - logvar.exp(), dim=1) 

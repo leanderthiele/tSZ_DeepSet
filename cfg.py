@@ -84,6 +84,10 @@ RESIDUALS_NOISE = None
 # seed that we use whenever we need something to be consistent between runs
 CONSISTENT_SEED = 137
 
+# seed that we use for the random components of the network,
+# i.e. the VAE part (should be chosen to have good balance between 0 and 1 bits!)
+NETWORK_SEED = 1234567890123456789
+
 # which globals to use -- set `none' to true if no globals are to be used
 GLOBALS_USE = dict(none=False,
                    #-------#
