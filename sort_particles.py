@@ -18,12 +18,6 @@ while True :
         print('Found %d halos'%idx)
         break
 
-    # make safety copy of data if it does not already exist
-    for s in ['coords', 'velocities', ] :
-        if not os.path.isfile(cfg._STORAGE_FILES['DM']%(idx, '%s_backup'%s)) :
-            shutil.copyfile(cfg._STORAGE_FILES['DM']%(idx, s),
-                            cfg._STORAGE_FILES['DM']%(idx, '%s_backup'%s))
-
     # get the geometry
     R200c = globals_DM['R200c']
     pos = globals_DM['pos']

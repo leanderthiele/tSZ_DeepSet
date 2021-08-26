@@ -5,10 +5,8 @@ import cfg
 
 halo_catalog = dict(np.load(cfg.HALO_CATALOG))
 
-res_str = '%d_'%cfg.TNG_RESOLUTION if cfg.TNG_RESOLUTION != 256 else ''
-
-Nprt_DM_str = 'Nprt_%sDM'%res_str
-Nprt_TNG_str = 'Nprt_%sTNG'%res_str
+Nprt_DM_str = 'Nprt_%d_DM'%cfg.TNG_RESOLUTION
+Nprt_TNG_str = 'Nprt_%d_TNG'%cfg.TNG_RESOLUTION
 
 if Nprt_DM_str in halo_catalog :
     print('Found %s, continuing'%Nprt_DM_str)

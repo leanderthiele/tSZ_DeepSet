@@ -30,10 +30,8 @@ class Halo :
                                velocities=cfg._STORAGE_FILES['DM']%(halo_index, 'velocities'),
                                offsets=cfg._STORAGE_FILES['DM']%(halo_index, 'offsets'))
         
-        res_str = '%d_'%cfg.TNG_RESOLUTION if cfg.TNG_RESOLUTION != 256 else ''
-
-        self.storage_TNG = dict(coords=cfg._STORAGE_FILES['TNG']%(halo_index, 'box_%scoords'%res_str),
-                                Pth=cfg._STORAGE_FILES['TNG']%(halo_index, 'box_%sPth'%res_str),
+        self.storage_TNG = dict(coords=cfg._STORAGE_FILES['TNG']%(halo_index, 'box_%d_coords'%cfg.TNG_RESOLUTION),
+                                Pth=cfg._STORAGE_FILES['TNG']%(halo_index, 'box_%d_Pth'%cfg.TNG_RESOLUTION),
                                 residuals=cfg._STORAGE_FILES['TNG']%(halo_index, 'residuals'))
 
         self.idx = halo_index

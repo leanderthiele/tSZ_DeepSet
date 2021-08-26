@@ -1,6 +1,9 @@
 This file lists the steps to be taken to prepare the data
 for training etc.
 
+Global hyperparameters that are used in various steps are marked
+as DEPENDENCIES.
+In general steps are dependent on earlier ones, unless indicated otherwise.
 
  1) run Rockstar on the simulation
 
@@ -13,29 +16,66 @@ for training etc.
  4) convert the ascii out_<snap>_wparents.list to an hdf5 file that
     is analogous in structure to the Arepo FOF group files
     using ascii_to_hdf5.py
+    Operates on : /tigress/lthiele/Illustris_300-1_Dark/rockstar/out_99_wparents.list
+    Uses as reference : /tigress/lthiele/Illustris_300-1_Dark/output/groups_099/fof_subhalo_tab_099.0.hdf5
+    Creates : /tigress/lthiele/Illustris_300-1_Dark/rockstar/out_99.hdf5
 
  5) run collect_particles_{DM, TNG} on the created hdf5 group file
     and the existing particle files.
     This creates binary files containing particle positions and some other
     things.
+    These binary files have the names (%d is the group index)
+        DM_%d_coords
+        DM_%d_velocities
+        TNG_%d_coords
+        TNG_%d_masses
+        TNG_%d_densities
+        TNG_%d_Pth
+    There are also text files with the names
+        DM_%d_globals
+        TNG_%d_globals
+    DEPENDENCIES: minimum mass, radial cutoff (hardcoded in .cpp file)
 
- 6) run create_halo_catalog.py to generate the first version of the halo
+ 6) sort the DM particles, using sort_particles.py
+    Now we have the format needed for the local part of the architecture.
+    Operates on the DM binary & text files
+    Creates the offset files, modifies binary files in-place
+    DEPENDENCIES: Nside (only an efficiency hyperparameter, likely no change needed
+                         any time soon)
+    NOTE: None of the subsequent steps depends on this one!
+
+ 7) run create_halo_catalog.py to generate the first version of the halo
     catalog.
     This catalog will not yet have the Nprt fields.
+    Operates on all DM files (text & binary), but only the TNG text files.
+    Creates cfg.HALO_CATALOG
 
- 7) run remove_TNG_outliers.py to remove particles with extremely high
-    pressures that would make training difficult for us.
+ 8) run create_boxes.py which will run voxelize to create the downsampled
+    electron pressure on a grid
+    Operates on the TNG binary & text files and creates the files
+        TNG_%d_box_%d_coords
+        TNG_%d_box_%d_Pth
+    where the first %d is again the halo index and the second %d is the box sidelength
+    (note that we could also voxelize the other fields we stored to disk but don't
+     have a need for them at the moment)
+    DEPENDENCIES: box sidelength
 
- 8) run create_Nprt.py which will add the Nprt fields to the halo catalog.
-    [now we now how many TNG particles we have]
+# PROBABLY NO LONGER NECESSARY AS WE ARE VOXELIZING THE PARTICLES
+# x) run remove_TNG_outliers.py to remove particles with extremely high
+#    pressures that would make training difficult for us.
 
- 9) train a simple network (modified B12 + origin shift)
+ 9) run create_Nprt.py which will add the Nprt fields to the halo catalog.
+    [now we know how many TNG particles we have]
 
-10) evaluate this network on the entire data set to find the residuals,
+10) train a simple network (modified B12 + origin shift)
+
+11) evaluate this network on the entire data set to find the residuals,
     using residuals.py
+    NOTE: generated files have no indication of the used resolution...
 
-11) bin the residuals, using bin_residuals.py
+12) bin the residuals, using bin_residuals.py
     Now we have the input for the VAE part of the larger architecture.
-
-12) sort the DM particles, using sort_particles.py
-    Now we have the format needed for the local part of the architecture.
+    Creates the files
+        TNG_%d_residuals
+    NOTE: generated files have no indication of the used resolution...
+    DEPENDENCIES: cfg.RESIDUALS_{RMIN, RMAX, NBINS}

@@ -1,3 +1,6 @@
+# NOTE I think this script is currently broken due to file name issues
+#      But we probably don't need it anymore due to voxelization.
+
 PLOT = False
 
 import numpy as np

@@ -200,7 +200,7 @@ namespace collect
     };// }}}
 
     constexpr RockstarFields::R200c::value_type Rscale = 2.5; // collect all particles within 2.5 R200c
-    constexpr RockstarFields::M200c::value_type Mmin = 5e3; // 5 x 10^13 Msun/h
+    constexpr RockstarFields::M200c::value_type Mmin = 3e3; // 3 x 10^13 Msun/h
 
     using grp_chunk = CallbackUtils::chunk::SingleGrp<AF>;
     using prt_chunk = CallbackUtils::chunk::MultiPrt<AF>;
