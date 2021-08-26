@@ -35,6 +35,7 @@ In general steps are dependent on earlier ones, unless indicated otherwise.
         DM_%d_globals
         TNG_%d_globals
     DEPENDENCIES: minimum mass, radial cutoff (hardcoded in .cpp file)
+    RECOMPILE!
 
  6) sort the DM particles, using sort_particles.py
     Now we have the format needed for the local part of the architecture.
@@ -43,6 +44,7 @@ In general steps are dependent on earlier ones, unless indicated otherwise.
     DEPENDENCIES: Nside (only an efficiency hyperparameter, likely no change needed
                          any time soon)
     NOTE: None of the subsequent steps depends on this one!
+    RECOMPILE!
 
  7) run create_halo_catalog.py to generate the first version of the halo
     catalog.
