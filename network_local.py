@@ -17,12 +17,15 @@ class NetworkLocal(nn.Module) :
     def __init__(self, Nlatent=DefaultFromCfg('LOCAL_NLATENT'),
                        Nlayers=DefaultFromCfg('LOCAL_NLAYERS'),
                        Nhidden=DefaultFromCfg('LOCAL_NHIDDEN'),
+                       pass_N=DefaultFromCfg('LOCAL_PASS_N'),
                        MLP_kwargs_dict=dict(),
                        **MLP_kwargs) :
         """
         Nlatent  ... number of neurons (scalar features) in the output
         Nlayers  ... number of hidden layers (each layer is an MLP)
         Nhidden  ... number of neurons in hidden layers (either int or dict)
+        pass_N   ... whether the local number of particles is used in the initial DeepSet step
+                     or only concatenated with the scalars after the pooling
         MLP_kwargs_dict ... a dict indexed by str(layer_index) -- does not need to have all keys
                             note that the indices here can be one more than the Nhidden indices
                             NOTE 'first' and 'last' are special keywords that can also be used
@@ -36,6 +39,8 @@ class NetworkLocal(nn.Module) :
             Nlayers = Nlayers()
         if isinstance(Nhidden, DefaultFromCfg) :
             Nhidden = Nhidden()
+        if isinstance(pass_N, DefaultFromCfg) :
+            pass_N = pass_N()
 
         assert isinstance(Nhidden, (int, dict))
 
@@ -49,14 +54,14 @@ class NetworkLocal(nn.Module) :
                 # x0.v0 and x.v
                 + (1+cfg.LOCAL_PASS_RELATIVE_TO_HALO) * cfg.USE_VELOCITIES
                 # number of particles in the sphere
-                + 1)
+                + pass_N)
 
         self.layers = nn.ModuleList(
             [NetworkMLP(k_in if ii==0 \
-                        else Nhidden if isinstance(Nhidden, int) \
-                        else Nhidden[str(ii-1)] if str(ii-1) in Nhidden \
-                        else Nhidden['first'] if 'first' in Nhidden and ii==1 \
-                        else cfg.LOCAL_NHIDDEN,
+                        else (Nhidden if isinstance(Nhidden, int) \
+                              else Nhidden[str(ii-1)] if str(ii-1) in Nhidden \
+                              else Nhidden['first'] if 'first' in Nhidden and ii==1 \
+                              else cfg.LOCAL_NHIDDEN) - 1, # subtract 1 to make space for concat with local N
                         Nlatent if ii==Nlayers \
                         else Nhidden if isinstance(Nhidden, int) \
                         else Nhidden[str(ii)] if str(ii) in Nhidden \
@@ -68,6 +73,8 @@ class NetworkLocal(nn.Module) :
                            else MLP_kwargs_dict['last'] if 'last' in MLP_kwargs_dict and ii==Nlayers \
                            else MLP_kwargs)
                        ) for ii in range(Nlayers+1)])
+
+        self.pass_N = pass_N
     #}}}
 
 
@@ -84,9 +91,23 @@ class NetworkLocal(nn.Module) :
             v0 = torch.mean(v, dim=2) # [batch, N_TNG, 3]
             v -= v0.unsqueeze(2)
 
-        # measure of number of DM particles in vicinity, has shape [batch, N_TNG, N_DM, 1]
-        scalars = normalization.local_N(N).unsqueeze(-1).unsqueeze(-1).expand(-1, -1, N_DM, -1)
-        desc += 'N [1]; '
+        x_norm = torch.linalg.norm(x, dim=-1, keepdim=True) + 1e-5
+
+        scalars = normalization.local_x(x_norm))
+        desc += '|x| [1]; '
+
+        scalars = torch.cat((scalars,
+                             normalization.unit_contraction(torch.einsum('bijd,bkd->bijk',
+                                                                         x/x_norm,
+                                                                         basis))),
+                            dim=-1)
+        desc += 'x.basis [%d]; '%len(Basis)
+
+        if self.pass_N :
+            # measure of number of DM particles in vicinity, has shape [batch, N_TNG, N_DM, 1]
+            N_expanded = normalization.local_N(N).unsqueeze(-1).unsqueeze(-1).expand(-1, -1, N_DM, -1)
+            scalars = torch.cat((scalars, N_expanded), dim=-1)
+            desc += 'N [1]; '
 
         # one of the TNG particles sits at r = 0, prevent explosions
         x0_norm = torch.linalg.norm(x0, dim=-1, keepdim=True) + 1e-5
@@ -127,17 +148,6 @@ class NetworkLocal(nn.Module) :
             desc += 'x0.v0 [1]; '
 
 
-        x_norm = torch.linalg.norm(x, dim=-1, keepdim=True) + 1e-5
-        scalars = torch.cat((scalars, normalization.local_x(x_norm)), dim=-1)
-        desc += '|x| [1]; '
-
-        scalars = torch.cat((scalars,
-                             normalization.unit_contraction(torch.einsum('bijd,bkd->bijk',
-                                                                         x/x_norm,
-                                                                         basis))),
-                            dim=-1)
-        desc += 'x.basis [%d]; '%len(Basis)
-
         if cfg.USE_VELOCITIES :
             v_norm = torch.linalg.norm(v, dim=-1, keepdim=True) + 1e-5
             scalars = torch.cat((scalars, normalization.local_v(v_norm)), dim=-1)
@@ -167,7 +177,7 @@ class NetworkLocal(nn.Module) :
                   of shape [batch, N_TNG, 3] or a list of length batch with shapes [1, N_TNG[ii], 3]
         x     ... the DM positions (in the halo frame),
                   of shape [batch, N_TNG, N_DM, 3] or a list of length batch with shapes [1, N_TNG[ii], N_DM, 3]
-        N     ,.. number of DM particles in vicinity of TNG position [not identical to len(x)!],
+        N     ... number of DM particles in vicinity of TNG position [not identical to len(x)!],
                   of shape [batch, N_TNG] or a list of length batch with shapes [1, N_TNG[ii]]
         basis ... the usual global vectors,
                   of shape [batch, Nbasis, 3]
@@ -201,6 +211,9 @@ class NetworkLocal(nn.Module) :
             if ii == 0 :
                 # in this case we also need a pooling operation
                 scalars = self.__pool(scalars)
+
+                # and we need to concatenate with the local DM density measure
+                scalars = torch.cat((scalars, N.unsqueeze(-1)), dim=-1)
 
         # return shape [batch, N_TNG, N_features]
         return (1 if not cfg.SCALE_PTH else (1/P200c)[:, None, None]) \

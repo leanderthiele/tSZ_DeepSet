@@ -155,6 +155,10 @@ DROPOUT = None
 # dropout rate (for the visible neurons) -- set to None if not wanted
 VISIBLE_DROPOUT = None
 
+# whether the number of particles is used in each initial MLP in the local network
+# (should not be necessary)
+LOCAL_PASS_N = False
+
 # default number of hidden layers in the local network
 # (I believe anything apart from 0, 1 doesn't make much sense)
 LOCAL_NLAYERS = 1
