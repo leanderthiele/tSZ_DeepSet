@@ -93,7 +93,7 @@ class NetworkLocal(nn.Module) :
 
         x_norm = torch.linalg.norm(x, dim=-1, keepdim=True) + 1e-5
 
-        scalars = normalization.local_x(x_norm))
+        scalars = normalization.local_x(x_norm)
         desc += '|x| [1]; '
 
         scalars = torch.cat((scalars,

@@ -160,7 +160,7 @@ class NetworkDecoder(nn.Module) :
     #}}}
 
 
-    def forward(self, x, h=None, r=None, u=None, basis=None, local=None, vae=None) :
+    def forward(self, x, h=None, s=None, r=None, u=None, basis=None, local=None, vae=None) :
         """
         x ... the positions where to evaluate, of shape [batch, Nvects, 3]
               or a list of length batch and shapes [1, Nvectsi, 3]
