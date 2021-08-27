@@ -163,5 +163,5 @@ class NetworkScalarEncoder(nn.Module) :
         --> we return [batch, N_features]
         """
     #{{{
-        return torch.mean(x, dim=2)
+        return torch.mean(x, dim=1)
     #}}}
