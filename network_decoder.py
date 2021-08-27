@@ -17,7 +17,7 @@ class NetworkDecoder(nn.Module) :
      locations, but they will no longer be vector valued!)
     """
 
-    def __init__(self, Nlatent, k_out=1,
+    def __init__(self, Nvecs, Nscals, k_out=1,
                  r_passed=DefaultFromCfg('DECODER_DEFAULT_R_PASSED'),
                  basis_passed=DefaultFromCfg('DECODER_DEFAULT_BASIS_PASSED'),
                  globals_passed=DefaultFromCfg('DECODER_DEFAULT_GLOBALS_PASSED'),
@@ -25,7 +25,8 @@ class NetworkDecoder(nn.Module) :
                  vae_passed=DefaultFromCfg('NET_ARCH["vae"]'),
                  **MLP_kwargs) :
         """
-        Nlatent    ... the number of latent space vectors (can be zero, then h should be None in forward)
+        Nvecs      ... the number of latent space vectors (can be zero, then h should be None in forward)
+        Nscals     ... the number of latent space scalars
         k_out      ... the number of features to predict at the locations
         r_passed   ... whether the TNG radial coordinates will be passed
         basis_passed   ... whether the basis vectors will be passed
@@ -48,7 +49,8 @@ class NetworkDecoder(nn.Module) :
 
         super().__init__()
 
-        self.mlp = NetworkMLP(2 * Nlatent # one for TNG coord projection, one for modulus
+        self.mlp = NetworkMLP(2 * Nvecs # one for TNG coord projection, one for modulus
+                              + Nscals
                               + r_passed
                               + globals_passed * len(GlobalFields)
                               + basis_passed * len(Basis)
@@ -56,7 +58,8 @@ class NetworkDecoder(nn.Module) :
                               + vae_passed * cfg.VAE_NLATENT,
                               k_out, **MLP_kwargs)
 
-        self.Nlatent = Nlatent
+        self.Nvecs = Nvecs
+        self.Nscals = Nscals
         self.r_passed = r_passed
         self.globals_passed = globals_passed
         self.basis_passed = basis_passed
@@ -65,7 +68,7 @@ class NetworkDecoder(nn.Module) :
     #}}}
 
 
-    def create_scalars(self, x, h=None, r=None, u=None, basis=None, local=None, vae=None) :
+    def create_scalars(self, x, h=None, s=None, r=None, u=None, basis=None, local=None, vae=None) :
     #{{{
         scalars = None
         desc = 'input to NetworkDecoder: '
@@ -82,14 +85,22 @@ class NetworkDecoder(nn.Module) :
             h_norm = torch.linalg.norm(h, dim=-1, keepdim=True)
 
             scalars = h_norm.unsqueeze(1).squeeze(dim=-1).expand(-1, N_TNG, -1).clone()
-            desc += '|h| [%d]; '%self.Nlatent
+            desc += '|h| [%d]; '%self.Nvecs
 
             # compute the projections of shape [batch, Nvects, latent feature]
             # TODO whether to normalize to unit vectors here is a hyperparameter we should explore!!!
             scalars = torch.cat((scalars,
                                  torch.einsum('bvd,bld->bvl', x / x_norm, h / (h_norm + 1e-5))),
                                 dim=-1)
-            desc += 'x.h [%d]; '%self.Nlatent
+            desc += 'x.h [%d]; '%self.Nvecs
+
+        if s is not None :
+            # concatenate with the halo-scale scalars (note this is exactly identical to the u-scalars)
+            s_expanded = s.unsqueeze(1).expand(-1, N_TNG, -1)
+            scalars = torch.cat((scalars, s_expanded), dim=-1) \
+                      if scalars is not None \
+                      else s_expanded
+            desc += 's [%d]'%self.Nscals
 
         # concatenate with the radial distances if requested
         if r is not None :
@@ -154,6 +165,7 @@ class NetworkDecoder(nn.Module) :
         x ... the positions where to evaluate, of shape [batch, Nvects, 3]
               or a list of length batch and shapes [1, Nvectsi, 3]
         h ... the latent vectors, of shape [batch, latent feature, 3]
+        s ... the latent scalars, of shape [batch, latent_feature]
         r ... the radial positions where to evaluate, of shape [batch, Nvects, 1]
               or a list of length batch shapes [1, Nvectsi, 1]
         u ... the global vector, of shape [batch, Nglobals]
@@ -176,7 +188,7 @@ class NetworkDecoder(nn.Module) :
                          vae=vae[ii, ...].unsqueeze(0) if vae is not None else vae)
                     for ii, xi in enumerate(x)]
 
-        scalars, _ = self.create_scalars(x, h, r, u, basis, local, vae)
+        scalars, _ = self.create_scalars(x, h, s, r, u, basis, local, vae)
 
         # pass through the MLP, transform scalars -> scalars
         return self.mlp(scalars)

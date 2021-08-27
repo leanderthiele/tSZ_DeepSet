@@ -54,6 +54,7 @@ NET_ARCH = dict(origin=True,
                 batt12=True,
                 deformer=True,
                 encoder=True,
+                scalarencoder=True,
                 decoder=True,
                 vae=True,
                 local=True)
@@ -172,6 +173,21 @@ LOCAL_MLP_NHIDDEN = 192
 
 # whether to include any information about the relative position and velocity of the local environment
 LOCAL_PASS_RELATIVE_TO_HALO = False
+
+# default number of features output by scalar encoder
+SCALAR_ENCODER_NLATENT = 128
+
+# default number of hidden layers in scalar encoder [only 0 or 1 really make sense]
+SCALAR_ENCODER_NLAYERS = 1
+
+# default number of hidden neurons in scalar encoder
+SCALAR_ENCODER_NHIDDEN = 128
+
+# whether basis is passed to scalar encoder
+SCALAR_ENCODER_BASIS_PASSED = True
+
+# whether globals are passed to scalar encoder
+SCALAR_ENCODER_GLOBALS_PASSED = False
 
 # default number of hidden layers in the encoder
 ENCODER_DEFAULT_NLAYERS = 1

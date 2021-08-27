@@ -159,9 +159,9 @@ class NetworkScalarEncoder(nn.Module) :
 
     def __pool(self, x) :
         """
-        input tensor is of shape [batch, N_TNG, N_DM, N_features]
-        --> we return [batch, N_TNG, N_features]
+        input tensor is of shape [batch, N_DM, N_features]
+        --> we return [batch, N_features]
         """
     #{{{
-        return torch.mean(x, dim=2)
+        return torch.mean(x, dim=1)
     #}}}

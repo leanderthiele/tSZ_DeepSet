@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 
 from network_encoder import NetworkEncoder
+from network_scalarencoder import NetworkScalarEncoder
 from network_decoder import NetworkDecoder
 from network_origin import NetworkOrigin
 from network_deformer import NetworkDeformer
@@ -26,9 +27,13 @@ class Network(nn.Module) :
         if cfg.NET_ARCH['decoder'] :
  
             if cfg.NET_ARCH['encoder'] :
-                self.encoder = NetworkEncoder(Nlatent)
+                self.encoder = NetworkEncoder()
+            
+            if cfg.NET_ARCH['scalarencoder'] :
+                self.scalarencoder = NetworkScalarEncoder()
 
             self.decoder = NetworkDecoder(self.encoder.Nlatent if cfg.NET_ARCH['encoder'] else 0,
+                                          self.scalarencoder.Nlatent if cfg.NET_ARCH['scalarencoder'] else 0,
                                           k_out=cfg.OUTPUT_NFEATURES,
                                           MLP_Nlayers=cfg.DECODER_DEFAULT_NLAYERS,
                                           MLP_Nhidden=cfg.DECODER_DEFAULT_NHIDDEN,
@@ -40,8 +45,15 @@ class Network(nn.Module) :
                                                                        'dropout' : None,
                                                                        'bias_init': 'zeros_(%s)'}))
 
+            # register degree of freedom to rescale the network output
+            self.register_parameter('scaling', nn.Parameter(torch.tensor(1.0, dtype=torch.float32)))
+
+        else :
+            # no decoder provided, this is unusual and we should check!
+            assert not (cfg.NET_ARCH['encoder'] or cfg.NET_ARCH['scalarencoder'] \
+                        or cfg.NET_ARCH['local'] or cfg.NET_ARCH['vae'])
+
         if cfg.NET_ARCH['local'] :
-            assert cfg.NET_ARCH['decoder']
             self.local = NetworkLocal(MLP_Nlayers=cfg.LOCAL_MLP_NLAYERS,
                                       MLP_Nhidden=cfg.LOCAL_MLP_NHIDDEN,
                                       dropout=None, # we'll always have enough training samples here
@@ -50,16 +62,12 @@ class Network(nn.Module) :
                                            last={'bias_init': 'zeros_(%s)'}))))
 
         if cfg.NET_ARCH['vae'] :
-            assert cfg.NET_ARCH['decoder']
             self.vae = NetworkVAE(MLP_Nlayers=cfg.VAE_NLAYERS,
                                   MLP_Nhidden=cfg.VAE_NHIDDEN,
                                   # apparently it is a bad idea to have dropout in VAE encoder,
                                   # which sort of makes sense
                                   dropout=None,
                                   layer_kwargs_dict=dict(last={'bias_init': 'zeros_(%s)'}))
-
-        if cfg.NET_ARCH['encoder'] :
-            assert cfg.NET_ARCH['decoder']
 
         if cfg.NET_ARCH['origin'] :
             self.origin = NetworkOrigin()
@@ -71,10 +79,6 @@ class Network(nn.Module) :
 
         if cfg.NET_ARCH['deformer'] :
             assert cfg.NET_ARCH['batt12']
-
-        if cfg.NET_ARCH['decoder'] :
-            # register degree of freedom to rescale the network output
-            self.register_parameter('scaling', nn.Parameter(torch.tensor(1.0, dtype=torch.float32)))
 
         if cfg.NET_ARCH['decoder'] and not cfg.NET_ARCH['batt12'] :
             assert cfg.OUTPUT_NFEATURES == 1
@@ -105,6 +109,11 @@ class Network(nn.Module) :
             # encode the DM field
             x = self.encoder(batch.DM_coords, v=batch.DM_vels, u=batch.u, basis=batch.basis)
 
+        if cfg.NET_ARCH['scalarencoder'] :
+            s = self.scalarencoder(batch.DM_coords, v=batch.DM_vels,
+                                   u=batch.u if self.scalarencoder.globals_passed else None,
+                                   basis=batch.basis if self.scalarencoder.basis_passed else None)
+
         if cfg.NET_ARCH['vae'] :
             z, KLD = self.vae(batch.TNG_residuals)
         else :
@@ -114,6 +123,7 @@ class Network(nn.Module) :
             # decode at the TNG particle positions
             x = self.decoder(batch.TNG_coords,
                              h=x if cfg.NET_ARCH['encoder'] else None,
+                             s=s if cfg.NET_ARCH['scalarencoder'] else None,
                              r=batch.TNG_radii if self.decoder.r_passed else None,
                              u=batch.u if self.decoder.globals_passed else None,
                              basis=batch.basis if self.decoder.basis_passed else None,
