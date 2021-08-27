@@ -49,7 +49,7 @@ class NetworkDecoder(nn.Module) :
 
         super().__init__()
 
-        self.mlp = NetworkMLP(2 * Nvecs # one for TNG coord projection, one for modulus
+        self.mlp = NetworkMLP(3 * Nvecs # one for TNG coord projection, one for TNG-vec distance, one for modulus
                               + Nscals
                               + r_passed
                               + globals_passed * len(GlobalFields)
@@ -93,6 +93,12 @@ class NetworkDecoder(nn.Module) :
                                  torch.einsum('bvd,bld->bvl', x / x_norm, h / (h_norm + 1e-5))),
                                 dim=-1)
             desc += 'x.h [%d]; '%self.Nvecs
+
+            # compute the vector distances of shape [batch, Nvects, latent feature]
+            scalars = torch.cat((scalars,
+                                 torch.linalg.norm(x-h, dim=-1, keepdim=True)),
+                                dim=-1)
+            desc += '|x-h| [%d]; '%self.Nvecs
 
         if s is not None :
             # concatenate with the halo-scale scalars (note this is exactly identical to the u-scalars)
