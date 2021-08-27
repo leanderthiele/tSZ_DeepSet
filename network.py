@@ -26,12 +26,10 @@ class Network(nn.Module) :
         if cfg.NET_ARCH['decoder'] :
  
             if cfg.NET_ARCH['encoder'] :
-                k_latent = cfg.NETWORK_DEFAULT_NLATENT
-                self.encoder = NetworkEncoder(k_latent)
-            else :
-                k_latent = 0
+                self.encoder = NetworkEncoder(Nlatent)
 
-            self.decoder = NetworkDecoder(k_latent, k_out=cfg.OUTPUT_NFEATURES,
+            self.decoder = NetworkDecoder(self.encoder.Nlatent if cfg.NET_ARCH['encoder'] else 0,
+                                          k_out=cfg.OUTPUT_NFEATURES,
                                           MLP_Nlayers=cfg.DECODER_DEFAULT_NLAYERS,
                                           MLP_Nhidden=cfg.DECODER_DEFAULT_NHIDDEN,
                                           # do not have an activation function before the final output

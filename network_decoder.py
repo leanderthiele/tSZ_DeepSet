@@ -17,7 +17,7 @@ class NetworkDecoder(nn.Module) :
      locations, but they will no longer be vector valued!)
     """
 
-    def __init__(self, k_latent, k_out=1,
+    def __init__(self, Nlatent, k_out=1,
                  r_passed=DefaultFromCfg('DECODER_DEFAULT_R_PASSED'),
                  basis_passed=DefaultFromCfg('DECODER_DEFAULT_BASIS_PASSED'),
                  globals_passed=DefaultFromCfg('DECODER_DEFAULT_GLOBALS_PASSED'),
@@ -25,7 +25,7 @@ class NetworkDecoder(nn.Module) :
                  vae_passed=DefaultFromCfg('NET_ARCH["vae"]'),
                  **MLP_kwargs) :
         """
-        k_latent   ... the number of latent space vectors (can be zero, then h should be None in forward)
+        Nlatent    ... the number of latent space vectors (can be zero, then h should be None in forward)
         k_out      ... the number of features to predict at the locations
         r_passed   ... whether the TNG radial coordinates will be passed
         basis_passed   ... whether the basis vectors will be passed
@@ -48,7 +48,7 @@ class NetworkDecoder(nn.Module) :
 
         super().__init__()
 
-        self.mlp = NetworkMLP(2 * k_latent # one for TNG coord projection, one for modulus
+        self.mlp = NetworkMLP(2 * Nlatent # one for TNG coord projection, one for modulus
                               + r_passed
                               + globals_passed * len(GlobalFields)
                               + basis_passed * len(Basis)
@@ -56,7 +56,7 @@ class NetworkDecoder(nn.Module) :
                               + vae_passed * cfg.VAE_NLATENT,
                               k_out, **MLP_kwargs)
 
-        self.k_latent = k_latent
+        self.Nlatent = Nlatent
         self.r_passed = r_passed
         self.globals_passed = globals_passed
         self.basis_passed = basis_passed
@@ -82,14 +82,14 @@ class NetworkDecoder(nn.Module) :
             h_norm = torch.linalg.norm(h, dim=-1, keepdim=True)
 
             scalars = h_norm.unsqueeze(1).squeeze(dim=-1).expand(-1, N_TNG, -1).clone()
-            desc += '|h| [%d]; '%self.k_latent
+            desc += '|h| [%d]; '%self.Nlatent
 
             # compute the projections of shape [batch, Nvects, latent feature]
             # TODO whether to normalize to unit vectors here is a hyperparameter we should explore!!!
             scalars = torch.cat((scalars,
                                  torch.einsum('bvd,bld->bvl', x / x_norm, h / (h_norm + 1e-5))),
                                 dim=-1)
-            desc += 'x.h [%d]; '%self.k_latent
+            desc += 'x.h [%d]; '%self.Nlatent
 
         # concatenate with the radial distances if requested
         if r is not None :

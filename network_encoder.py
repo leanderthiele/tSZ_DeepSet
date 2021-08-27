@@ -12,7 +12,7 @@ class NetworkEncoder(nn.Module) :
     which we can than evaluate at specific points
     """
 
-    def __init__(self, k_latent,
+    def __init__(self, Nlatent=DefaultFromCfg('NETWORK_DEFAULT_NLATENT'),
                        Nlayers=DefaultFromCfg('ENCODER_DEFAULT_NLAYERS'),
                        Nhidden=DefaultFromCfg('ENCODER_DEFAULT_NHIDDEN'),
                        basis_max_layer=DefaultFromCfg('ENCODER_DEFAULT_BASIS_MAXLAYER'),
@@ -20,9 +20,9 @@ class NetworkEncoder(nn.Module) :
                        MLP_kwargs_dict=dict(),
                        **MLP_kwargs) :
         """
-        k_latent ... number of neurons in the output
-        Nlayers  ... number of hidden layers (i.e. hidden h-vectors)
-        Nhidden  ... either an integer, which is the number of h-vectors used in the hidden layers,
+        Nlatent ... number of neurons in the output
+        Nlayers ... number of hidden layers (i.e. hidden h-vectors)
+        Nhidden ... either an integer, which is the number of h-vectors used in the hidden layers,
                      or a dict indexed by str(layer index) -- does not need to have all keys
                      NOTE 'first' and 'last' are special keywords that can also be used
         basis_max_layer ... until which layer the basis should be passed
@@ -36,6 +36,8 @@ class NetworkEncoder(nn.Module) :
                             in MLP_kwargs_dict
         """
     #{{{
+        if isinstance(Nlatent, DefaultFromCfg) :
+            Nlatent = Nlatent()
         if isinstance(Nlayers, DefaultFromCfg) :
             Nlayers = Nlayers()
         if isinstance(Nhidden, DefaultFromCfg) :
@@ -51,6 +53,7 @@ class NetworkEncoder(nn.Module) :
 
         self.basis_max_layer = basis_max_layer
         self.globals_max_layer = globals_max_layer
+        self.Nlatent = Nlatent
 
         self.layers = nn.ModuleList(
             [NetworkLayer(0 if ii==0 \
@@ -58,7 +61,7 @@ class NetworkEncoder(nn.Module) :
                           else Nhidden[str(ii-1)] if str(ii-1) in Nhidden \
                           else Nhidden['first'] if 'first' in Nhidden and ii==1
                           else cfg.ENCODER_DEFAULT_NHIDDEN,
-                          k_latent if ii==Nlayers \
+                          Nlatent if ii==Nlayers \
                           else Nhidden if isinstance(Nhidden, int) \
                           else Nhidden[str(ii)] if str(ii) in Nhidden \
                           else Nhidden['first'] if 'first' in Nhidden and ii==0 \

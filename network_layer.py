@@ -73,9 +73,6 @@ class NetworkLayer(nn.Module) :
             # compute the mutual dot products
             scalars = torch.cat((scalars, torch.einsum('bid,bjd->bij', x, x)), dim=-1)
             desc += 'x.x [%d]; '%x.shape[-1]
-        else :
-            # we are in the very first layer and need to normalize the vector
-            x = x / x_norm
 
         # concatenate with the global scalars if requested
         if u is not None :
@@ -99,7 +96,7 @@ class NetworkLayer(nn.Module) :
                                                                                  v/v_norm,
                                                                                  basis))),
                                     dim=-1)
-                desc += 'v.basis [%d]'%len(Basis)
+                desc += 'v.basis [%d]; '%len(Basis)
 
         return scalars, desc
     # }}}

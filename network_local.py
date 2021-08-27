@@ -48,7 +48,7 @@ class NetworkLocal(nn.Module) :
                 + (1+cfg.LOCAL_PASS_RELATIVE_TO_HALO) * (1+cfg.USE_VELOCITIES)
                 # x0.v0 and x.v
                 + (1+cfg.LOCAL_PASS_RELATIVE_TO_HALO) * cfg.USE_VELOCITIES
-                # number of particles in the spher
+                # number of particles in the sphere
                 + 1)
 
         self.layers = nn.ModuleList(

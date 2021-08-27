@@ -52,6 +52,10 @@ In general steps are dependent on earlier ones, unless indicated otherwise.
     Operates on all DM files (text & binary), but only the TNG text files.
     Creates cfg.HALO_CATALOG
 
+# PROBABLY NO LONGER NECESSARY AS WE ARE VOXELIZING THE PARTICLES
+# x) run remove_TNG_outliers.py to remove particles with extremely high
+#    pressures that would make training difficult for us.
+
  8) run create_boxes.py which will run voxelize to create the downsampled
     electron pressure on a grid
     Operates on the TNG binary & text files and creates the files
@@ -61,10 +65,6 @@ In general steps are dependent on earlier ones, unless indicated otherwise.
     (note that we could also voxelize the other fields we stored to disk but don't
      have a need for them at the moment)
     DEPENDENCIES: box sidelength
-
-# PROBABLY NO LONGER NECESSARY AS WE ARE VOXELIZING THE PARTICLES
-# x) run remove_TNG_outliers.py to remove particles with extremely high
-#    pressures that would make training difficult for us.
 
  9) run create_Nprt.py which will add the Nprt fields to the halo catalog.
     [now we know how many TNG particles we have]
