@@ -84,6 +84,9 @@ class NetworkDecoder(nn.Module) :
             # compute the moduli of the latent vectors, shape [batch, Nfeatures, 1]
             h_norm = torch.linalg.norm(h, dim=-1, keepdim=True)
 
+            # harden against reordering by future me
+            assert scalars is None
+
             scalars = h_norm.unsqueeze(1).squeeze(dim=-1).expand(-1, N_TNG, -1).clone()
             desc += '|h| [%d]; '%self.Nvecs
 
@@ -96,7 +99,7 @@ class NetworkDecoder(nn.Module) :
 
             # compute the vector distances of shape [batch, Nvects, latent feature]
             scalars = torch.cat((scalars,
-                                 torch.linalg.norm(x-h, dim=-1, keepdim=True)),
+                                 torch.linalg.norm(x.unsqueeze(2)-h.unsqueeze(1), dim=-1)),
                                 dim=-1)
             desc += '|x-h| [%d]; '%self.Nvecs
 
