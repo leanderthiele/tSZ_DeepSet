@@ -10,8 +10,8 @@ class NetworkOrigin(NetworkEncoder) :
 
     def __init__(self, Nlayers=DefaultFromCfg('ORIGIN_DEFAULT_NLAYERS'),
                        Nhidden=DefaultFromCfg('ORIGIN_DEFAULT_NHIDDEN'),
-                       basis_max_layer=DefaultFromCfg('ORIGIN_DEFAULT_BASIS_MAX_LAYER'),
-                       globals_max_layer=DefaultFromCfg('ORIGIN_DEFAULT_GLOBALS_MAX_LAYER'),
+                       basis_max_layer=DefaultFromCfg('ORIGIN_DEFAULT_BASIS_MAXLAYER'),
+                       globals_max_layer=DefaultFromCfg('ORIGIN_DEFAULT_GLOBALS_MAXLAYER'),
                        **kwargs) :
     #{{{
         if isinstance(Nlayers, DefaultFromCfg) :
