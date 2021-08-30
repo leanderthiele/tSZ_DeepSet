@@ -16,11 +16,26 @@ EPOCHS = 100
 SCALE_PTH = True
 
 # weight decay (applied only to weights)
-WEIGHT_DECAY = 1e-3
+WEIGHT_DECAY = dict(default=1e-4,
+                    batt12=0,
+                    deformer=1e-4,
+                    origin=1e-4,
+                    encoder=1e-4,
+                    scalarencoder=1e-4,
+                    decoder=1e-4,
+                    vae=0,
+                    local=0)
 
 # how to construct the learning rate scheduler
-ONE_CYCLE_LR_KWARGS = dict(max_lr=3e-2,
-                           div_factor=1000)
+ONE_CYCLE_LR_KWARGS = dict(default={'max_lr': 1e-3, 'div_factor': 1000},
+                           batt12={'max_lr': 1e-2},
+                           deformer={'max_lr': 1e-3},
+                           origin={'max_lr': 3e-3},
+                           encoder={'max_lr': 1e-2},
+                           scalarencoder{'max_lr': 1e-2},
+                           decoder={'max_lr': 1e-3},
+                           vae={'max_lr': 1e-3},
+                           local={'max_lr': 3e-4})
 
 # where we have the halo catalog stored
 HALO_CATALOG = 'halo_catalog.npz'
