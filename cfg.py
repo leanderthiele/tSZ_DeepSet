@@ -249,6 +249,16 @@ KLD_ANNEALING_END = 0.8
 #    at least for now)
 ORIGIN_DEFAULT_NLAYERS = 3
 
+# default number of neurons in the outer layers of the MLPs
+# (which correspond to hidden layers at the encoder level)
+ORIGIN_DEFAULT_NHIDDEN = 128
+
+# until which layer the origin net should pass the basis
+ORIGIN_DEFAULT_BASIS_MAXLAYER = 0
+
+# until which layer the origin net should pass the globals
+ORIGIN_DEFAULT_GLOBALS_MAXLAYER = 0
+
 # default number of latent features in the space separating encoder and decoder
 NETWORK_DEFAULT_NLATENT = 128
 
