@@ -206,6 +206,12 @@ ENCODER_DEFAULT_BASIS_MAXLAYER = 0
 # until which layer the encoder should pass the globals
 ENCODER_DEFAULT_GLOBALS_MAXLAYER = 0
 
+# default for each MLP in encoder
+ENCODER_MLP_NLAYERS = 4
+
+# default for each MLP in encoder
+ENCODER_MLP_NHIDDEN = 128
+
 # whether we pass the TNG radii to the decoder
 DECODER_DEFAULT_R_PASSED = True
 

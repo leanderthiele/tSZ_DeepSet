@@ -27,7 +27,8 @@ class Network(nn.Module) :
         if cfg.NET_ARCH['decoder'] :
  
             if cfg.NET_ARCH['encoder'] :
-                self.encoder = NetworkEncoder()
+                self.encoder = NetworkEncoder(MLP_Nlayers=cfg.ENCODER_MLP_NLAYERS,
+                                              MLP_Nhidden=cfg.ENCODER_MLP_NHIDDEN)
             
             if cfg.NET_ARCH['scalarencoder'] :
                 self.scalarencoder = NetworkScalarEncoder()
