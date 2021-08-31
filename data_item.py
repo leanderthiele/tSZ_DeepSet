@@ -79,7 +79,7 @@ class DataItem :
         self.has_TNG_residuals = load_TNG_residuals
 
         if load_DM :
-            self.DM_coords, self.DM_vels, self.__DM_offsets = self.__get_DM()
+            self.__N_DM, self.DM_coords, self.DM_vels, self.__DM_offsets = self.__get_DM()
             assert (self.DM_vels is None and not cfg.USE_VELOCITIES) \
                    or (self.DM_vels is not None and cfg.USE_VELOCITIES)
 
@@ -104,21 +104,24 @@ class DataItem :
         returns the properties for the network input 
         """
     #{{{
+        # first find the number of DM particles
+        with open(self.halo.storage_DM['coords'], 'r') as f :
+            f.seek(0, os.SEEK_END)
+            Nbytes = f.tell()
+            N = Nbytes // (3*4) # each particle has 3 32bit numbers
+            assert N * 3 * 4 == Nbytes
+
         if cfg.MEMMAP_DM :
             # do not load the DM particles directly into memory
 
-            # first we need to figure out how many particles there are
-            with open(self.halo.storage_DM['coords'], 'r') as f :
-                f.seek(0, os.SEEK_END)
-                Nbytes = f.tell()
-                Nprt = Nbytes // (3*4) # each particle has 3 32bit numbers
-                assert Nprt * 3 * 4 == Nbytes
-
             coords = np.memmap(self.halo.storage_DM['coords'],
-                               mode='r', dtype=np.float32, shape=(Nprt,3,))
+                               mode='r', dtype=np.float32, shape=(N,3,))
 
-            vels = np.memmap(self.halo.storage_DM['velocities'],
-                             mode='r', dtype=np.float32, shape=(Nprt,3,))
+            if cfg.USE_VELOCITIES :
+                vels = np.memmap(self.halo.storage_DM['velocities'],
+                                 mode='r', dtype=np.float32, shape=(N,3,))
+            else :
+                vels = None
 
         else :
             # load the DM particles directly into memory (takes longer initially)
@@ -138,6 +141,7 @@ class DataItem :
                 vels = np.fromfile(self.halo.storage_DM['velocities'], dtype=np.float32)
                 vels = vels.reshape((len(vels)//3, 3))
                 assert len(vels) == len(coords)
+                assert N == len(coords)
                 # subtract bulk motion
                 vels -= self.halo.vel
             else :
@@ -148,7 +152,7 @@ class DataItem :
         else :
             offsets = None
 
-        return coords, vels, offsets
+        return N, coords, vels, offsets
     #}}}
 
 
@@ -184,6 +188,7 @@ class DataItem :
         (both as raw pointer and numpy array)
         """
     #{{{
+        # FIXME adapt for memmap-ed use
         # passed by reference
         err = ct.c_int(0) # error status
         Nout = ct.c_uint64(0) # length of the returned array
@@ -194,7 +199,7 @@ class DataItem :
 
         # call the compiled library
         ptr = prtfinder.prtfinder(x_TNG, cfg.R_LOCAL,
-                                  self.DM_coords, len(self.DM_coords),
+                                  self.DM_coords, self.__N_DM,
                                   ul_corner, extent, self.__DM_offsets,
                                   ct.byref(Nout), ct.byref(err))
 

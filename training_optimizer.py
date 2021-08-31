@@ -31,12 +31,12 @@ class _ModuleOptimizer(torch.optim.Adam) :
         self._no_wd_params = list()
 
         self.weight_decay = cfg.WEIGHT_DECAY[name] \
-                            if name in cfg.WEIGHT_DECAY \
+                            if not isinstance(name, list) and name in cfg.WEIGHT_DECAY \
                             else cfg.WEIGHT_DECAY['default']
 
         self.one_cycle_lr_kwargs = _ModuleOptimizer._merge(cfg.ONE_CYCLE_LR_KWARGS[name], \
                                                            cfg.ONE_CYCLE_LR_KWARGS['default']) \
-                                   if name in cfg.ONE_CYCLE_LR_KWARGS \
+                                   if not isinstance(name, list) and name in cfg.ONE_CYCLE_LR_KWARGS \
                                    else cfg.ONE_CYCLE_LR_KWARGS['default']
 
         # solution adopted from
@@ -47,7 +47,7 @@ class _ModuleOptimizer(torch.optim.Adam) :
             if isinstance(name, list) and any(n in s for s in name) :
                 continue
 
-            if name not in n :
+            if not isinstance(name, list) and name not in n :
                 # we only collect parameters for a specific module
                 continue
             
