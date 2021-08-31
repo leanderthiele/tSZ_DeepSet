@@ -108,6 +108,13 @@ class Network(nn.Module) :
             # o is of shape [batch, 1, 3]
             o = o_norm * (batch.Xoff / batch.R200c).unsqueeze(1).unsqueeze(1).expand(-1, -1, 3)
 
+            # in order to stabilize training (and make some asserts safe), we should make sure
+            # the origin is not shifted too much
+            # We crop at 0.5*R200c in each coordinate direction, this is very conservative and
+            # makes later asserts on radii safe
+            # tanh(x) is pretty close to linear for |x| < 0.3, so this should be fine
+            o = 0.5 * torch.tanh(o)
+
             # shift all coordinates according to this new origin
             batch = batch.add_origin(o)
 

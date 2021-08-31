@@ -53,6 +53,11 @@ class NetworkLayer(nn.Module) :
         # we know that the last dimension is the real space one
         x_norm = torch.linalg.norm(x, dim=-1, keepdim=True) + 1e-5
 
+        if not self.x_is_latent :
+            # we know that the DM coordinates are normalized to unit R200c,
+            # but need to take the origin shift into account
+            assert x_norm.max().item() < 3.5, x_norm.max().item()
+
         # this tensor will collect all scalar quantities
         scalars = x_norm.clone() if self.x_is_latent else normalization.encoder_x(x_norm)
         desc += '|x| [1]; '

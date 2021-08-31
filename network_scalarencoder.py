@@ -87,6 +87,10 @@ class NetworkScalarEncoder(nn.Module) :
         # get the radial distances
         x_norm = torch.linalg.norm(x, dim=-1, keepdim=True) + 1e-5
 
+        # we know that the DM coordinates are normalized by R200c,
+        # but must take the origin shift into account
+        assert x_norm.max().item() < 3.5, x_norm.max().item()
+
         scalars = normalization.encoder_x(x_norm)
         desc += '|x| [1]; '
 
