@@ -62,4 +62,4 @@ if __name__ == '__main__' :
     INDEX = len(study.trials)
 
     # run the optimization loop
-    study.optimize(objective, n_trials=50)
+    study.optimize(objective)
