@@ -33,7 +33,6 @@ mod_translations (const float *x0, float *cub);
 static inline void
 mod_reflections (float *cub);
 
-
 static inline float *
 load_x_file (std::FILE *x_file,
              size_t offset,
@@ -42,7 +41,6 @@ load_x_file (std::FILE *x_file,
              const float *halo_pos,
              int *err
             );
-
 
 static std::vector<std::pair<size_t, size_t>>
 find_idx_ranges (const float *x0,
