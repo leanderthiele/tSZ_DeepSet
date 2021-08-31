@@ -283,6 +283,12 @@ ORIGIN_DEFAULT_BASIS_MAXLAYER = 0
 # until which layer the origin net should pass the globals
 ORIGIN_DEFAULT_GLOBALS_MAXLAYER = 0
 
+# the individual MLPs in the origin network
+ORIGIN_MLP_NLAYERS = 4
+
+# the individual MLPs in the origin network
+ORIGIN_MLP_NHIDDEN = 128
+
 # default number of latent features in the space separating encoder and decoder
 NETWORK_DEFAULT_NLATENT = 128
 

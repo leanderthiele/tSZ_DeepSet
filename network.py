@@ -71,7 +71,8 @@ class Network(nn.Module) :
                                   layer_kwargs_dict=dict(last={'bias_init': 'zeros_(%s)'}))
 
         if cfg.NET_ARCH['origin'] :
-            self.origin = NetworkOrigin()
+            self.origin = NetworkOrigin(MLP_Nlayers=cfg.ORIGIN_MLP_NLAYERS,
+                                        MLP_Nhidden=cfg.ORIGIN_MLP_NHIDDEN)
 
         if cfg.NET_ARCH['batt12'] :
             self.batt12 = NetworkBatt12(xc_fixed=cfg.NET_ARCH['deformer'])

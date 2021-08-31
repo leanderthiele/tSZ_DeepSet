@@ -12,7 +12,7 @@ class NetworkOrigin(NetworkEncoder) :
                        Nhidden=DefaultFromCfg('ORIGIN_DEFAULT_NHIDDEN'),
                        basis_max_layer=DefaultFromCfg('ORIGIN_DEFAULT_BASIS_MAXLAYER'),
                        globals_max_layer=DefaultFromCfg('ORIGIN_DEFAULT_GLOBALS_MAXLAYER'),
-                       **kwargs) :
+                       **MLP_kwargs) :
     #{{{
         if isinstance(Nlayers, DefaultFromCfg) :
             Nlayers = Nlayers()
@@ -31,9 +31,11 @@ class NetworkOrigin(NetworkEncoder) :
                          Nhidden=Nhidden,
                          basis_max_layer=basis_max_layer,
                          globals_max_layer=globals_max_layer,
-                         MLP_kwargs_dict=dict(last=dict(layer_kwargs_dict=dict(last={'activation' : False,
-                                                                                     'dropout': None,
-                                                                                     'bias_init': 'zeros_(%s)'})))
+                         MLP_kwargs_dict=dict(last=dict(layer_kwargs_dict=\
+                            dict(last={'activation' : False,
+                                       'dropout': None,
+                                       'bias_init': 'zeros_(%s)'}))),
+                         **MLP_kwargs
                         )
     #}}}
 
