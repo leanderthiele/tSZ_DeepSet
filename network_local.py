@@ -175,7 +175,7 @@ class NetworkLocal(nn.Module) :
         """
         x0    ... the TNG positions around which we are evaluating,
                   of shape [batch, N_TNG, 3] or a list of length batch with shapes [1, N_TNG[ii], 3]
-        x     ... the DM positions (in the halo frame),
+        x     ... the DM positions (in the local frame, i.e. relative to x0),
                   of shape [batch, N_TNG, N_DM, 3] or a list of length batch with shapes [1, N_TNG[ii], N_DM, 3]
         N     ... number of DM particles in vicinity of TNG position [not identical to len(x)!],
                   of shape [batch, N_TNG] or a list of length batch with shapes [1, N_TNG[ii]]
