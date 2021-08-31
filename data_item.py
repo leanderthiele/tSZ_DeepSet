@@ -111,6 +111,7 @@ class DataItem :
             N = Nbytes // (3*4) # each particle has 3 32bit numbers
             assert N * 3 * 4 == Nbytes
 
+
         if cfg.MEMMAP_DM :
             # do not load the DM particles directly into memory
 
@@ -194,8 +195,8 @@ class DataItem :
 
         # call the compiled library
         ptr = prtfinder.prtfinder(x_TNG, cfg.R_LOCAL, not cfg.MEMMAP_DM,
-                                  self.DM_coords if not cfg.MEMMAP_DM else np.zeros(0, dtype=np.float32),
-                                  self.halo.storage_DM['coords'] if cfg.MEMMAP_DM else 'no file',
+                                  self.DM_coords if not cfg.MEMMAP_DM else np.empty(0, dtype=np.float32),
+                                  prtfinder.c_str(self.halo.storage_DM['coords'] if cfg.MEMMAP_DM else 'no file'),
                                   self.__N_DM, cfg._BOX_SIZE, self.halo.R200c, self.halo.pos,
                                   self.__DM_offsets,
                                   ct.byref(Nout), ct.byref(err))
@@ -253,6 +254,13 @@ class DataItem :
 
                 if self.DM_vels is not None :
                     v[ii, ...] = self.DM_vels[prt_indices]
+                
+                # if we use memmap-ed arrays, these are directly from disk so we need to normalize them
+                if cfg.MEMMAP_DM :
+                    x[ii, ...] -= self.halo.pos
+                    x[ii, ...] = DataItem.__periodicize(x[ii, ...])
+                    if self.DM_vels is not None :
+                        v[ii, ...] -= self.halo.vel
 
             # now we can safely free the memory
             prtfinder.myfree(raw_ptr)

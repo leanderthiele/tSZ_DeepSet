@@ -1,3 +1,5 @@
+from sys import stdout
+
 import ctypes as ct
 
 import numpy as np
@@ -29,3 +31,13 @@ prtfinder.argtypes = [np.ctypeslib.ndpointer(dtype=ct.c_float, ndim=1, flags='C_
 myfree = _libprtfinder.myfree
 myfree.restype = None
 myfree.argtypes = [ct.POINTER(ct.c_uint64), ]
+
+# utility function to create a C string from a python byte/str instance
+def c_str(some_str) :
+
+    assert isinstance(some_str, (str, bytes))
+
+    if isinstance(some_str, str) :
+        some_str = some_str.encode(stdout.encoding)
+
+    return ct.c_char_p(some_str)
