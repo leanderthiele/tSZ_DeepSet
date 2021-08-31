@@ -50,7 +50,10 @@ def objective(trial) :
         validation_guess_loss = f['validation_guess']
 
     loss_curve = np.median(validation_loss/validation_guess_loss, axis=-1)
-    final_loss = loss_curve[-1]
+
+    # take the mean of the last few losses to make sure we are not in some spurious 
+    # local minimum
+    final_loss = np.mean(loss_curve[-5:])
 
     INDEX += 1
 
