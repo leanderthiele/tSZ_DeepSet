@@ -63,28 +63,6 @@ for epoch in range(cfg.EPOCHS) :
 
         prediction, KLD = model(data)
 
-        if cfg.mpi_env_type is MPIEnvTypes.NOGPU :
-            # FIXME diagnostics on head node
-            if epoch > 0 :
-                r_npy = data.TNG_radii.cpu().detach().numpy()[0, ...].squeeze()
-                g_npy = guess.cpu().detach().numpy()[0, ...].squeeze()
-                p_npy = prediction.cpu().detach().numpy()[0, ...].squeeze()
-                t_npy = data.TNG_Pth.cpu().detach().numpy()[0, ...].squeeze()
-                plt.loglog(r_npy, t_npy, linestyle='none', marker='o', label='target')
-                plt.loglog(r_npy, g_npy, linestyle='none', marker='o', label='guess')
-                plt.loglog(r_npy, p_npy, linestyle='none', marker='o', label='prediction')
-                plt.legend()
-                plt.show()
-        else :
-            # FIXME diagnostics to file
-            if False and (epoch in [30, 80, 250] and t < 10) :
-                r_npy = data.TNG_radii.cpu().detach().numpy()[0, ...].squeeze()
-                g_npy = guess.cpu().detach().numpy()[0, ...].squeeze()
-                p_npy = prediction.cpu().detach().numpy()[0, ...].squeeze()
-                t_npy = data.TNG_Pth.cpu().detach().numpy()[0, ...].squeeze()
-                np.savez('test_%s_%d_%d.npz'%(cfg.ID, epoch, t),
-                         r=r_npy, g=g_npy, p=p_npy, t=t_npy)
-
         loss, loss_list, KLD_list = loss_fn(prediction, data.TNG_Pth, KLD, w=None, epoch=epoch)
 
         loss_record.add_training_loss(loss_list, KLD_list, loss_list_guess, 
