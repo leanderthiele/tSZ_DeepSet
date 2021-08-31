@@ -12,6 +12,7 @@ from data_loader import DataLoader
 from data_modes import DataModes
 from training_loss import TrainingLoss
 from training_optimizer import TrainingOptimizer
+from training_loss_record import TrainingLossRecord
 from data_batch import DataBatch
 from init_proc import InitProc
 from init_model import InitModel
@@ -41,28 +42,12 @@ validation_loader = DataLoader(mode=DataModes.VALIDATION)
 optimizer = TrainingOptimizer(model, steps_per_epoch=len(training_loader))
 
 # store all the losses here
-training_loss_arr = []
-training_KLD_arr = []
-training_guess_loss_arr = []
-training_logM_arr = []
-training_idx_arr = []
-
-validation_loss_arr = []
-validation_KLD_arr = []
-validation_guess_loss_arr = []
-validation_logM_arr = []
-validation_idx_arr = []
+loss_record = TrainingLossRecord()
 
 for epoch in range(cfg.EPOCHS) :
 
     model.train()
     print('epoch %d'%epoch)
-
-    this_training_loss_arr = []
-    this_training_KLD_arr = []
-    this_training_guess_loss_arr = []
-    this_training_logM_arr = []
-    this_training_idx_arr = []
 
     for t, data in enumerate(training_loader) :
 
@@ -102,11 +87,8 @@ for epoch in range(cfg.EPOCHS) :
 
         loss, loss_list, KLD_list = loss_fn(prediction, data.TNG_Pth, KLD, w=None, epoch=epoch)
 
-        this_training_loss_arr.extend(loss_list)
-        this_training_KLD_arr.extend(KLD_list)
-        this_training_guess_loss_arr.extend(loss_list_guess)
-        this_training_logM_arr.extend(np.log(data.M200c.cpu().detach().numpy()))
-        this_training_idx_arr.extend(data.idx)
+        loss_record.add_training_loss(loss_list, KLD_list, loss_list_guess, 
+                                      np.log(data.M200c.cpu().detach().numpy()), data.idx)
 
         loss.backward()
         
@@ -118,22 +100,8 @@ for epoch in range(cfg.EPOCHS) :
         optimizer.lr_step()
 
 
-    # put the losses for this epoch in the global arrays
-    training_loss_arr.append(this_training_loss_arr)
-    training_KLD_arr.append(this_training_KLD_arr)
-    training_guess_loss_arr.append(this_training_guess_loss_arr)
-    training_logM_arr.append(this_training_logM_arr)
-    training_idx_arr.append(this_training_idx_arr)
-
-
     model.eval()
     
-    this_validation_loss_arr = []
-    this_validation_KLD_arr = []
-    this_validation_guess_loss_arr = []
-    this_validation_logM_arr = []
-    this_validation_idx_arr = []
-
     for t, data in enumerate(validation_loader) :
         
         data = data.to_device()
@@ -145,32 +113,11 @@ for epoch in range(cfg.EPOCHS) :
             _, loss_list, KLD_list = loss_fn(prediction, data.TNG_Pth, KLD, w=None, epoch=epoch)
             _, loss_list_guess, _ = loss_fn(guess, data.TNG_Pth, w=None)
 
-        this_validation_loss_arr.extend(loss_list)
-        this_validation_KLD_arr.extend(KLD_list)
-        this_validation_guess_loss_arr.extend(loss_list_guess)
-        this_validation_logM_arr.extend(np.log(data.M200c.cpu().detach().numpy()))
-        this_validation_idx_arr.extend(data.idx)
+        loss_record.add_validation_loss(loss_list, KLD_list, loss_list_guess,
+                                        np.log(data.M200c.cpu().detach().numpy()), data.idx)
 
-    # put the validation losses in the global arrays
-    validation_loss_arr.append(this_validation_loss_arr)
-    validation_KLD_arr.append(this_validation_KLD_arr)
-    validation_guess_loss_arr.append(this_validation_guess_loss_arr)
-    validation_logM_arr.append(this_validation_logM_arr)
-    validation_idx_arr.append(this_validation_idx_arr)
-
-
-    # save all the losses so far to file 
-    np.savez(os.path.join(cfg.RESULTS_PATH, 'loss_%s.npz'%cfg.ID),
-             training=np.array(training_loss_arr),
-             training_KLD=np.array(training_KLD_arr),
-             training_guess=np.array(training_guess_loss_arr),
-             training_logM=np.array(training_logM_arr),
-             training_idx=np.array(training_idx_arr, dtype=int),
-             validation=np.array(validation_loss_arr),
-             validation_KLD=np.array(validation_KLD_arr),
-             validation_guess=np.array(validation_guess_loss_arr),
-             validation_logM=np.array(validation_logM_arr),
-             validation_idx=np.array(validation_idx_arr, dtype=int))
+    # gather losses and save to file
+    loss_record.end_epoch()
 
 # save the network to file
 torch.save(model.state_dict(), os.path.join(cfg.RESULTS_PATH, 'model_%s.pt'%cfg.ID))
