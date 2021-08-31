@@ -313,12 +313,12 @@ class DataItem :
             else :
                 out.DM_vels = None
             
-            # if we use memmap-ed arrays, these are directly from disk so we need to normalize them
-            out.DM_coords -= self.halo.pos
-            out.DM_coords = DataItem.__periodicize(out.DM_coords)
-            if out.DM_vels is not None :
-                out.DM_vels -= self.halo.vel
-                
+            if cfg.MEMMAP_DM :
+                # if we use memmap-ed arrays, these are directly from disk so we need to normalize them
+                out.DM_coords -= self.halo.pos
+                out.DM_coords = DataItem.__periodicize(out.DM_coords)
+                if out.DM_vels is not None :
+                    out.DM_vels -= self.halo.vel
 
         if out.has_TNG :
             out.TNG_coords = self.TNG_coords[indices['TNG']]
