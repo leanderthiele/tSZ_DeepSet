@@ -98,7 +98,7 @@ class NetworkLocal(nn.Module) :
         x_norm = torch.linalg.norm(x, dim=-1, keepdim=True) + 1e-5
 
         # the local coordinates are normalized to unit cfg.R_LOCAL
-        assert x_norm.max().item() < 1.05
+        assert x_norm.max().item() < 1.05, x_norm.max().item()
 
         scalars = normalization.local_x(x_norm)
         desc += '|x| [1]; '
