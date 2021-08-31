@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 
 from default_from_cfg import DefaultFromCfg
+from merge_dicts import MergeDicts
 import cfg
 
 
@@ -90,9 +91,9 @@ class NetworkMLP(nn.Sequential) :
         super().__init__(*[_MLPLayer(Nin if ii==0 else MLP_Nhidden,
                                      Nout if ii==MLP_Nlayers else MLP_Nhidden,
                                      ii != 0, # = input is hidden
-                                     **(layer_kwargs_dict[str(ii)] if str(ii) in layer_kwargs_dict \
-                                        else layer_kwargs_dict['first'] if 'first' in layer_kwargs_dict and ii==0 \
-                                        else layer_kwargs_dict['last'] if 'last' in layer_kwargs_dict and ii==MLP_Nlayers \
+                                     **(MergeDicts(layer_kwargs_dict[str(ii)], layer_kwargs) if str(ii) in layer_kwargs_dict \
+                                        else MergeDicts(layer_kwargs_dict['first'], layer_kwargs) if 'first' in layer_kwargs_dict and ii==0 \
+                                        else MergeDicts(layer_kwargs_dict['last'], layer_kwargs) if 'last' in layer_kwargs_dict and ii==MLP_Nlayers \
                                         else layer_kwargs))
                            for ii in range(MLP_Nlayers+1)])
     #}}}

@@ -1,5 +1,6 @@
 import torch
 
+from merge_dicts import MergeDicts
 import cfg
 
 
@@ -34,8 +35,8 @@ class _ModuleOptimizer(torch.optim.Adam) :
                             if not isinstance(name, list) and name in cfg.WEIGHT_DECAY \
                             else cfg.WEIGHT_DECAY['default']
 
-        self.one_cycle_lr_kwargs = _ModuleOptimizer._merge(cfg.ONE_CYCLE_LR_KWARGS[name], \
-                                                           cfg.ONE_CYCLE_LR_KWARGS['default']) \
+        self.one_cycle_lr_kwargs = MergeDicts(cfg.ONE_CYCLE_LR_KWARGS[name], \
+                                              cfg.ONE_CYCLE_LR_KWARGS['default']) \
                                    if not isinstance(name, list) and name in cfg.ONE_CYCLE_LR_KWARGS \
                                    else cfg.ONE_CYCLE_LR_KWARGS['default']
 
@@ -83,23 +84,6 @@ class _ModuleOptimizer(torch.optim.Adam) :
     #}}}
 
     
-    @staticmethod
-    def _merge(d1, d2) :
-        """
-        utility function that merges two dicts (not recursive).
-        Returns a dict that has all keys from d1 and all keys from d2 that are not in d1
-        """
-    #{{{
-        assert isinstance(d1, dict) and isinstance(d2, dict)
-
-        out = d1.copy()
-        for k, v in d2.items() :
-            out.setdefault(k, v)
-
-        return out
-    #}}}
-
-
     def lr_step(self) :
     #{{{ 
         self._lr_scheduler.step()

@@ -6,6 +6,7 @@ from global_fields import GlobalFields
 from basis import Basis
 from default_from_cfg import DefaultFromCfg
 import normalization
+from merge_dicts import MergeDicts
 import cfg
 
 
@@ -61,9 +62,9 @@ class NetworkScalarEncoder(nn.Module) :
         self.layers = nn.ModuleList(
             [NetworkMLP(k_in if ii==0 else Nhidden,
                         Nlatent if ii==Nlayers else Nhidden,
-                        **(MLP_kwargs_dict[str(ii)] if str(ii) in MLP_kwargs_dict \
-                           else MLP_kwargs_dict['first'] if 'first' in MLP_kwargs_dict and ii==0 \
-                           else MLP_kwargs_dict['last'] if 'last' in MLP_kwargs_dict and ii==Nlayers \
+                        **(MergeDicts(MLP_kwargs_dict[str(ii)], MLP_kwargs) if str(ii) in MLP_kwargs_dict \
+                           else MergeDicts(MLP_kwargs_dict['first'], MLP_kwargs) if 'first' in MLP_kwargs_dict and ii==0 \
+                           else MergeDicts(MLP_kwargs_dict['last'], MLP_kwargs) if 'last' in MLP_kwargs_dict and ii==Nlayers \
                            else MLP_kwargs)
                        ) for ii in range(Nlayers+1)])
 

@@ -3,6 +3,7 @@ import torch.nn as nn
 
 from network_layer import NetworkLayer
 from default_from_cfg import DefaultFromCfg
+from merge_dicts import MergeDicts
 import cfg
 
 
@@ -70,9 +71,9 @@ class NetworkEncoder(nn.Module) :
                           velocities_passed=cfg.USE_VELOCITIES if ii==0 else False,
                           basis_passed=ii <= self.basis_max_layer,
                           globals_passed=ii <= self.globals_max_layer,
-                          **(MLP_kwargs_dict[str(ii)] if str(ii) in MLP_kwargs_dict \
-                             else MLP_kwargs_dict['first'] if 'first' in MLP_kwargs_dict and ii==0 \
-                             else MLP_kwargs_dict['last'] if 'last' in MLP_kwargs_dict and ii==Nlayers \
+                          **(MergeDicts(MLP_kwargs_dict[str(ii)], MLP_kwargs) if str(ii) in MLP_kwargs_dict \
+                             else MergeDicts(MLP_kwargs_dict['first'], MLP_kwargs) if 'first' in MLP_kwargs_dict and ii==0 \
+                             else MergeDicts(MLP_kwargs_dict['last'], MLP_kwargs) if 'last' in MLP_kwargs_dict and ii==Nlayers \
                              else MLP_kwargs)
                          ) for ii in range(Nlayers+1)])
     #}}}

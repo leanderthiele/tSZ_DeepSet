@@ -5,6 +5,7 @@ from network_mlp import NetworkMLP
 from basis import Basis
 import normalization
 from default_from_cfg import DefaultFromCfg
+from merge_dicts import MergeDicts
 import cfg
 
 
@@ -71,9 +72,9 @@ class NetworkLocal(nn.Module) :
                          else Nhidden['last'] if 'last' in Nhidden and ii==Nlayers-1 \
                          else cfg.LOCAL_NHIDDEN) - (1 if ii==0 else 0), # for the first layer, make space for scalars
                         # other arguments
-                        **(MLP_kwargs_dict[str(ii)] if str(ii) in MLP_kwargs_dict \
-                           else MLP_kwargs_dict['first'] if 'first' in MLP_kwargs_dict and ii==0 \
-                           else MLP_kwargs_dict['last'] if 'last' in MLP_kwargs_dict and ii==Nlayers \
+                        **(MergeDicts(MLP_kwargs_dict[str(ii)], MLP_kwargs) if str(ii) in MLP_kwargs_dict \
+                           else MergeDicts(MLP_kwargs_dict['first'], MLP_kwargs) if 'first' in MLP_kwargs_dict and ii==0 \
+                           else MergeDicts(MLP_kwargs_dict['last'], MLP_kwargs) if 'last' in MLP_kwargs_dict and ii==Nlayers \
                            else MLP_kwargs)
                        ) for ii in range(Nlayers+1)])
 
