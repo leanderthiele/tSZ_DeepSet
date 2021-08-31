@@ -195,7 +195,7 @@ class DataItem :
 
         # call the compiled library
         ptr = prtfinder.prtfinder(x_TNG, cfg.R_LOCAL, not cfg.MEMMAP_DM,
-                                  self.DM_coords if not cfg.MEMMAP_DM else np.empty(0, dtype=np.float32),
+                                  self.DM_coords if not cfg.MEMMAP_DM else np.empty((1,3), dtype=np.float32),
                                   prtfinder.c_str(self.halo.storage_DM['coords'] if cfg.MEMMAP_DM else 'no file'),
                                   self.__N_DM, cfg._BOX_SIZE, self.halo.R200c, self.halo.pos,
                                   self.__DM_offsets,
