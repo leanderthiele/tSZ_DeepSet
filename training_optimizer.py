@@ -54,9 +54,7 @@ class _ModuleOptimizer(torch.optim.Adam) :
             # we only apply weight decay to the weight matrices in linear layers.
             # Furthermore, we want to exclude the local network from weight decay
             # since we have more than enough training samples there.
-            if 'linear' in n and 'weight' in n \
-               and not 'local' in n \
-               and p.requires_grad :
+            if 'linear' in n and 'weight' in n and p.requires_grad :
                 self._wd_params.append(p)
             else :
                 self._no_wd_params.append(p)
