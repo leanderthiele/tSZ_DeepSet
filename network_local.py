@@ -57,17 +57,20 @@ class NetworkLocal(nn.Module) :
                 + pass_N)
 
         self.layers = nn.ModuleList(
-            [NetworkMLP(k_in if ii==0 \
-                        else (Nhidden if isinstance(Nhidden, int) \
-                              else Nhidden[str(ii-1)] if str(ii-1) in Nhidden \
-                              else Nhidden['first'] if 'first' in Nhidden and ii==1 \
-                              else cfg.LOCAL_NHIDDEN) - 1, # subtract 1 to make space for concat with local N
-                        Nlatent if ii==Nlayers \
+            [NetworkMLP(# number of input features
+                        k_in if ii==0 \
                         else Nhidden if isinstance(Nhidden, int) \
-                        else Nhidden[str(ii)] if str(ii) in Nhidden \
-                        else Nhidden['first'] if 'first' in Nhidden and ii==0 \
-                        else Nhidden['last'] if 'last' in Nhidden and ii==Nlayers-1 \
+                        else Nhidden[str(ii-1)] if str(ii-1) in Nhidden \
+                        else Nhidden['first'] if 'first' in Nhidden and ii==1 \
                         else cfg.LOCAL_NHIDDEN,
+                        # number of output features
+                        (Nlatent if ii==Nlayers \
+                         else Nhidden if isinstance(Nhidden, int) \
+                         else Nhidden[str(ii)] if str(ii) in Nhidden \
+                         else Nhidden['first'] if 'first' in Nhidden and ii==0 \
+                         else Nhidden['last'] if 'last' in Nhidden and ii==Nlayers-1 \
+                         else cfg.LOCAL_NHIDDEN) - (1 if ii==0 else 0), # for the first layer, make space for scalars
+                        # other arguments
                         **(MLP_kwargs_dict[str(ii)] if str(ii) in MLP_kwargs_dict \
                            else MLP_kwargs_dict['first'] if 'first' in MLP_kwargs_dict and ii==0 \
                            else MLP_kwargs_dict['last'] if 'last' in MLP_kwargs_dict and ii==Nlayers \
