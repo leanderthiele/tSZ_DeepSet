@@ -32,7 +32,7 @@ ONE_CYCLE_LR_KWARGS = dict(default={'max_lr': 1e-3, 'div_factor': 1000},
                            deformer={'max_lr': 1e-3},
                            origin={'max_lr': 3e-3},
                            encoder={'max_lr': 1e-2},
-                           scalarencoder{'max_lr': 1e-2},
+                           scalarencoder={'max_lr': 1e-2},
                            decoder={'max_lr': 1e-3},
                            vae={'max_lr': 1e-3},
                            local={'max_lr': 3e-4})

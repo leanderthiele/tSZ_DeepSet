@@ -83,6 +83,10 @@ class Network(nn.Module) :
 
         if cfg.NET_ARCH['decoder'] and not cfg.NET_ARCH['batt12'] :
             assert cfg.OUTPUT_NFEATURES == 1
+
+        # validate that we didn't make a mistake
+        for k, v in cfg.NET_ARCH.items() :
+            assert v == hasattr(self, k)
     #}}}
 
  
