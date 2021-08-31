@@ -11,6 +11,7 @@ import sys
 import logging
 import importlib
 import subprocess
+from time import time
 
 import numpy as np
 import optuna
@@ -24,16 +25,24 @@ INDEX = 0
 
 def objective(trial) :
 
+    global INDEX
+
     # generate our command line arguments
     cl = generate_cl_lib.generate_cl(trial)
 
     # the ID for this run
     ID = 'optuna_%s_%d'%(IDENT, INDEX)
 
+    start_time = time()
+
     # run the training loop
     subprocess.run(['python', '-u', 'training.py', '--ID="%s"'%ID,
                     *['--%s'%s for s in cl]],
                    check=True)
+
+    end_time = time()
+
+    print('***One training loop (#%d) took %f seconds'%(INDEX, end_time-start_time))
 
     # retrieve our final loss
     with np.load(os.path.join(cfg.RESULTS_PATH, 'loss_%s.npz'%ID)) as f :
