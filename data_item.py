@@ -188,19 +188,16 @@ class DataItem :
         (both as raw pointer and numpy array)
         """
     #{{{
-        # FIXME adapt for memmap-ed use
         # passed by reference
         err = ct.c_int(0) # error status
         Nout = ct.c_uint64(0) # length of the returned array
 
-        # geometry
-        ul_corner = np.full(3, -2.51 * self.halo.R200c, dtype=np.float32)
-        extent = 2 * 2.51 * self.halo.R200c
-
         # call the compiled library
-        ptr = prtfinder.prtfinder(x_TNG, cfg.R_LOCAL,
-                                  self.DM_coords, self.__N_DM,
-                                  ul_corner, extent, self.__DM_offsets,
+        ptr = prtfinder.prtfinder(x_TNG, cfg.R_LOCAL, not cfg.MEMMAP_DM,
+                                  self.DM_coords if not cfg.MEMMAP_DM else np.zeros(0, dtype=np.float32),
+                                  self.halo.storage_DM['coords'] if cfg.MEMMAP_DM else 'no file',
+                                  self.__N_DM, cfg._BOX_SIZE, self.halo.R200c, self.halo.pos,
+                                  self.__DM_offsets,
                                   ct.byref(Nout), ct.byref(err))
 
         # convert to native python
@@ -307,6 +304,13 @@ class DataItem :
                 out.DM_vels = self.DM_vels[indices['DM']]
             else :
                 out.DM_vels = None
+            
+            # if we use memmap-ed arrays, these are directly from disk so we need to normalize them
+            out.DM_coords -= self.halo.pos
+            out.DM_coords = DataItem.__periodicize(out.DM_coords)
+            if out.DM_vels is not None :
+                out.DM_vels -= self.halo.vel
+                
 
         if out.has_TNG :
             out.TNG_coords = self.TNG_coords[indices['TNG']]

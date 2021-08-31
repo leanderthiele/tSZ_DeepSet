@@ -46,6 +46,7 @@ find_idx_ranges (const float *x0,
 static uint64_t *
 find_indices (const float *x0,
               float R,
+              int x_filled,
               const float *x,
               const char *x_fname,
               float box_size,
@@ -59,6 +60,7 @@ find_indices (const float *x0,
 static uint64_t *
 prtfinder_(const float *x0, // origin around which to find particles [3]
            float R, // radius of the sphere
+           int x_filled, // whether x is already allocated and filled
            const float *x, // particle coordinates [Nin x 3]
            const char *x_fname, // file with particle coordinates
            uint64_t Nin, // number of particles
@@ -78,10 +80,11 @@ extern "C"
 {
     // NOTE the coordinates x, x0 already have the halo position
     //      subtracted off, so we do not need to worry about periodic boundary conditions!
-    // NOTE the argument x is only used if x_fname == 'NONE'
+    // NOTE the argument x is only used if x_filled = True
     // NOTE if x_fname != 'NONE', x is not used but box_size, halo_pos used!
     uint64_t * prtfinder (const float *x0, // origin around which to find particles [3]
                           float R, // radius of the sphere
+                          int x_filled, // whether x is already allocated and filled
                           const float *x, // particle coordinates [Nin x 3]
                           const char *x_fname, // file with particle coordinates
                           uint64_t Nin, // number of particles
@@ -93,7 +96,7 @@ extern "C"
                           int *err // error flag (nonzero if error occured)
                          )
     {
-        return prtfinder_(x0, R, x, x_fname, Nin, box_size, R200c, halo_pos, offsets, Nout, err);
+        return prtfinder_(x0, R, x_filled, x, x_fname, Nin, box_size, R200c, halo_pos, offsets, Nout, err);
     }
 
     void myfree (uint64_t *data)
@@ -108,6 +111,7 @@ extern "C"
 static uint64_t *
 prtfinder_(const float *x0, // origin around which to find particles [3]
            float R, // radius of the sphere
+           int x_filled, // whether x is already allocated and filled
            const float *x, // particle coordinates [Nin x 3]
            const char *x_fname, // where to find the particle coordinates
            uint64_t Nin, // number of particles
@@ -128,7 +132,7 @@ prtfinder_(const float *x0, // origin around which to find particles [3]
         return nullptr;
     }
 
-    auto out = find_indices(x0, R, x, x_fname, box_size, halo_pos, Nout, &idx_ranges, &tmp_err);
+    auto out = find_indices(x0, R, x_filled, x, x_fname, box_size, halo_pos, Nout, &idx_ranges, &tmp_err);
     if (tmp_err)
     {
         *err = 2000 + tmp_err;
@@ -208,6 +212,7 @@ find_idx_ranges (const float *x0,
 static uint64_t *
 find_indices (const float *x0,
               float R,
+              int x_filled,
               const float *x,
               const char *x_fname,
               float box_size,
@@ -223,9 +228,6 @@ find_indices (const float *x0,
         *Nout = 0UL;
         return nullptr;
     }
-
-    // figure out if x contains data
-    bool x_filled = !std::strcmp(x_fname, "NONE");
 
     // get a file descriptor if necessary
     std::FILE *x_file;
