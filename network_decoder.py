@@ -80,6 +80,10 @@ class NetworkDecoder(nn.Module) :
         else :
             x_norm = torch.linalg.norm(x, dim=-1, keepdim=True) + 1e-5
 
+        # we know that the TNG positions are normalized by R200c,
+        # but need to take the origin shift into account
+        assert x_norm.max().item() < 3.5, x_norm.max().item()
+
         if h is not None :
             # compute the moduli of the latent vectors, shape [batch, Nfeatures, 1]
             h_norm = torch.linalg.norm(h, dim=-1, keepdim=True)
