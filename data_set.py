@@ -110,6 +110,8 @@ class DataSet(torch_DataSet) :
            or cfg.PRT_FRACTION[ptype] is None :
             return None
 
+        # TODO this is the only place where we use Nprt and currently not even that,
+        #      so the use of Nprt is not really tested and this field should be treated with caution
         Nprt = getattr(halo, 'Nprt_%d_%s'%(cfg.TNG_RESOLUTION, ptype))
         Nindices = int(cfg.PRT_FRACTION[ptype] * Nprt) \
                    if isinstance(cfg.PRT_FRACTION[ptype], float) and cfg.PRT_FRACTION[ptype]<=1 \

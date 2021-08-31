@@ -1,3 +1,4 @@
+import os
 import ctypes as ct
 
 import numpy as np
@@ -103,25 +104,44 @@ class DataItem :
         returns the properties for the network input 
         """
     #{{{
-        # load the particle coordinates from file
-        coords = np.fromfile(self.halo.storage_DM['coords'], dtype=np.float32)
-        coords = coords.reshape((len(coords)//3, 3))
+        if cfg.MEMMAP_DM :
+            # do not load the DM particles directly into memory
 
-        # remove the origin
-        coords -= self.halo.pos
+            # first we need to figure out how many particles there are
+            with open(self.halo.storage_DM['coords'], 'r') as f :
+                f.seek(0, os.SEEK_END)
+                Nbytes = f.tell()
+                Nprt = Nbytes // (3*4) # each particle has 3 32bit numbers
+                assert Nprt * 3 * 4 == Nbytes
 
-        # take periodic boundary conditions into account
-        coords = DataItem.__periodicize(coords)
+            coords = np.memmap(self.halo.storage_DM['coords'],
+                               mode='r', dtype=np.float32, shape=(Nprt,3,))
 
-        # load the velocities if required
-        if cfg.USE_VELOCITIES :
-            vels = np.fromfile(self.halo.storage_DM['velocities'], dtype=np.float32)
-            vels = vels.reshape((len(vels)//3, 3))
-            assert len(vels) == len(coords)
-            # subtract bulk motion
-            vels -= self.halo.vel
+            vels = np.memmap(self.halo.storage_DM['velocities'],
+                             mode='r', dtype=np.float32, shape=(Nprt,3,))
+
         else :
-            vels = None
+            # load the DM particles directly into memory (takes longer initially)
+
+            # load the particle coordinates from file
+            coords = np.fromfile(self.halo.storage_DM['coords'], dtype=np.float32)
+            coords = coords.reshape((len(coords)//3, 3))
+
+            # remove the origin
+            coords -= self.halo.pos
+
+            # take periodic boundary conditions into account
+            coords = DataItem.__periodicize(coords)
+
+            # load the velocities if required
+            if cfg.USE_VELOCITIES :
+                vels = np.fromfile(self.halo.storage_DM['velocities'], dtype=np.float32)
+                vels = vels.reshape((len(vels)//3, 3))
+                assert len(vels) == len(coords)
+                # subtract bulk motion
+                vels -= self.halo.vel
+            else :
+                vels = None
 
         if cfg.NET_ARCH['local'] :
             offsets = np.fromfile(self.halo.storage_DM['offsets'], dtype=np.uint)

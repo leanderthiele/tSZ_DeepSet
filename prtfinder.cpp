@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <cstdint>
 #include <cstdio>
+#include <cstring>
 #include <algorithm>
 #include <vector>
 #include <utility>
@@ -37,8 +38,7 @@ static std::vector<std::pair<size_t, size_t>>
 find_idx_ranges (const float *x0,
                  float R,
                  uint64_t Nin,
-                 const float *ul_corner,
-                 float extent,
+                 float R200c,
                  const uint64_t *offsets,
                  int *err
                 );
@@ -47,6 +47,9 @@ static uint64_t *
 find_indices (const float *x0,
               float R,
               const float *x,
+              const char *x_fname,
+              float box_size,
+              const float *halo_pos,
               uint64_t *Nout,
               const std::vector<std::pair<size_t, size_t>> *idx_ranges,
               int *err
@@ -57,9 +60,11 @@ static uint64_t *
 prtfinder_(const float *x0, // origin around which to find particles [3]
            float R, // radius of the sphere
            const float *x, // particle coordinates [Nin x 3]
+           const char *x_fname, // file with particle coordinates
            uint64_t Nin, // number of particles
-           const float *ul_corner, // minimum coordinates [3]
-           float extent, // local box size
+           float box_size, // global box size
+           float R200c, // halo radius
+           const float *halo_pos, // halo position
            const uint64_t *offsets, // see sort_particles.cpp, [Nside*Nside*Nside+1]
            uint64_t *Nout, // length of output array
            int *err // error flag (nonzero if error occured)
@@ -71,20 +76,24 @@ prtfinder_(const float *x0, // origin around which to find particles [3]
 //
 extern "C"
 {
-    // NOTE the coordinates x, as well as the ul_corner already have the halo position
+    // NOTE the coordinates x, x0 already have the halo position
     //      subtracted off, so we do not need to worry about periodic boundary conditions!
+    // NOTE the argument x is only used if x_fname == 'NONE'
+    // NOTE if x_fname != 'NONE', x is not used but box_size, halo_pos used!
     uint64_t * prtfinder (const float *x0, // origin around which to find particles [3]
                           float R, // radius of the sphere
                           const float *x, // particle coordinates [Nin x 3]
+                          const char *x_fname, // file with particle coordinates
                           uint64_t Nin, // number of particles
-                          const float *ul_corner, // minimum coordinates [3]
-                          float extent, // local box size
+                          float box_size, // global box size
+                          float R200c, // halo radius
+                          const float *halo_pos, // halo position
                           const uint64_t *offsets, // see sort_particles.cpp, [Nside*Nside*Nside+1]
                           uint64_t *Nout, // length of output array
                           int *err // error flag (nonzero if error occured)
                          )
     {
-        return prtfinder_(x0, R, x, Nin, ul_corner, extent, offsets, Nout, err);
+        return prtfinder_(x0, R, x, x_fname, Nin, box_size, R200c, halo_pos, offsets, Nout, err);
     }
 
     void myfree (uint64_t *data)
@@ -100,9 +109,11 @@ static uint64_t *
 prtfinder_(const float *x0, // origin around which to find particles [3]
            float R, // radius of the sphere
            const float *x, // particle coordinates [Nin x 3]
+           const char *x_fname, // where to find the particle coordinates
            uint64_t Nin, // number of particles
-           const float *ul_corner, // minimum coordinates [3]
-           float extent, // local box size
+           float box_size, // global box size
+           float R200c, // radius of the halo
+           const float *halo_pos, // position of the halo
            const uint64_t *offsets, // see sort_particles.cpp, [Nside*Nside*Nside+1]
            uint64_t *Nout, // length of output array
            int *err // error flag (nonzero if error occured)
@@ -110,14 +121,14 @@ prtfinder_(const float *x0, // origin around which to find particles [3]
 {// {{{
     int tmp_err;
 
-    auto idx_ranges = find_idx_ranges(x0, R, Nin, ul_corner, extent, offsets, &tmp_err);
+    auto idx_ranges = find_idx_ranges(x0, R, Nin, R200c, offsets, &tmp_err);
     if (tmp_err)
     {
         *err = 1000 + tmp_err;
         return nullptr;
     }
 
-    auto out = find_indices(x0, R, x, Nout, &idx_ranges, &tmp_err);
+    auto out = find_indices(x0, R, x, x_fname, box_size, halo_pos, Nout, &idx_ranges, &tmp_err);
     if (tmp_err)
     {
         *err = 2000 + tmp_err;
@@ -133,20 +144,19 @@ static std::vector<std::pair<size_t, size_t>>
 find_idx_ranges (const float *x0,
                  float R,
                  uint64_t Nin,
-                 const float *ul_corner,
-                 float extent,
+                 float R200c,
                  const uint64_t *offsets,
                  int *err
                 )
 {// {{{
     std::vector<std::pair<size_t, size_t>> out;
 
-    // normalize to unit cell size and zero ul_corner
-    const float acell = extent / Nside;
+    // normalize to unit cell size and zero upper left corner
+    const float acell = 2.0F * 2.51F * R200c / Nside;
 
     float x0_normalized[3];
     for (size_t ii=0; ii != 3; ++ii)
-        x0_normalized[ii] = (x0[ii]-ul_corner[ii]) / acell;
+        x0_normalized[ii] = (x0[ii]+2.51F*R200c) / acell;
 
     float R_normalized = R / acell;
     float Rsq_normalized = R_normalized * R_normalized;
@@ -199,6 +209,9 @@ static uint64_t *
 find_indices (const float *x0,
               float R,
               const float *x,
+              const char *x_fname,
+              float box_size,
+              const float *halo_pos,
               uint64_t *Nout,
               const std::vector<std::pair<size_t, size_t>> *idx_ranges,
               int *err
@@ -211,6 +224,21 @@ find_indices (const float *x0,
         return nullptr;
     }
 
+    // figure out if x contains data
+    bool x_filled = !std::strcmp(x_fname, "NONE");
+
+    // get a file descriptor if necessary
+    std::FILE *x_file;
+    if (!x_filled)
+    {
+        x_file = std::fopen(x_fname, "r");
+        if (!x_file)
+        {
+            *err = 13;
+            return nullptr;
+        }
+    }
+
     // initial memory allocation
     *Nout = 0UL;
     size_t Nalloc = Ninit;
@@ -219,9 +247,56 @@ find_indices (const float *x0,
     float Rsq = R * R;
 
     for (const auto &idx_range : *idx_ranges)
-        for (size_t ii=idx_range.first; ii != idx_range.second; ++ii)
+    {
+        // number of particles in this index range
+        size_t Nprt = idx_range.second - idx_range.first;
+
+        if (!Nprt)
+            continue;
+
+        float *x_buffer;
+        if (!x_filled)
+        {
+            // in this case, we first need to read the relevant portion from disk
+            if (std::fseek(x_file, (long)(idx_range.first * 3UL * sizeof(float)), SEEK_SET))
+            {
+                *err = 14;
+                return nullptr;
+            }
+
+            x_buffer = (float *)std::malloc(Nprt * 3UL * sizeof(float));
+
+            size_t Nread = std::fread(x_buffer, sizeof(float), 3UL * Nprt, x_file);
+            if (Nread != 3UL * Nprt)
+            {
+                *err = 15;
+                return nullptr;
+            }
+
+            // now normalize the coordinates with respect to halo position and radius
+            for (size_t ii=0; ii != Nprt; ++ii)
+                for (size_t dd=0; dd != 3; ++dd)
+                {
+                    // get pointer to the element we'll operate on
+                    float *this_x = x_buffer + ii*3 + dd;
+
+                    // take relative to halo position
+                    *this_x -= halo_pos[dd];
+
+                    // enforce periodic boundary conditions
+                    if (*this_x > +0.5*box_size)
+                        *this_x -= box_size;
+                    else if (*this_x < -0.5*box_size)
+                        *this_x += box_size;
+                }
+        }
+        else
+            // x is already filled, i.e. the file has already been read from memory
+            x_buffer = x + idx_range.first * 3UL;
+
+        for (size_t ii=0; ii != Nprt; ++ii)
             #define SQU(var) ((var)*(var))
-            if (SQU(x[ii*3+0]-x0[0]) + SQU(x[ii*3+1]-x0[1]) + SQU(x[ii*3+2]-x0[2]) < Rsq)
+            if (SQU(x_buffer[ii*3+0]-x0[0]) + SQU(x_buffer[ii*3+1]-x0[1]) + SQU(x_buffer[ii*3+2]-x0[2]) < Rsq)
             #undef SQU
             {
                 // check if we need to make more space
@@ -233,6 +308,17 @@ find_indices (const float *x0,
 
                 out[(*Nout)++] = ii;
             }
+        
+        if (!x_filled)
+            std::free(x_buffer);
+    }
+
+    if (!x_filled)
+        if (std::fclose(x_file))
+        {
+            *err = 16;
+            return nullptr;
+        }
 
     // shrink to correct size -- make sure we don't realloc to zero as subsequent frees
     //                           may be buggy

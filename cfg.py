@@ -51,6 +51,9 @@ TNG_RESOLUTION = 128
 # in the particle list for those halos, which should be ok.
 PRT_FRACTION = dict(DM=1e4, TNG=256)
 
+# whether to use memmap for the DM data (speeds up initial data loading)
+MEMMAP_DM = False
+
 # how far (in units of R200c) to go out when choosing TNG particles
 # (set to None for no cutoff)
 RMAX = 2.0
