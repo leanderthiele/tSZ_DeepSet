@@ -96,7 +96,7 @@ class _ModuleOptimizer(torch.optim.Adam) :
 
         out = d1.copy()
         for k, v in d2.items() :
-            out.setdefault(k, default=v)
+            out.setdefault(k, v)
 
         return out
     #}}}
