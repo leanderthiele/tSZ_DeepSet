@@ -34,6 +34,16 @@ static inline void
 mod_reflections (float *cub);
 
 
+static inline float *
+load_x_file (std::FILE *x_file,
+             size_t offset,
+             size_t N,
+             float box_size,
+             const float *halo_pos,
+             int *err
+            );
+
+
 static std::vector<std::pair<size_t, size_t>>
 find_idx_ranges (const float *x0,
                  float R,
@@ -256,45 +266,15 @@ find_indices (const float *x0,
         if (!Nprt)
             continue;
 
-        float *x_buffer;
-        if (!x_filled)
-        {
-            // in this case, we first need to read the relevant portion from disk
-            if (std::fseek(x_file, (long)(idx_range.first * 3UL * sizeof(float)), SEEK_SET))
-            {
-                *err = 14;
-                return nullptr;
-            }
+        const float *x_buffer = (x_filled) ?
+                                // x already filled, simply set buffer to correct memory location
+                                x + idx_range.first * 3UL
+                                // x not filled, need to read a segment from file
+                                : load_x_file(x_file, idx_range.first, Nprt, box_size, halo_pos, err);
 
-            x_buffer = (float *)std::malloc(Nprt * 3UL * sizeof(float));
-
-            size_t Nread = std::fread(x_buffer, sizeof(float), 3UL * Nprt, x_file);
-            if (Nread != 3UL * Nprt)
-            {
-                *err = 15;
-                return nullptr;
-            }
-
-            // now normalize the coordinates with respect to halo position and radius
-            for (size_t ii=0; ii != Nprt; ++ii)
-                for (size_t dd=0; dd != 3; ++dd)
-                {
-                    // get pointer to the element we'll operate on
-                    float *this_x = x_buffer + ii*3 + dd;
-
-                    // take relative to halo position
-                    *this_x -= halo_pos[dd];
-
-                    // enforce periodic boundary conditions
-                    if (*this_x > +0.5*box_size)
-                        *this_x -= box_size;
-                    else if (*this_x < -0.5*box_size)
-                        *this_x += box_size;
-                }
-        }
-        else
-            // x is already filled, i.e. the file has already been read from memory
-            x_buffer = x + idx_range.first * 3UL;
+        // if we read from file, check whether we did that successfully
+        if (!x_filled && *err)
+            return nullptr;
 
         for (size_t ii=0; ii != Nprt; ++ii)
             #define SQU(var) ((var)*(var))
@@ -312,7 +292,8 @@ find_indices (const float *x0,
             }
         
         if (!x_filled)
-            std::free(x_buffer);
+            // need casting here because signature of free is stupid
+            std::free((float *)x_buffer);
     }
 
     if (!x_filled)
@@ -370,3 +351,50 @@ mod_reflections (float *cub)
         if (cub[ii] < -0.5F)
             cub[ii] = - (cub[ii] + 1.0F);
 }// }}}
+
+static inline float *
+load_x_file (std::FILE *x_file,
+             size_t offset,
+             size_t N,
+             float box_size,
+             const float *halo_pos,
+             int *err
+            )
+{// {{{
+    float *x_buffer = (float *)std::malloc(N * 3UL * sizeof(float));
+
+    // in this case, we first need to read the relevant portion from disk
+    if (std::fseek(x_file, (long)(offset * 3UL * sizeof(float)), SEEK_SET))
+    {
+        *err = 14;
+        return nullptr;
+    }
+
+    size_t Nread = std::fread(x_buffer, sizeof(float), 3UL * N, x_file);
+    if (Nread != 3UL * N)
+    {
+        *err = 15;
+        return nullptr;
+    }
+
+    // now normalize the coordinates with respect to halo position and radius
+    for (size_t ii=0; ii != N; ++ii)
+        for (size_t dd=0; dd != 3; ++dd)
+        {
+            // get pointer to the element we'll operate on
+            float *this_x = x_buffer + ii*3 + dd;
+
+            // take relative to halo position
+            *this_x -= halo_pos[dd];
+
+            // enforce periodic boundary conditions
+            if (*this_x > +0.5*box_size)
+                *this_x -= box_size;
+            else if (*this_x < -0.5*box_size)
+                *this_x += box_size;
+        }
+
+    *err = 0;
+    return x_buffer;
+}// }}}
+
