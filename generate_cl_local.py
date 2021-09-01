@@ -6,6 +6,7 @@ def generate_cl(trial) :
                              'scalarencoder=False,decoder=True,vae=False,local=True)')
     out.append('LOCAL_NLATENT=1')
     out.append('OUTPUT_NFEATURES=1')
+    out.append('LOCAL_N_LAYERS=1') # required because there's no decoder
 
     lr = trial.suggest_float('lr', 1e-4, 1e-1, log=True)
     out.append('ONE_CYCLE_LR_KWARGS["local"]["max_lr"]=%.8e'%lr)
@@ -15,9 +16,6 @@ def generate_cl(trial) :
 
     R_local = trial.suggest_float('R_local', 50.0, 200.0)
     out.append('R_LOCAL=%.8e'%R_local)
-
-    N_layers = trial.suggest_categorical('N_layers', (0,1))
-    out.append('ORIGIN_DEFAULT_NLAYERS=%d'%N_layers)
 
     MLP_N_layers = trial.suggest_int('MLP_N_layers', 2, 8)
     out.append('LOCAL_MLP_NLAYERS=%d'%MLP_N_layers)

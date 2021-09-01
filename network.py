@@ -54,6 +54,9 @@ class Network(nn.Module) :
             assert not (cfg.NET_ARCH['encoder'] or cfg.NET_ARCH['scalarencoder'] or cfg.NET_ARCH['vae'])
             if cfg.NET_ARCH['local'] :
                 assert cfg.LOCAL_NLATENT == cfg.OUTPUT_NFEATURES
+                # if we have zero hidden layers, we can't concat with the number of particles
+                # and still get something useful as output
+                assert cfg.LOCAL_NLAYERS > 0
 
         if cfg.NET_ARCH['local'] :
             self.local = NetworkLocal(MLP_Nlayers=cfg.LOCAL_MLP_NLAYERS,
