@@ -81,9 +81,6 @@ if __name__ == '__main__' :
             for fname in fnames :
                 os.remove(fname)
 
-    raise RuntimeError
-
-
     # set up some logging (according to online example)
     optuna.logging.get_logger('optuna').addHandler(logging.StreamHandler(sys.stdout))
 
