@@ -21,6 +21,7 @@ from time import time
 
 import numpy as np
 import optuna
+from optuna.samplers import TPESampler
 
 import cfg
 
@@ -92,7 +93,8 @@ if __name__ == '__main__' :
     optuna.logging.get_logger('optuna').addHandler(logging.StreamHandler(sys.stdout))
 
     # set up our study (loads from data base if exists)
-    study = optuna.create_study(study_name=IDENT,
+    study = optuna.create_study(sampler=TPESampler(n_startup_trials=20),
+                                study_name=IDENT,
                                 storage='sqlite:///%s.db'%IDENT,
                                 load_if_exists=True)
 
