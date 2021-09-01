@@ -43,10 +43,17 @@ def objective(trial) :
 
     start_time = time()
 
-    # run the training loop
-    subprocess.run(['python', '-u', 'training.py', '--ID="%s"'%ID,
-                    *['--%s'%s for s in cl]],
-                   check=True)
+    # run the training loop, making sure we catch any errors that may occur
+    # (we expect errors to be mostly OOM, which is ok, we just cannot run this model then)
+    try :
+        subprocess.run(['python', '-u', 'training.py', '--ID="%s"'%ID,
+                        *['--%s'%s for s in cl]],
+                       check=True)
+    except subprocess.CalledProcessError as err :
+        print('WARNING training.py returned with the following error. We will continue.')
+        print(err)
+        # return something large but not unreasonable, so the optuna Gaussian process does not blow up
+        return 20.0
 
     end_time = time()
 
