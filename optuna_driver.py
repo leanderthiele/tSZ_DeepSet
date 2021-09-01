@@ -72,6 +72,7 @@ def objective(trial) :
 if __name__ == '__main__' :
     
     if REMOVE_PREVIOUS :
+        print('REMOVE_PREVIOUS==True, will delete all previously generated data with same IDENT')
         os.remove('%s.db'%IDENT)
         for prefix, suffix in [('loss', 'npz'), ('cfg', 'py'), ('model', 'pt')] :
             # this is not ideal because glob doesn't know regular expressions, but should be
