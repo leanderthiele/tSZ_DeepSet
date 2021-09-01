@@ -1,12 +1,18 @@
 """
 This is the driver code for optuna. The idea is that we specify as the first command
-line arguments a string ident,
-such that generate_cl_<ident>.py exports a function generate_cl(trial)
+line arguments a string IDENT,
+such that generate_cl_<IDENT>.py exports a function generate_cl(trial)
 which returns the command line arguments for a specific run (as a list ['ARG=value', ...]).
+
+Second command line argument is an integer which if non-zero means that any previous runs
+with the same IDENT should be discarded and the resulting data products (SQL database, loss curves, ...)
+should be removed
 """
 
+import os
 import os.path
 from sys import argv
+from glob import glob
 import sys
 import logging
 import importlib
@@ -21,6 +27,8 @@ import cfg
 IDENT = argv[1]
 generate_cl_lib = importlib.import_module('generate_cl_%s'%IDENT)
 
+REMOVE_PREVIOUS = bool(int(argv[2]))
+
 INDEX = 0
 
 def objective(trial) :
@@ -30,8 +38,8 @@ def objective(trial) :
     # generate our command line arguments
     cl = generate_cl_lib.generate_cl(trial)
 
-    # the ID for this run
-    ID = 'optuna_%s_%d'%(IDENT, INDEX)
+    # the ID for this run (use the nr to be fairly sure we really only have the number afterwards)
+    ID = 'optuna_%s_nr%d'%(IDENT, INDEX)
 
     start_time = time()
 
@@ -62,6 +70,15 @@ def objective(trial) :
 
 # main driver code
 if __name__ == '__main__' :
+    
+    if REMOVE_PREVIOUS :
+        os.remove('%s.db'%IDENT)
+        for prefix, suffix in [('loss', 'npz'), ('cfg', 'py'), ('model', 'pt')] :
+            fnames = glob(os.path.join(cfg.RESULTS_PATH, '%s_optuna_%s_nr*.%s'%(prefix, IDENT, suffix))
+            for fname in fnames :
+                os.remove(fname)
+
+
     # set up some logging (according to online example)
     optuna.logging.get_logger('optuna').addHandler(logging.StreamHandler(sys.stdout))
 
