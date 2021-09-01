@@ -51,6 +51,9 @@ def objective(trial) :
     # the ID for this run (use the nr to be fairly sure we really only have the number afterwards)
     ID = 'optuna_%s_nr%d'%(IDENT, INDEX)
 
+    # set the environment variables that will be used by the training process
+    os.environ['TSZ_DEEP_SET_CFG'] = ' '.join('--%s'%s for s in cl)
+
     start_time = time()
 
     # run the training loop, making sure we catch any errors that may occur
