@@ -23,7 +23,7 @@ def generate_cl(trial) :
     out.append('LOCAL_MLP_NLAYERS=%d'%MLP_N_layers)
 
     MLP_N_hidden = trial.suggest_int('MLP_N_hidden', 32, 256)
-    out.append('LOCAL_MLP_NHIDDEN=%d', MLP_N_hidden)
+    out.append('LOCAL_MLP_NHIDDEN=%d'%MLP_N_hidden)
 
     pass_N = trial.suggest_categorical('pass_N', ('True', 'False'))
     out.append('LOCAL_PASS_N=%s'%pass_N)
