@@ -61,8 +61,8 @@ def objective(trial) :
     try :
         loss_record = Training(training_loader=TRAINING_LOADER, validation_loader=VALIDATION_LOADER)
     except Exception as e :
-        # make sure we abort if the user really wants it
-        if isinstance(e, KeyboardInterrupt) :
+        # there are some exceptions where we know we really should abort
+        if isinstance(e, (KeyboardInterrupt, AssertionError)) :
             raise e from None
         print('WARNING Training() finished with error. Will continue!')
         print(e)
