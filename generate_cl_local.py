@@ -6,7 +6,7 @@ def generate_cl(trial) :
                              'scalarencoder=False,decoder=True,vae=False,local=True)')
     out.append('LOCAL_NLATENT=1')
     out.append('OUTPUT_NFEATURES=1')
-    out.append('LOCAL_N_LAYERS=1') # required because there's no decoder
+    out.append('LOCAL_NLAYERS=1') # required because there's no decoder
 
     lr = trial.suggest_float('lr', 1e-4, 1e-1, log=True)
     out.append('ONE_CYCLE_LR_KWARGS["local"]["max_lr"]=%.8e'%lr)

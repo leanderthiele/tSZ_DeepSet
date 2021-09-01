@@ -50,11 +50,11 @@ def _parse_cmd_line() :
         cfg_key = cfg_key.split('[', maxsplit=1)[0]
 
         # check that this is a valid key
-        assert hasattr(cfg, cfg_key)
+        assert hasattr(cfg, cfg_key), cfg_key
 
         # check that this is a key that we allow to be changed
-        assert cfg_key.isupper()
-        assert not cfg_key.startswith('_')
+        assert cfg_key.isupper(), cfg_key
+        assert not cfg_key.startswith('_'), cfg_key
 
         # TODO for the [] case, make sure we are not adding a new item to the dict
         #      (for lists this would throw)
