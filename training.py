@@ -31,7 +31,8 @@ model = Network().to_device()
 
 InitModel(model)
 
-batt12 = NetworkBatt12().to_device() # use this to compute the reference loss
+# use B12 model (with updated parameters) as reference
+batt12 = NetworkBatt12().to_device()
 batt12.eval()
 
 loss_fn = TrainingLoss()
