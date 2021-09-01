@@ -99,6 +99,10 @@ class TrainingOptimizer(list) :
     def __init__(self, model, steps_per_epoch) :
     #{{{
         super().__init__()
+
+        # make sure the NET_ARCH dict is consistent with the other relevant ones
+        assert set(cfg.WEIGHT_DECAY.keys()) - set(cfg.NET_ARCH.keys()) == {'default'}
+        assert set(cfg.ONE_CYCLE_LR_KWARGS.keys()) - set(cfg.NET_ARCH.keys()) == {'default'}
         
         # loop over the named modules
         for k, v in cfg.NET_ARCH.items() :

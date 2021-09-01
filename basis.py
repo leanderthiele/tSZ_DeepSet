@@ -24,6 +24,9 @@ class Basis(np.ndarray, metaclass=FixedLenVec) :
     #{{{    
         assert isinstance(halo, Halo)
 
+        # make sure no typos in BASIS_USE dict
+        assert set(cfg.BASIS_USE.keys()) == {'none', 'ang_mom', 'CM', 'inertia', 'vel_dispersion'}
+
         _, v = LA.eigh(halo.inertia)
         v = v.T # more intuitive
 

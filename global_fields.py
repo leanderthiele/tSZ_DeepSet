@@ -24,6 +24,11 @@ class GlobalFields(np.ndarray, metaclass=FixedLenVec) :
     #{{{
         assert isinstance(halo, Halo)
 
+        # make sure no typos in the GLOBALS_USE dict
+        assert set(cfg.GLOBALS_USE.keys()) == {'none', 'logM', 'ang_mom', 'Xoff', 'Voff', 'CM', 'inertia',
+                                               'inertia_dot_ang_mom', 'vel_dispersion',
+                                               'vel_dispersion_dot_ang_mom', 'vel_dispersion_dot_inertia'}
+
         # logarithmic mass
         logM = np.log(halo.M200c)
 

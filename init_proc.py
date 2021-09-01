@@ -60,7 +60,12 @@ def _parse_cmd_line() :
         cfg_key, _ = a.split('=', maxsplit=1)
 
         # account for the fact that there may be indexing/key access involved
-        cfg_key = cfg_key.split('[', maxsplit=1)[0]
+        if '[' in cfg_key :
+            assert ']' in cfg_key
+            getitem_idx = cfg_key[cfg_key.find('[')+1:cfg_key.find(']')]
+            cfg_key = cfg_key.split('[', maxsplit=1)[0]
+        else :
+            getitem_idx = None
 
         # check that this is a valid key
         assert hasattr(cfg, cfg_key), cfg_key
@@ -74,6 +79,15 @@ def _parse_cmd_line() :
         if from_env_var :
             assert cfg_key not in ['DATALOADER_ARGS', 'HALO_CATALOG', 'GLOBALS_USE',
                                    'TNG_RESOLUTION', 'USE_VELOCITIES', ]
+
+        # if indexing is involved, also do some basic checks
+        if getitem_idx is not None :
+            if isinstance(getattr(cfg, cfg_key), dict) :
+                assert getitem_idx in getattr(cfg, cfg_key).keys()
+            elif isinstance(getattr(cfg, cfg_key), list) :
+                assert getitem_idx.isdigit()
+            else :
+                raise RuntimeError('Bad index %s for cfg_key %s'%(getitem_idx, cfg_key))
         
         # now hopefully everything is alright, let's do this super unsafe thing
         exec('cfg.%s'%a)

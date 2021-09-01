@@ -23,6 +23,10 @@ class Network(nn.Module) :
         super().__init__()
 
         assert cfg.NET_ARCH['local'] or cfg.NET_ARCH['decoder'] or cfg.NET_ARCH['batt12']
+
+        # make sure there were no typos when modifying the NET_ARCH dict
+        assert set(cfg.NET_ARCH.keys()) == {'origin', 'batt12', 'deformer', 'encoder',
+                                            'scalarencoder', 'decoder', 'vae', 'local', }
  
         if cfg.NET_ARCH['decoder'] :
  
