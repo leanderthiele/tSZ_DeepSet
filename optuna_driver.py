@@ -74,9 +74,13 @@ if __name__ == '__main__' :
     if REMOVE_PREVIOUS :
         os.remove('%s.db'%IDENT)
         for prefix, suffix in [('loss', 'npz'), ('cfg', 'py'), ('model', 'pt')] :
-            fnames = glob(os.path.join(cfg.RESULTS_PATH, '%s_optuna_%s_nr*.%s'%(prefix, IDENT, suffix))
+            # this is not ideal because glob doesn't know regular expressions, but should be
+            # safe unless we do something stupid like taking ..._nr as IDENT
+            fnames = glob(os.path.join(cfg.RESULTS_PATH, '%s_optuna_%s_nr[0-9]*.%s'%(prefix, IDENT, suffix)))
             for fname in fnames :
                 os.remove(fname)
+
+    raise RuntimeError
 
 
     # set up some logging (according to online example)
