@@ -22,7 +22,7 @@ class Network(nn.Module) :
     #{{{
         super().__init__()
 
-        assert cfg.NET_ARCH['decoder'] or cfg.NET_ARCH['batt12']
+        assert cfg.NET_ARCH['local'] or cfg.NET_ARCH['decoder'] or cfg.NET_ARCH['batt12']
  
         if cfg.NET_ARCH['decoder'] :
  
@@ -51,8 +51,9 @@ class Network(nn.Module) :
 
         else :
             # no decoder provided, this is unusual and we should check!
-            assert not (cfg.NET_ARCH['encoder'] or cfg.NET_ARCH['scalarencoder'] \
-                        or cfg.NET_ARCH['local'] or cfg.NET_ARCH['vae'])
+            assert not (cfg.NET_ARCH['encoder'] or cfg.NET_ARCH['scalarencoder'] or cfg.NET_ARCH['vae'])
+            if cfg.NET_ARCH['local'] :
+                assert cfg.LOCAL_NLATENT == cfg.OUTPUT_NFEATURES
 
         if cfg.NET_ARCH['local'] :
             self.local = NetworkLocal(MLP_Nlayers=cfg.LOCAL_MLP_NLAYERS,
@@ -82,7 +83,7 @@ class Network(nn.Module) :
         if cfg.NET_ARCH['deformer'] :
             assert cfg.NET_ARCH['batt12']
 
-        if cfg.NET_ARCH['decoder'] and not cfg.NET_ARCH['batt12'] :
+        if (cfg.NET_ARCH['decoder'] or cfg.NET_ARCH['local']) and not cfg.NET_ARCH['batt12'] :
             assert cfg.OUTPUT_NFEATURES == 1
 
         # validate that we didn't make a mistake
@@ -158,8 +159,12 @@ class Network(nn.Module) :
             x = self.scaling * torch.relu(torch.sinh(x))
         elif cfg.NET_ARCH['decoder'] and cfg.NET_ARCH['batt12'] :
             x = self.__combine(x, b12)
-        elif not cfg.NET_ARCH['decoder'] and cfg.NET_ARCH['batt12'] :
+        elif not cfg.NET_ARCH['decoder'] and not cfg.NET_ARCH['local'] and cfg.NET_ARCH['batt12'] :
             x = b12
+        elif not cfg.NET_ARCH['decoder'] and cfg.NET_ARCH['local'] and cfg.NET_ARCH['batt12'] :
+            x = self.__combine(l, b12)
+        elif not cfg.NET_ARCH['decoder'] and cfg.NET_ARCH['local'] and not cfg.NET_ARCH['batt12'] :
+            x = torch.relu(torch.sinh(l))
         else :
             raise RuntimeError('Should not happen!')
 
