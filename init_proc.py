@@ -77,8 +77,9 @@ def _parse_cmd_line() :
         # check that some cfg keys are not modified if loading from environment variable
         # (see note in docstring above)
         if from_env_var :
-            assert cfg_key not in ['DATALOADER_ARGS', 'HALO_CATALOG', 'GLOBALS_USE',
-                                   'TNG_RESOLUTION', 'USE_VELOCITIES', ]
+            assert cfg_key not in ['DATALOADER_ARGS', 'HALO_CATALOG',
+                                   'SAMPLE_FRACTIONS', 'CONSISTENT_SEED', 'RMAX',
+                                   'GLOBALS_USE', 'TNG_RESOLUTION', 'USE_VELOCITIES', ]
 
         # if indexing is involved, also do some basic checks
         if getitem_idx is not None :

@@ -6,7 +6,7 @@ import cfg
 
 class DataModes(Enum) :
     """
-    the three possible modes for which we may want to load data
+    the possible modes for which we may want to load data
     """
 
     TRAINING = auto()

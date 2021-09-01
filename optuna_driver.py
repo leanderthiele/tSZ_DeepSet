@@ -54,6 +54,9 @@ def objective(trial) :
     # set the environment variables that will be used by the training process
     os.environ['TSZ_DEEP_SET_CFG'] = ' '.join('--%s'%s for s in cl + ['ID="%s"'%ID, ])
 
+    print('***Starting training loop (#d) with parameters:'%INDEX)
+    print(os.environ['TSZ_DEEP_SET_CFG'])
+
     start_time = time()
 
     # run the training loop, making sure we catch any errors that may occur
