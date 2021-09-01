@@ -34,14 +34,11 @@ generate_cl_lib = importlib.import_module('generate_cl_%s'%IDENT)
 
 REMOVE_PREVIOUS = bool(int(argv[2]))
 
-INDEX = 0
-
 TRAINING_LOADER = None
 VALIDATION_LOADER = None
 
 def objective(trial) :
 
-    global INDEX
     global TRAINING_LOADER
     global VALIDATION_LOADER
 
@@ -49,12 +46,12 @@ def objective(trial) :
     cl = generate_cl_lib.generate_cl(trial)
 
     # the ID for this run (use the nr to be fairly sure we really only have the number afterwards)
-    ID = 'optuna_%s_nr%d'%(IDENT, INDEX)
+    ID = 'optuna_%s_nr%d'%(IDENT, trial.number)
 
     # set the environment variables that will be used by the training process
     os.environ['TSZ_DEEP_SET_CFG'] = ' '.join('--%s'%s for s in cl + ['ID="%s"'%ID, ])
 
-    print('***Starting training loop (#d) with parameters:'%INDEX)
+    print('***Starting training loop (#d) with parameters:'%trial.number)
     print(os.environ['TSZ_DEEP_SET_CFG'])
 
     start_time = time()
@@ -73,7 +70,7 @@ def objective(trial) :
 
     end_time = time()
 
-    print('***One training loop (#%d) took %f seconds'%(INDEX, end_time-start_time))
+    print('***One training loop (#%d) took %f seconds'%(trial.number, end_time-start_time))
 
     assert isinstance(loss_record, TrainingLossRecord)
     loss_curve = np.median(np.array(loss_record.validation_loss_arr)
@@ -83,8 +80,6 @@ def objective(trial) :
     # take the mean of the last few losses to make sure we are not in some spurious 
     # local minimum
     final_loss = np.mean(loss_curve[-5:])
-
-    INDEX += 1
 
     return final_loss
 
@@ -110,9 +105,6 @@ if __name__ == '__main__' :
                                 study_name=IDENT,
                                 storage='sqlite:///%s.db'%IDENT,
                                 load_if_exists=True)
-
-    # we should adapt the global index if trials have already been run
-    INDEX = len(study.trials)
 
     # construct the data loaders
     TRAINING_LOADER = DataLoader(DataModes.TRAINING)
