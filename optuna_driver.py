@@ -64,6 +64,8 @@ def objective(trial) :
         # make sure we abort if the user really wants it
         if isinstance(e, KeyboardInterrupt) :
             raise e from None
+        print('WARNING Training() finished with error. Will continue!')
+        print(e)
         return 20.0
 
     end_time = time()

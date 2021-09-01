@@ -3,7 +3,7 @@ def generate_cl(trial) :
 
     out = []
     out.append('NET_ARCH=dict(origin=False,batt12=False,deformer=False,encoder=False,'\
-                             'scalarencoder=False,decoder=True,vae=False,local=True)')
+                             'scalarencoder=False,decoder=False,vae=False,local=True)')
     out.append('LOCAL_NLATENT=1')
     out.append('OUTPUT_NFEATURES=1')
     out.append('LOCAL_NLAYERS=1') # required because there's no decoder

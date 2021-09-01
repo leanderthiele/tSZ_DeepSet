@@ -83,9 +83,11 @@ def _parse_cmd_line() :
         # if indexing is involved, also do some basic checks
         if getitem_idx is not None :
             if isinstance(getattr(cfg, cfg_key), dict) :
-                assert getitem_idx in getattr(cfg, cfg_key).keys()
+                # need to be careful with the quotes here
+                assert all(getitem_idx[ii] in ['"', "'", ] for ii in [0,-1])
+                assert getitem_idx[1:-1] in getattr(cfg, cfg_key).keys(), getitem_idx
             elif isinstance(getattr(cfg, cfg_key), list) :
-                assert getitem_idx.isdigit()
+                assert getitem_idx.isdigit(), getitem_idx
             else :
                 raise RuntimeError('Bad index %s for cfg_key %s'%(getitem_idx, cfg_key))
         
