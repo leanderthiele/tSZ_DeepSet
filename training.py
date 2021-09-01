@@ -19,84 +19,103 @@ from init_model import InitModel
 from archive_cfg import ArchiveCfg
 import cfg
 
-InitProc(0)
+def Training(training_loader=None, validation_loader=None) :
+    """
+    The entire training process. If training_loader and validation_loader are passed,
+    there are certain restrictions on the changes that can be made in cfg.
+    (usually not important)
 
-ArchiveCfg()
+    Returns a TrainingLossRecord instance gathering all the training losses.
+    """
+#{{{
+    InitProc(0)
 
-if cfg.mpi_env_type is MPIEnvTypes.NOGPU :
-    torch.set_num_threads(5)
-    from matplotlib import pyplot as plt
+    ArchiveCfg()
 
-model = Network().to_device()
+    if cfg.mpi_env_type is MPIEnvTypes.NOGPU :
+        torch.set_num_threads(5)
 
-InitModel(model)
+    model = Network().to_device()
 
-# use B12 model (with updated parameters) as reference
-batt12 = NetworkBatt12().to_device()
-batt12.eval()
+    InitModel(model)
 
-loss_fn = TrainingLoss()
+    # use B12 model (with updated parameters) as reference
+    batt12 = NetworkBatt12().to_device()
+    batt12.eval()
 
-training_loader = DataLoader(mode=DataModes.TRAINING)
-validation_loader = DataLoader(mode=DataModes.VALIDATION)
+    loss_fn = TrainingLoss()
 
-optimizer = TrainingOptimizer(model, steps_per_epoch=len(training_loader))
-
-# store all the losses here
-loss_record = TrainingLossRecord()
-
-for epoch in range(cfg.EPOCHS) :
-
-    model.train()
-    print('epoch %d'%epoch)
-
-    for t, data in enumerate(training_loader) :
-
-        assert isinstance(data, DataBatch)
-
-        optimizer.zero_grad()
-        data = data.to_device()
-
-        with torch.no_grad() :
-            guess = batt12(data.M200c, data.TNG_radii, data.P200c)
-
-        _, loss_list_guess, _ = loss_fn(guess, data.TNG_Pth, w=None)
-
-        prediction, KLD = model(data)
-
-        loss, loss_list, KLD_list = loss_fn(prediction, data.TNG_Pth, KLD, w=None, epoch=epoch)
-
-        loss_record.add_training_loss(loss_list, KLD_list, loss_list_guess, 
-                                      np.log(data.M200c.cpu().detach().numpy()), data.idx)
-
-        loss.backward()
-        
-        if cfg.GRADIENT_CLIP is not None :
-            # TODO when scaling with P200c, we can consider scaling the max_norm here
-            nn.utils.clip_grad_norm_(model.parameters(), max_norm=cfg.GRADIENT_CLIP)
-
-        optimizer.step()
-        optimizer.lr_step()
-
-
-    model.eval()
+    if training_loader is None :
+        training_loader = DataLoader(mode=DataModes.TRAINING)
     
-    for t, data in enumerate(validation_loader) :
-        
-        data = data.to_device()
+    if validation_loader is None :
+        validation_loader = DataLoader(mode=DataModes.VALIDATION)
 
-        with torch.no_grad() :
-            guess = batt12(data.M200c, data.TNG_radii, data.P200c)
-            prediction, KLD = model(data)
+    optimizer = TrainingOptimizer(model, steps_per_epoch=len(training_loader))
 
-            _, loss_list, KLD_list = loss_fn(prediction, data.TNG_Pth, KLD, w=None, epoch=epoch)
+    # store all the losses here
+    loss_record = TrainingLossRecord()
+
+    for epoch in range(cfg.EPOCHS) :
+
+        model.train()
+        print('epoch %d'%epoch)
+
+        for t, data in enumerate(training_loader) :
+
+            assert isinstance(data, DataBatch)
+
+            optimizer.zero_grad()
+            data = data.to_device()
+
+            with torch.no_grad() :
+                guess = batt12(data.M200c, data.TNG_radii, data.P200c)
+
             _, loss_list_guess, _ = loss_fn(guess, data.TNG_Pth, w=None)
 
-        loss_record.add_validation_loss(loss_list, KLD_list, loss_list_guess,
-                                        np.log(data.M200c.cpu().detach().numpy()), data.idx)
+            prediction, KLD = model(data)
 
-    # gather losses and save to file
-    loss_record.end_epoch()
+            loss, loss_list, KLD_list = loss_fn(prediction, data.TNG_Pth, KLD, w=None, epoch=epoch)
 
-# save the network to file
-torch.save(model.state_dict(), os.path.join(cfg.RESULTS_PATH, 'model_%s.pt'%cfg.ID))
+            loss_record.add_training_loss(loss_list, KLD_list, loss_list_guess, 
+                                          np.log(data.M200c.cpu().detach().numpy()), data.idx)
+
+            loss.backward()
+            
+            if cfg.GRADIENT_CLIP is not None :
+                # TODO when scaling with P200c, we can consider scaling the max_norm here
+                nn.utils.clip_grad_norm_(model.parameters(), max_norm=cfg.GRADIENT_CLIP)
+
+            optimizer.step()
+            optimizer.lr_step()
+
+
+        model.eval()
+        
+        for t, data in enumerate(validation_loader) :
+            
+            data = data.to_device()
+
+            with torch.no_grad() :
+                guess = batt12(data.M200c, data.TNG_radii, data.P200c)
+                prediction, KLD = model(data)
+
+                _, loss_list, KLD_list = loss_fn(prediction, data.TNG_Pth, KLD, w=None, epoch=epoch)
+                _, loss_list_guess, _ = loss_fn(guess, data.TNG_Pth, w=None)
+
+            loss_record.add_validation_loss(loss_list, KLD_list, loss_list_guess,
+                                            np.log(data.M200c.cpu().detach().numpy()), data.idx)
+
+        # gather losses and save to file
+        loss_record.end_epoch()
+
+    # save the network to file
+    torch.save(model.state_dict(), os.path.join(cfg.RESULTS_PATH, 'model_%s.pt'%cfg.ID))
+
+    return loss_record
+#}}}
+
+
+if __name__ == '__main__' :
+    
+    Training()

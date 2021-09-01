@@ -38,8 +38,7 @@ class HaloCatalog(list) :
         # member variable for the noise generation
         if compute_dglobals \
            and len(GlobalFields) != 0 \
-           and mode is DataModes.TRAINING \
-           and cfg.GLOBALS_NOISE is not None :
+           and mode is DataModes.TRAINING :
             
             # ok, this is probably not efficient but who cares, these arrays are small
             # and we do this O(1) times

@@ -10,6 +10,8 @@ import cfg
 def _parse_cmd_line() :
     """
     replaces settings in cfg.py with those given on the command line
+    or in the environment variable TSZ_DEEP_SET_CFG.
+    (if TSZ_DEEP_SET_CFG is set, this one will be used regardless of command line arguments)
     The command line should look something like
        --VARIABLE_IN_CFG=value ...
     such that
@@ -23,12 +25,23 @@ def _parse_cmd_line() :
          variable followed by a [. In particular, no composite datatypes with attribute
          access are allowed
     NOTE we assume that VARIABLE_IN_CFG does not contain an = sign
+    NOTE it is assumed that if the variables are set from the env var TSZ_DEEP_SET_CFG,
+         this is the situation in which the DataLoader's have already been constructed
+         prior to calling Training. Thus, in this situation we check that no cfg variables
+         are modified which were used in constructing DataLoader's.
     """
 #{{{
-    # cut out the program name
-    _argv = argv[1:]
+    if 'TSZ_DEEP_SET_CFG' in os.environ :
+        from_env_var = True
+        # convert the environment variable into a list that looks like argv
+        # note that this also works when TSZ_DEEP_SET_CFG is set to the empty string
+        _argv = os.environ['TSZ_DEEP_SET_CFG'].split()
+    else :
+        from_env_var = False
+        # cut out the program name
+        _argv = argv[1:]
 
-    if len(argv) == 0 :
+    if len(_argv) == 0 :
         return
 
     # concatenate into one long string
@@ -56,8 +69,11 @@ def _parse_cmd_line() :
         assert cfg_key.isupper(), cfg_key
         assert not cfg_key.startswith('_'), cfg_key
 
-        # TODO for the [] case, make sure we are not adding a new item to the dict
-        #      (for lists this would throw)
+        # check that some cfg keys are not modified if loading from environment variable
+        # (see note in docstring above)
+        if from_env_var :
+            assert cfg_key not in ['DATALOADER_ARGS', 'HALO_CATALOG', 'GLOBALS_USE',
+                                   'TNG_RESOLUTION', 'USE_VELOCITIES', ]
         
         # now hopefully everything is alright, let's do this super unsafe thing
         exec('cfg.%s'%a)
