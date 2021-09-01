@@ -23,6 +23,10 @@ import numpy as np
 import optuna
 from optuna.samplers import TPESampler
 
+from data_modes import DataModes
+from data_loader import DataLoader
+from training import Training
+from training_loss_record import TrainingLossRecord
 import cfg
 
 IDENT = argv[1]
@@ -32,9 +36,14 @@ REMOVE_PREVIOUS = bool(int(argv[2]))
 
 INDEX = 0
 
+TRAINING_LOADER = None
+VALIDATION_LOADER = None
+
 def objective(trial) :
 
     global INDEX
+    global TRAINING_LOADER
+    global VALIDATION_LOADER
 
     # generate our command line arguments
     cl = generate_cl_lib.generate_cl(trial)
@@ -47,25 +56,21 @@ def objective(trial) :
     # run the training loop, making sure we catch any errors that may occur
     # (we expect errors to be mostly OOM, which is ok, we just cannot run this model then)
     try :
-        subprocess.run(['python', '-u', 'training.py', '--ID="%s"'%ID,
-                        *['--%s'%s for s in cl]],
-                       check=True)
-    except subprocess.CalledProcessError as err :
-        print('WARNING training.py returned with the following error. We will continue.')
-        print(err)
-        # return something large but not unreasonable, so the optuna Gaussian process does not blow up
+        loss_record = Training(training_loader=TRAINING_LOADER, validation_loader=VALIDATION_LOADER)
+    except Exception as e :
+        # make sure we abort if the user really wants it
+        if isinstance(e, KeyboardInterrupt) :
+            raise e from None
         return 20.0
 
     end_time = time()
 
     print('***One training loop (#%d) took %f seconds'%(INDEX, end_time-start_time))
 
-    # retrieve our final loss
-    with np.load(os.path.join(cfg.RESULTS_PATH, 'loss_%s.npz'%ID)) as f :
-        validation_loss = f['validation']
-        validation_guess_loss = f['validation_guess']
-
-    loss_curve = np.median(validation_loss/validation_guess_loss, axis=-1)
+    assert isinstance(loss_record, TrainingLossRecord)
+    loss_curve = np.median(np.array(loss_record.validation_loss_arr)
+                           / np.array(loss_record.validation_guess_loss_arr),
+                           axis = -1)
 
     # take the mean of the last few losses to make sure we are not in some spurious 
     # local minimum
@@ -100,6 +105,10 @@ if __name__ == '__main__' :
 
     # we should adapt the global index if trials have already been run
     INDEX = len(study.trials)
+
+    # construct the data loaders
+    TRAINING_LOADER = DataLoader(DataModes.TRAINING)
+    VALIDATION_LOADER = DataLoader(DataModes.VALIDATION)
 
     # run the optimization loop
     study.optimize(objective)
