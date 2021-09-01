@@ -163,6 +163,8 @@ def InitProc(local_rank=None) :
     local_rank ... process-local rank (i.e. within this MPI process)
     """
 #{{{
+    _parse_cmd_line()
+
     if cfg.init_proc_called :
         
         if local_rank is not None and not cfg.set_rank :
@@ -175,8 +177,6 @@ def InitProc(local_rank=None) :
 
     if local_rank is not None :
         _set_mp_env_for_rank(local_rank)
-
-    _parse_cmd_line()
 
     cfg.init_proc_called = True
 #}}}
