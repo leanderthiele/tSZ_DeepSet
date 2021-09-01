@@ -86,8 +86,7 @@ class Network(nn.Module) :
             assert cfg.OUTPUT_NFEATURES == 1
 
         # validate that we didn't make a mistake
-        for k, v in cfg.NET_ARCH.items() :
-            assert v == hasattr(self, k)
+        assert all(v == hasattr(self, k) for k, v in cfg.NET_ARCH.items())
     #}}}
 
  
