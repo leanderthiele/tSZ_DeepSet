@@ -286,7 +286,7 @@ find_indices (const float *x0,
                     out = (uint64_t *)std::realloc(out, Nalloc * sizeof(uint64_t));
                 }
 
-                out[(*Nout)++] = ii;
+                out[(*Nout)++] = ii + idx_range.first;
             }
         
         if (!x_filled)
