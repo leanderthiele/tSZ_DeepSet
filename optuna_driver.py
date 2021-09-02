@@ -121,7 +121,7 @@ class Objective :
         call_after_epoch = CallAfterEpoch(trial)
 
         print('***Starting training loop (#%d) with parameters:'%trial.number)
-        print(os.environ['TSZ_DEEP_SET_CFG'])
+        print('\n'.join(os.environ['TSZ_DEEP_SET_CFG'].split()))
 
         start_time = time()
 
