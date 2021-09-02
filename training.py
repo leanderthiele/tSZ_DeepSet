@@ -19,11 +19,13 @@ from init_model import InitModel
 from archive_cfg import ArchiveCfg
 import cfg
 
-def Training(training_loader=None, validation_loader=None) :
+def Training(training_loader=None, validation_loader=None, call_after_epoch=None) :
     """
     The entire training process. If training_loader and validation_loader are passed,
     there are certain restrictions on the changes that can be made in cfg.
     (usually not important)
+
+    call_after_epoch ... will be called with the TrainingLossRecord instance as argument.
 
     Returns a TrainingLossRecord instance gathering all the training losses.
     """
@@ -108,6 +110,11 @@ def Training(training_loader=None, validation_loader=None) :
 
         # gather losses and save to file
         loss_record.end_epoch()
+
+        # if user requested, call their callback function
+        if call_after_epoch is not None :
+            assert callable(call_after_epoch)
+            call_after_epoch(loss_record)
 
     # save the network to file
     torch.save(model.state_dict(), os.path.join(cfg.RESULTS_PATH, 'model_%s.pt'%cfg.ID))
