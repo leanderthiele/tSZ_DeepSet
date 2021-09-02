@@ -45,7 +45,6 @@ class MyPruner(BasePruner) :
         """
     #{{{
         self.warmup_steps = warmup_steps
-        self.min_cut = min_cut
     #}}}
 
 
