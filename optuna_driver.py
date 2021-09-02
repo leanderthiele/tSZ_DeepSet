@@ -39,10 +39,9 @@ REMOVE_PREVIOUS = bool(int(argv[2]))
 
 class MyPruner(BasePruner) :
 
-    def __init__(self, warmup_steps=10, min_cut=2.0) :
+    def __init__(self, warmup_steps=20) :
         """
         warmup_steps ... number of steps before which we do not consider the loss curve
-        min_cut ... if after warmup_steps//2 all losses are above min_cut, we prune
         """
     #{{{
         self.warmup_steps = warmup_steps
@@ -65,8 +64,16 @@ class MyPruner(BasePruner) :
             if step < self.warmup_steps :
                 # we are in early phase of training, cannot tell if it is promising
                 return False
+            
+            if np.min(loss_curve) < 1.0 :
+                # we have made some progress, so it is clear we should continue
+                # NOTE this is something we should probably play with later.
+                #      Currently it only serves to exclude the origin training from pruning
+                #      as we expect it to be fairly noisy initially for good results.
+                return False
 
-            if np.min(loss_curve[self.warmup_steps//2:]) > self.min_cut :
+            if np.median(loss_curve[self.warmup_steps//2:]) > np.median(loss_curve[:self.warmup_steps//2]) :
+                # we are not making progress
                 return True
 
         return False

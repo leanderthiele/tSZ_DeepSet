@@ -26,4 +26,7 @@ def generate_cl(trial) :
     pass_N = trial.suggest_categorical('pass_N', ('True', 'False'))
     out.append('LOCAL_PASS_N=%s'%pass_N)
 
+    layernorm = trial.suggest_categorical('layernorm', ('True', 'False'))
+    out.append('LAYERNORM=%s'%layernorm)
+
     return out

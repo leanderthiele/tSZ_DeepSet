@@ -90,7 +90,7 @@ class NetworkMLP(nn.Sequential) :
 
         super().__init__(*[_MLPLayer(Nin if ii==0 else MLP_Nhidden,
                                      Nout if ii==MLP_Nlayers else MLP_Nhidden,
-                                     ii != 0, # = input is hidden
+                                     ii != 0, # = input_is_hidden
                                      **(MergeDicts(layer_kwargs_dict[str(ii)], layer_kwargs) if str(ii) in layer_kwargs_dict \
                                         else MergeDicts(layer_kwargs_dict['first'], layer_kwargs) if 'first' in layer_kwargs_dict and ii==0 \
                                         else MergeDicts(layer_kwargs_dict['last'], layer_kwargs) if 'last' in layer_kwargs_dict and ii==MLP_Nlayers \
