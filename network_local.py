@@ -19,6 +19,7 @@ class NetworkLocal(nn.Module) :
                        Nlayers=DefaultFromCfg('LOCAL_NLAYERS'),
                        Nhidden=DefaultFromCfg('LOCAL_NHIDDEN'),
                        pass_N=DefaultFromCfg('LOCAL_PASS_N'),
+                       concat_with_N=DefaultFromCfg('LOCAL_CONCAT_WITH_N'),
                        MLP_kwargs_dict=dict(),
                        **MLP_kwargs) :
         """
@@ -27,6 +28,8 @@ class NetworkLocal(nn.Module) :
         Nhidden  ... number of neurons in hidden layers (either int or dict)
         pass_N   ... whether the local number of particles is used in the initial DeepSet step
                      or only concatenated with the scalars after the pooling
+        concat_with_N ... whether the local number of particles is concatenated with the scalars
+                          produced after pooling
         MLP_kwargs_dict ... a dict indexed by str(layer_index) -- does not need to have all keys
                             note that the indices here can be one more than the Nhidden indices
                             NOTE 'first' and 'last' are special keywords that can also be used
@@ -42,8 +45,11 @@ class NetworkLocal(nn.Module) :
             Nhidden = Nhidden()
         if isinstance(pass_N, DefaultFromCfg) :
             pass_N = pass_N()
+        if isinstance(concat_with_N, DefaultFromCfg) :
+            concat_with_N = concat_with_N()
 
         assert isinstance(Nhidden, (int, dict))
+        assert pass_N or concat_with_N
 
         super().__init__()
 
@@ -65,12 +71,13 @@ class NetworkLocal(nn.Module) :
                         else Nhidden['first'] if 'first' in Nhidden and ii==1 \
                         else cfg.LOCAL_NHIDDEN,
                         # number of output features
+                        # for the first layer, we need to make space for N if concat_with_N
                         (Nlatent if ii==Nlayers \
                          else Nhidden if isinstance(Nhidden, int) \
                          else Nhidden[str(ii)] if str(ii) in Nhidden \
                          else Nhidden['first'] if 'first' in Nhidden and ii==0 \
                          else Nhidden['last'] if 'last' in Nhidden and ii==Nlayers-1 \
-                         else cfg.LOCAL_NHIDDEN) - (1 if ii==0 else 0), # for the first layer, make space for scalars
+                         else cfg.LOCAL_NHIDDEN) - (1 if ii==0 and concat_with_N else 0),
                         # other arguments
                         **(MergeDicts(MLP_kwargs_dict[str(ii)], MLP_kwargs) if str(ii) in MLP_kwargs_dict \
                            else MergeDicts(MLP_kwargs_dict['first'], MLP_kwargs) if 'first' in MLP_kwargs_dict and ii==0 \
@@ -79,6 +86,7 @@ class NetworkLocal(nn.Module) :
                        ) for ii in range(Nlayers+1)])
 
         self.pass_N = pass_N
+        self.concat_with_N = concat_with_N
     #}}}
 
 
@@ -219,8 +227,9 @@ class NetworkLocal(nn.Module) :
                 # in this case we also need a pooling operation
                 scalars = self.__pool(scalars)
 
-                # and we need to concatenate with the local DM density measure
-                scalars = torch.cat((scalars, N.unsqueeze(-1)), dim=-1)
+                if self.concat_with_N :
+                    # and we need to concatenate with the local DM density measure
+                    scalars = torch.cat((scalars, N.unsqueeze(-1)), dim=-1)
 
         # return shape [batch, N_TNG, N_features]
         return (1 if not cfg.SCALE_PTH else (1/P200c)[:, None, None]) \

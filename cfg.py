@@ -177,6 +177,9 @@ VISIBLE_DROPOUT = None
 # (should not be necessary)
 LOCAL_PASS_N = False
 
+# whether after the pooling the scalars are concatenated with N
+LOCAL_CONCAT_WITH_N = True
+
 # default number of hidden layers in the local network
 # (I believe anything apart from 0, 1 doesn't make much sense)
 LOCAL_NLAYERS = 1
