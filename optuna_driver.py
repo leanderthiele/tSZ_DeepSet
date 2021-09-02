@@ -167,7 +167,10 @@ if __name__ == '__main__' :
     
     if REMOVE_PREVIOUS :
         print('REMOVE_PREVIOUS==True, will delete all previously generated data with same IDENT')
-        os.remove('%s.db'%IDENT)
+        # the SQL data base where optuna puts its stuff
+        db_fname = '%s.db'%IDENT
+        if os.path.isfile(db_fname)
+        os.remove(db_fname)
         for prefix, suffix in [('loss', 'npz'), ('cfg', 'py'), ('model', 'pt')] :
             # this is not ideal because glob doesn't know regular expressions, but should be
             # safe unless we do something stupid like taking ..._nr as IDENT
