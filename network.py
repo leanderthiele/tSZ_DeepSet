@@ -108,12 +108,14 @@ class Network(nn.Module) :
                            batch.P200c)
 
         if cfg.NET_ARCH['origin'] :
-            # first find the shifted origin
+            # first find the shifted origin, shape [batch, 2, 3]
             o_norm = self.origin(batch.DM_coords, v=batch.DM_vels, u=batch.u, basis=batch.basis)
 
-            # we want the origin network to be nicely normalized, so multiply by an appropriate scale
+            # we give the network the freedom to generally choose a mixture of multiplying by an
+            # appropriate scale or simply taking a pre-determined vector
             # o is of shape [batch, 1, 3]
-            o = o_norm * (batch.Xoff / batch.R200c).unsqueeze(1).unsqueeze(1).expand(-1, -1, 3)
+            o = (o_norm[:, 0, :] * (batch.Xoff / batch.R200c).unsqueeze(1).expand(-1, 3) \
+                 + o_norm[:, 1, :]).unsqueeze(1)
 
             # in order to stabilize training (and make some asserts safe), we should make sure
             # the origin is not shifted too much

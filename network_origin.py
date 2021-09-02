@@ -23,7 +23,7 @@ class NetworkOrigin(NetworkEncoder) :
         if isinstance(globals_max_layer, DefaultFromCfg) :
             globals_max_layer = globals_max_layer()
 
-        super().__init__(Nlatent=1, # predict exactly one vector
+        super().__init__(Nlatent=2, # predict two vectors
                          # do not have an activation function before the final output
                          # since we generally want to map to the entire real line
                          # initialize last bias to zero because on average we don't expect a shift
