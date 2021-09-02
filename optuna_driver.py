@@ -120,7 +120,7 @@ class Objective :
         # get our callable which will be executed after each epoch
         call_after_epoch = CallAfterEpoch(trial)
 
-        print('***Starting training loop (#d) with parameters:'%trial.number)
+        print('***Starting training loop (#%d) with parameters:'%trial.number)
         print(os.environ['TSZ_DEEP_SET_CFG'])
 
         start_time = time()
