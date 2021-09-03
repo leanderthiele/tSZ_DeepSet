@@ -48,6 +48,36 @@ class MyPruner(BasePruner) :
     #}}}
 
 
+    @staticmethod
+    def should_prune(loss_curve, step, warmup_steps) :
+    #{{{
+        if not np.all(np.isfinite(loss_curve)) :
+            # we have nan/inf in the loss curve, should abort
+            return True
+        
+        if step < warmup_steps :
+            # we are in early phase of training, cannot tell if it is promising
+            return False
+
+        if step > 0.7 * cfg.EPOCHS :
+            # now we have spent so much time on this, let us finish the run
+            return False
+        
+        if np.min(loss_curve) < 1.0 :
+            # we have made some progress, so it is clear we should continue
+            # NOTE this is something we should probably play with later.
+            #      Currently it only serves to exclude the origin training from pruning
+            #      as we expect it to be fairly noisy initially for good results.
+            return False
+
+        if np.median(loss_curve[warmup_steps//2:]) > np.median(loss_curve[:warmup_steps//2]) :
+            # we are not making progress
+            return True
+
+        return False
+    #}}}
+
+
     def prune(self, study, trial) :
     #{{{
         step = trial.last_step
@@ -56,32 +86,14 @@ class MyPruner(BasePruner) :
 
             loss_curve = np.array(list(trial.intermediate_values[ii] for ii in range(step+1)))
 
-            if not np.all(np.isfinite(loss_curve)) :
-                # we have nan/inf in the loss curve, should abort
-                return True
-            
-            if step < self.warmup_steps :
-                # we are in early phase of training, cannot tell if it is promising
-                return False
-
-            if step > 0.7 * cfg.EPOCHS :
-                # now we have spent so much time on this, let us finish the run
-                return False
-            
-            if np.min(loss_curve) < 1.0 :
-                # we have made some progress, so it is clear we should continue
-                # NOTE this is something we should probably play with later.
-                #      Currently it only serves to exclude the origin training from pruning
-                #      as we expect it to be fairly noisy initially for good results.
-                return False
-
-            if np.median(loss_curve[self.warmup_steps//2:]) > np.median(loss_curve[:self.warmup_steps//2]) :
-                # we are not making progress
-                return True
+            return MyPruner.should_prune(loss_curve, step, self.warmup_steps)
 
         return False
     #}}}
 
+
+class TrainingAbort(BaseException) :
+    pass    
 
 
 class CallAfterEpoch :
@@ -95,14 +107,17 @@ class CallAfterEpoch :
     def __call__(self, loss_record) :
     #{{{
         assert isinstance(loss_record, TrainingLossRecord)
+
         loss_curve = np.median(np.array(loss_record.validation_loss_arr)
                                / np.array(loss_record.validation_guess_loss_arr),
                                axis = -1)
 
-        self.trial.report(loss_curve[-1], len(loss_curve)-1)
+        if MyPruner.should_prune(loss_curve, len(loss_curve)-1, 20) :
+            raise TrainingAbort
 
-        if self.trial.should_prune() :
-            raise TrialPruned
+#        self.trial.report(loss_curve[-1], len(loss_curve)-1)
+#        if self.trial.should_prune() :
+#            raise TrialPruned
     #}}}
 
 
@@ -145,6 +160,9 @@ class Objective :
             # there are some exceptions where we know we really should abort
             if isinstance(e, (KeyboardInterrupt, AssertionError, TrialPruned)) :
                 raise e from None
+            if isinstance(e, TrainingAbort) :
+                print('WARNING Training() finished prematuraly because loss curve did not look good.')
+                return 20.0
             print('WARNING Training() finished with error. Will continue!')
             print(e)
             return 20.0
@@ -187,7 +205,6 @@ if __name__ == '__main__' :
 
     # set up our study (loads from data base if exists)
     study = optuna.create_study(sampler=TPESampler(n_startup_trials=20),
-                                pruner=MyPruner(),
                                 study_name=IDENT,
                                 storage='sqlite:///%s.db'%IDENT,
                                 load_if_exists=True)
