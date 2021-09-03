@@ -92,7 +92,7 @@ class MyPruner(BasePruner) :
     #}}}
 
 
-class TrainingAbort(BaseException) :
+class TrainingAbort(Exception) :
     pass    
 
 
@@ -166,7 +166,7 @@ class Objective :
             if isinstance(e, TrainingAbort) :
                 print('WARNING Training() finished prematuraly because loss curve did not look good.')
                 return 20.0
-            if isinstance(e, (KeyboardInterrupt, AssertionError, TrialPruned)) :
+            if isinstance(e, (AssertionError, TrialPruned)) :
                 raise e from None
             if self.n_trials == 1 :
                 # we are in the first run overall, it is highly unlikely that we encountered something

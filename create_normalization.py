@@ -103,7 +103,7 @@ for t, data in enumerate(loader) :
     append_samples(scalars_deformer, scalars_deformer_)
     append_samples(scalars_vae, scalars_vae_)
 
-np.savez('normalization_data_memmap.npz',
+np.savez('normalization_data_Sep2.npz',
          scalars_encoder=np.array(scalars_encoder),
          scalars_local=np.array(scalars_local),
          scalars_deformer=np.array(scalars_deformer),
