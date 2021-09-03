@@ -63,6 +63,10 @@ class MyPruner(BasePruner) :
             if step < self.warmup_steps :
                 # we are in early phase of training, cannot tell if it is promising
                 return False
+
+            if step > 0.7 * cfg.EPOCHS :
+                # now we have spent so much time on this, let us finish the run
+                return False
             
             if np.min(loss_curve) < 1.0 :
                 # we have made some progress, so it is clear we should continue

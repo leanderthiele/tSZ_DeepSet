@@ -145,7 +145,7 @@ USE_VELOCITIES = True
 
 # arguments passed to the torch DataLoader constructor
 DATALOADER_ARGS = dict(batch_size=4,
-                       num_workers=4,
+                       num_workers=8,
                        pin_memory=True, # TODO for this to have an effect, I think the Batch class must have a pin_memory() method
                        prefetch_factor=1,
                        drop_last=False)
