@@ -61,8 +61,8 @@ class Network(nn.Module) :
                                           # since we generally want to map to the entire real line
                                           # we also initialize the last bias to zero because our base model
                                           # expects zero output on average here
-                                          layer_kwargs_dict=dict(last={'activation' : False,
-                                                                       'dropout' : None,
+                                          layer_kwargs_dict=dict(last={'activation': False,
+                                                                       'dropout': None,
                                                                        'bias_init': 'zeros_(%s)'}))
 
         else :
@@ -82,7 +82,8 @@ class Network(nn.Module) :
                                       dropout=None, # we'll always have enough training samples here
                                       MLP_kwargs_dict=dict(\
                                         last=dict(layer_kwargs_dict=dict(\
-                                           last={'bias_init': 'zeros_(%s)'}))))
+                                           last={'activation': False,
+                                                 'bias_init': 'zeros_(%s)'}))))
 
         if cfg.NET_ARCH['origin'] :
             self.origin = NetworkOrigin(MLP_Nlayers=cfg.ORIGIN_MLP_NLAYERS,
