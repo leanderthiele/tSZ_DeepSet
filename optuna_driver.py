@@ -128,11 +128,16 @@ class Objective :
     #{{{
         self.training_loader = DataLoader(DataModes.TRAINING)
         self.validation_loader = DataLoader(DataModes.VALIDATION)
+
+        self.n_trials = 0
     #}}}
 
 
     def __call__(self, trial) :
     #{{{
+        # advance our counter
+        self.n_trials += 1
+
         # generate our command line arguments
         cl = generate_cl_lib.generate_cl(trial)
 
@@ -158,11 +163,15 @@ class Objective :
                                    call_after_epoch=call_after_epoch)
         except Exception as e :
             # there are some exceptions where we know we really should abort
-            if isinstance(e, (KeyboardInterrupt, AssertionError, TrialPruned)) :
-                raise e from None
             if isinstance(e, TrainingAbort) :
                 print('WARNING Training() finished prematuraly because loss curve did not look good.')
                 return 20.0
+            if isinstance(e, (KeyboardInterrupt, AssertionError, TrialPruned)) :
+                raise e from None
+            if self.n_trials == 1 :
+                # we are in the first run overall, it is highly unlikely that we encountered something
+                # like OOM for which we would want to continue.
+                raise e from None
             print('WARNING Training() finished with error. Will continue!')
             print(e)
             return 20.0
