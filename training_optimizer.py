@@ -53,8 +53,6 @@ class _ModuleOptimizer(torch.optim.Adam) :
                 continue
             
             # we only apply weight decay to the weight matrices in linear layers.
-            # Furthermore, we want to exclude the local network from weight decay
-            # since we have more than enough training samples there.
             if 'linear' in n and 'weight' in n and p.requires_grad :
                 self._wd_params.append(p)
             else :
@@ -101,17 +99,13 @@ class TrainingOptimizer(list) :
         super().__init__()
 
         # make sure the NET_ARCH dict is consistent with the other relevant ones
-        assert set(cfg.WEIGHT_DECAY.keys()) - set(cfg.NET_ARCH.keys()) == {'default'}
-        assert set(cfg.ONE_CYCLE_LR_KWARGS.keys()) - set(cfg.NET_ARCH.keys()) == {'default'}
+        assert set(cfg.WEIGHT_DECAY.keys()).symmetric_difference(set(cfg.NET_ARCH.keys())) == {'default'}
+        assert set(cfg.ONE_CYCLE_LR_KWARGS.keys()).symmetric_difference(set(cfg.NET_ARCH.keys())) == {'default'}
         
         # loop over the named modules
         for k, v in cfg.NET_ARCH.items() :
-
-            if not v :
-                continue
-            
-            self.append(_ModuleOptimizer(model, k, steps_per_epoch))
-
+            if v :
+                self.append(_ModuleOptimizer(model, k, steps_per_epoch))
 
         # now do the un-moduled parameters
         # it is possible that we don't have any such parameters, so we should be careful
