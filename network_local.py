@@ -229,7 +229,7 @@ class NetworkLocal(nn.Module) :
 
                 if self.concat_with_N :
                     # and we need to concatenate with the local DM density measure
-                    scalars = torch.cat((scalars, N.unsqueeze(-1)), dim=-1)
+                    scalars = torch.cat((scalars, normalization.local_N(N).unsqueeze(-1)), dim=-1)
 
         # return shape [batch, N_TNG, N_features]
         return (1 if not cfg.SCALE_PTH else (1/P200c)[:, None, None]) \
