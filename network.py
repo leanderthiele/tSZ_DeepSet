@@ -37,6 +37,14 @@ class Network(nn.Module) :
             if cfg.NET_ARCH['scalarencoder'] :
                 self.scalarencoder = NetworkScalarEncoder()
 
+            if cfg.NET_ARCH['vae'] :
+                self.vae = NetworkVAE(MLP_Nlayers=cfg.VAE_NLAYERS,
+                                      MLP_Nhidden=cfg.VAE_NHIDDEN,
+                                      # apparently it is a bad idea to have dropout in VAE encoder,
+                                      # which sort of makes sense
+                                      dropout=None,
+                                      layer_kwargs_dict=dict(last={'bias_init': 'zeros_(%s)'}))
+
             self.decoder = NetworkDecoder(self.encoder.Nlatent if cfg.NET_ARCH['encoder'] else 0,
                                           self.scalarencoder.Nlatent if cfg.NET_ARCH['scalarencoder'] else 0,
                                           k_out=cfg.OUTPUT_NFEATURES,
@@ -51,8 +59,10 @@ class Network(nn.Module) :
                                                                        'bias_init': 'zeros_(%s)'}))
 
         else :
+
             # no decoder provided, this is unusual and we should check!
             assert not (cfg.NET_ARCH['encoder'] or cfg.NET_ARCH['scalarencoder'] or cfg.NET_ARCH['vae'])
+
             if cfg.NET_ARCH['local'] :
                 assert cfg.LOCAL_NLATENT == cfg.OUTPUT_NFEATURES
                 # if we have zero hidden layers, we can't concat with the number of particles
@@ -66,14 +76,6 @@ class Network(nn.Module) :
                                       MLP_kwargs_dict=dict(\
                                         last=dict(layer_kwargs_dict=dict(\
                                            last={'bias_init': 'zeros_(%s)'}))))
-
-        if cfg.NET_ARCH['vae'] :
-            self.vae = NetworkVAE(MLP_Nlayers=cfg.VAE_NLAYERS,
-                                  MLP_Nhidden=cfg.VAE_NHIDDEN,
-                                  # apparently it is a bad idea to have dropout in VAE encoder,
-                                  # which sort of makes sense
-                                  dropout=None,
-                                  layer_kwargs_dict=dict(last={'bias_init': 'zeros_(%s)'}))
 
         if cfg.NET_ARCH['origin'] :
             self.origin = NetworkOrigin(MLP_Nlayers=cfg.ORIGIN_MLP_NLAYERS,
