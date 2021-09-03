@@ -28,10 +28,7 @@ class NetworkDeformer(nn.Module) :
                               + globals_passed * len(GlobalFields)
                               + len(Basis),
                               1, # output only the changed radial magnitude
-                              **MLP_kwargs,
-                              layer_kwargs_dict=dict(last={'activation' : False,
-                                                           'dropout': None,
-                                                           'bias_init': 'zeros_(%s)'}))
+                              **MLP_kwargs)
 
         self.globals_passed = globals_passed
     #}}}
