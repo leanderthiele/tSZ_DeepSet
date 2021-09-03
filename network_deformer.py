@@ -6,6 +6,7 @@ from network_mlp import NetworkMLP
 from basis import Basis
 from global_fields import GlobalFields
 import normalization
+from default_from_cfg import DefaultFromCfg
 import cfg
 
 
@@ -15,17 +16,21 @@ class NetworkDeformer(nn.Module) :
     on some global properties of the halo
     """
 
-    def __init__(self) :
+    def __init__(self, globals_passed=DefaultFromCfg('DEFORMER_GLOBALS_PASSED'),
+                       **MLP_kwargs) :
     #{{{ 
         super().__init__()
 
         self.mlp = NetworkMLP(1 # radial coordinate
-                              + len(GlobalFields)
+                              + globals_passed * len(GlobalFields)
                               + len(Basis),
                               1, # output only the changed radial magnitude
+                              **MLP_kwargs,
                               layer_kwargs_dict=dict(last={'activation' : False,
                                                            'dropout': None,
                                                            'bias_init': 'zeros_(%s)'}))
+
+        self.globals_passed = globals_passed
     #}}}
 
 
@@ -47,8 +52,11 @@ class NetworkDeformer(nn.Module) :
 
         # concatenate with the global features if required
         if u is not None :
+            assert self.globals_passed and len(GlobalFields) > 0
             scalars = torch.cat((scalars, u.unsqueeze(1).expand(-1, scalars.shape[1], -1)), dim=-1)
             desc += 'u [%d]; '%len(GlobalFields)
+        else :
+            assert not self.globals_passed or len(GlobalFields) == 0
 
         return scalars, desc
     #}}}

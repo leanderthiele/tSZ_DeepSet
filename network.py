@@ -91,7 +91,11 @@ class Network(nn.Module) :
         if cfg.NET_ARCH['batt12'] :
             self.batt12 = NetworkBatt12(xc_fixed=cfg.NET_ARCH['deformer'])
             if cfg.NET_ARCH['deformer'] :
-                self.deformer = NetworkDeformer()
+                self.deformer = NetworkDeformer(MLP_Nlayers=cfg.DEFORMER_NLAYERS,
+                                                MLP_Nhidden=cfg.DEFORMER_NHIDDEN,
+                                                layer_kwargs_dict=dict(last={'activation': False,
+                                                                             'dropout': None,
+                                                                             'bias_init': 'zeros_(%s)'}))
 
         if cfg.NET_ARCH['deformer'] :
             assert cfg.NET_ARCH['batt12']
@@ -167,7 +171,8 @@ class Network(nn.Module) :
                 # now deform the TNG positions -- TODO experiment with the order
                 # relative to the decoder evaluation
                 r_b12 = self.deformer(batch.TNG_coords, batch.TNG_radii,
-                                      u=batch.u, basis=batch.basis)
+                                      u=batch.u if self.deformer.globals_passed else None,
+                                      basis=batch.basis)
             else :
                 r_b12 = batch.TNG_radii
 

@@ -254,6 +254,15 @@ DECODER_DEFAULT_NLAYERS = 4
 # how many hidden features to have in the decoder
 DECODER_DEFAULT_NHIDDEN = 128
 
+# how many layers to have in deformer MLP
+DEFORMER_NLAYERS = 4
+
+# how many hidden neurons to have in deformer MLP
+DEFORMER_NHIDDEN = 128
+
+# whether globals will be passed to the deformer
+DEFORMER_GLOBALS_PASSED = True
+
 # number of latent variables in the VAE (x2 for variance & mean)
 VAE_NLATENT = 1
 
