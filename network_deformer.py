@@ -19,6 +19,9 @@ class NetworkDeformer(nn.Module) :
     def __init__(self, globals_passed=DefaultFromCfg('DEFORMER_GLOBALS_PASSED'),
                        **MLP_kwargs) :
     #{{{ 
+        if isinstance(globals_passed, DefaultFromCfg) :
+            globals_passed = globals_passed()
+    
         super().__init__()
 
         self.mlp = NetworkMLP(1 # radial coordinate
