@@ -36,4 +36,7 @@ def generate_cl(trial) :
         out.append('ONE_CYCLE_LR_KWARGS["origin"]["max_lr"]=0.00019447042667833673')
         out.append('WEIGHT_DECAY["origin"]=0.004798177481146052')
 
+    N_TNG = trial.suggest_int('N_TNG', 1e2, 1e5, log=True)
+    out.append('PRT_FRACTION["TNG"]=%d'%N_TNG)
+
     return out
