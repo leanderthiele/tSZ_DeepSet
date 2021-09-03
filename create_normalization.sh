@@ -19,4 +19,4 @@ python -u create_normalization.py \
   --'BASIS_USE["inertia"]=True' \
   --'BASIS_USE["vel_dispersion"]=True' \
   --'DATALOADER_ARGS["num_workers"]=1' \
-  --'MEMMAP_DM=True'
+  --'LOCAL_PASS_N=True'

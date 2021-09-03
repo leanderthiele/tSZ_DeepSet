@@ -7,11 +7,14 @@ def generate_cl(trial) :
     out.append('LOCAL_NLATENT=1')
     out.append('OUTPUT_NFEATURES=1')
     out.append('LOCAL_NLAYERS=1') # required because there's no decoder
+    # FIXME this should not matter!
+    out.append('SCALE_PTH=False')
 
     lr = trial.suggest_float('lr', 1e-5, 1e-3, log=True)
     out.append('ONE_CYCLE_LR_KWARGS["local"]["max_lr"]=%.8e'%lr)
 
-    N_local = trial.suggest_int('N_local', 32, 1024, log=True)
+    # TODO increase maximum value later, this is only for debugging
+    N_local = trial.suggest_int('N_local', 32, 256, log=True)
     out.append('N_LOCAL=%d'%N_local)
 
     R_local = trial.suggest_float('R_local', 50.0, 200.0)
