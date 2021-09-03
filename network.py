@@ -32,10 +32,17 @@ class Network(nn.Module) :
  
             if cfg.NET_ARCH['encoder'] :
                 self.encoder = NetworkEncoder(MLP_Nlayers=cfg.ENCODER_MLP_NLAYERS,
-                                              MLP_Nhidden=cfg.ENCODER_MLP_NHIDDEN)
+                                              MLP_Nhidden=cfg.ENCODER_MLP_NHIDDEN,
+                                              MLP_kwargs_dict=dict(\
+                                                last=dict(layer_kwargs_dict=dict(\
+                                                   last={'bias_init': 'zeros_(%s)'}))))
             
             if cfg.NET_ARCH['scalarencoder'] :
-                self.scalarencoder = NetworkScalarEncoder()
+                self.scalarencoder = NetworkScalarEncoder(MLP_Nlayers=cfg.SCALAR_ENCODER_MLP_NLAYERS,
+                                                          MLP_Nhidden=cfg.SCALAR_ENCODER_MLP_NHIDDEN,
+                                                          MLP_kwargs_dict=dict(\
+                                                            last=dict(layer_kwargs_dict=dict(\
+                                                               last={'bias_init': 'zeros_(%s)'}))))
 
             if cfg.NET_ARCH['vae'] :
                 self.vae = NetworkVAE(MLP_Nlayers=cfg.VAE_NLAYERS,

@@ -208,6 +208,12 @@ SCALAR_ENCODER_NLAYERS = 1
 # default number of hidden neurons in scalar encoder
 SCALAR_ENCODER_NHIDDEN = 128
 
+# inside the scalar encoder MLPs
+SCALAR_ENCODER_MLP_NLAYERS = 4
+
+# inside the scalar encoder MLPs
+SCALAR_ENCODER_MLP_NHIDDEN = 128
+
 # whether basis is passed to scalar encoder
 SCALAR_ENCODER_BASIS_PASSED = True
 
