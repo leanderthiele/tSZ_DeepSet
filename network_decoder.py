@@ -169,6 +169,9 @@ class NetworkDecoder(nn.Module) :
         else :
             assert not self.vae_passed
 
+        # FIXME
+        print(desc)
+
         return scalars, desc
     #}}}
 
