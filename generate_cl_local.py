@@ -16,7 +16,7 @@ def generate_cl(trial) :
     R_local = trial.suggest_float('R_local', 50.0, 200.0)
     out.append('R_LOCAL=%.8e'%R_local)
 
-    N_layers = trial.suggest_categorical('N_layers', 0, 3)
+    N_layers = trial.suggest_categorical('N_layers', (0,1,2,3))
     out.append('LOCAL_NLAYERS=%d'%N_layers)
 
     MLP_N_layers = trial.suggest_int('MLP_N_layers', 2, 8)
