@@ -7,6 +7,8 @@ which returns the command line arguments for a specific run (as a list ['ARG=val
 Second command line argument is an integer which if non-zero means that any previous runs
 with the same IDENT should be discarded and the resulting data products (SQL database, loss curves, ...)
 should be removed
+
+Third command line argument is whether early stopping should be applied (also int)
 """
 
 import os
@@ -35,6 +37,8 @@ IDENT = argv[1]
 generate_cl_lib = importlib.import_module('generate_cl_%s'%IDENT)
 
 REMOVE_PREVIOUS = bool(int(argv[2]))
+
+EARLY_STOPPING = bool(int(argv[3]))
 
 
 class MyPruner(BasePruner) :
@@ -160,7 +164,7 @@ class Objective :
         try :
             loss_record = Training(training_loader=self.training_loader,
                                    validation_loader=self.validation_loader,
-                                   call_after_epoch=call_after_epoch)
+                                   call_after_epoch=call_after_epoch if EARLY_STOPPING else None)
         except Exception as e :
             # there are some exceptions where we know we really should abort
             if isinstance(e, TrainingAbort) :
