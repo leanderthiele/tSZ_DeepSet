@@ -82,7 +82,8 @@ class Network(nn.Module) :
                                       dropout=None, # we'll always have enough training samples here
                                       MLP_kwargs_dict=dict(\
                                         last=dict(layer_kwargs_dict=dict(\
-                                           last={'activation': False,
+                                           last={'layernorm': False if not cfg.NET_ARCH['decoder'] else cfg.LAYERNORM,
+                                                 'activation': False,
                                                  'bias_init': 'zeros_(%s)'}))))
 
         if cfg.NET_ARCH['origin'] :
