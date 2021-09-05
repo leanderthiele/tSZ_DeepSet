@@ -44,12 +44,12 @@ HALO_CATALOG = 'halo_catalog.npz'
 TNG_RESOLUTION = 128
 
 # how many particles of each type to use per halo
-# set to None if all particles are to be used
 # if an integer or float larger than one, not the fraction but this number is used
 # NOTE that if the absolute number is given, it is not a bug to choose it larger than
 # the number of particles in some low-mass halos. This will result in duplicate entries
 # in the particle list for those halos, which should be ok.
-PRT_FRACTION = dict(DM=1e4, TNG=256)
+PRT_FRACTION = dict(DM={'training': 1e4, 'validation': 1e4, 'testing': 1e4, 'all': 1e4},
+                    TNG={'training': 256, 'validation': 1024, 'testing': 1024, 'all': 256})
 
 # whether to use memmap for the DM data (speeds up initial data loading)
 MEMMAP_DM = False

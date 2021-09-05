@@ -15,7 +15,7 @@ class DataModes(Enum) :
     ALL = auto()
 
 
-    def __str__(self) :
+    def __repr__(self) :
         """
         a nice human readable representation
         """

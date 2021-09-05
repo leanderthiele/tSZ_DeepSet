@@ -105,17 +105,12 @@ class DataSet(torch_DataSet) :
         assert isinstance(halo, Halo)
         assert ptype in ['DM', 'TNG']
 
-        if cfg.PRT_FRACTION is None \
-           or ptype not in cfg.PRT_FRACTION \
-           or cfg.PRT_FRACTION[ptype] is None :
-            return None
-
         # TODO this is the only place where we use Nprt and currently not even that,
         #      so the use of Nprt is not really tested and this field should be treated with caution
         Nprt = getattr(halo, 'Nprt_%d_%s'%(cfg.TNG_RESOLUTION, ptype))
-        Nindices = int(cfg.PRT_FRACTION[ptype] * Nprt) \
-                   if isinstance(cfg.PRT_FRACTION[ptype], float) and cfg.PRT_FRACTION[ptype]<=1 \
-                   else int(cfg.PRT_FRACTION[ptype])
+        Nindices = int(cfg.PRT_FRACTION[ptype][str(self.mode) * Nprt) \
+                   if isinstance(cfg.PRT_FRACTION[ptype][str(self.mode)], float) and cfg.PRT_FRACTION[ptype][str(self.mode)]<=1 \
+                   else int(cfg.PRT_FRACTION[ptype][str(self.mode)])
 
         # here we allow the possibility for duplicate entries
         # in practice, this should not be an issue and will make the sampling a lot faster
