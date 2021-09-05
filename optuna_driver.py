@@ -165,6 +165,7 @@ class Objective :
             loss_record = Training(training_loader=self.training_loader,
                                    validation_loader=self.validation_loader,
                                    call_after_epoch=call_after_epoch if EARLY_STOPPING else None)
+        # TODO the following can be made nicer with several excepts
         except Exception as e :
             # there are some exceptions where we know we really should abort
             if isinstance(e, TrainingAbort) :

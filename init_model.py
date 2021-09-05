@@ -7,8 +7,22 @@ import cfg
 
 def _load_pretrained(model, name) :
 #{{{
-    checkpoint = torch.load(os.path.join(cfg.RESULTS_PATH, 'model_%s.pt'%name))
-    model.load_state_dict(checkpoint, strict=False)
+    # TODO I believe for distributed training this whole thing doesn't really work because
+    #      PyTorch appends a 'module.' string in front of everything
+    # TODO there could also be issues with the device. In the simple case of one-process training,
+    #      model is already on device and the checkpoint is also on the same device index
+    if isinstance(name, tuple) :
+        assert len(name) > 1
+        checkpoint = torch.load(os.path.join(cfg.RESULTS_PATH, 'model_%s.pt'%name[0]))
+        for module in name[1:] :
+            assert hasattr(model, module)
+            checkpoint_part = {k.split('.', maxsplit=1) : v \
+                               for k, v in checkpoint.items() \
+                               if k.startswith(module)}
+            getattr(model, module).load_state_dict(checkpoint_part, strict=True)
+    else :
+        checkpoint = torch.load(os.path.join(cfg.RESULTS_PATH, 'model_%s.pt'%name))
+        model.load_state_dict(checkpoint, strict=False)
 #}}}
 
 def InitModel(model) :

@@ -82,6 +82,12 @@ NET_ARCH = dict(origin=True,
 NET_FREEZE = None
 
 # can provide a pre-trained network here (can be a single ID or a list),
+# each ID can be one of two things:
+#     -- a simple string, will attempt to load the entire saved state dict
+#     -- a tuple, first element is the ID and the other elements are keys in NET_ARCH,
+#        indicating which parts of the network should be loaded from disk
+#        This is useful if thare are parts of the architecture on disk that are not compatible
+#        with the run-time architecture
 # set to None for no loading
 NET_ID = None
 
