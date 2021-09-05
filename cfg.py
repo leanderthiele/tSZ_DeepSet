@@ -130,7 +130,7 @@ GLOBALS_USE = dict(none=False,
 # amount of noise added to the globals
 # 1 means that confusion with other halos is almost impossible
 # set to None if no noise desired
-GLOBALS_NOISE = 5
+GLOBALS_NOISE = 5.0
 
 # which basis vectors to use -- set `none' to true if no basis vectors are to be used
 BASIS_USE = dict(none=False,
