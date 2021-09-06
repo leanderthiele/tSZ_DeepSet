@@ -16,7 +16,7 @@ def _load_pretrained(model, name) :
         checkpoint = torch.load(os.path.join(cfg.RESULTS_PATH, 'model_%s.pt'%name[0]))
         for module in name[1:] :
             assert hasattr(model, module)
-            checkpoint_part = {k.split('.', maxsplit=1) : v \
+            checkpoint_part = {k.split('.', maxsplit=1)[-1] : v \
                                for k, v in checkpoint.items() \
                                if k.startswith(module)}
             getattr(model, module).load_state_dict(checkpoint_part, strict=True)
