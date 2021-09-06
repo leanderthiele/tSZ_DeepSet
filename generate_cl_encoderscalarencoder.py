@@ -11,7 +11,7 @@ def generate_cl(trial) :
     out.append('SCALAR_ENCODER_NLAYERS=1')
     out.append('SCALAR_ENCODER_MLP_NLAYERS=2')
     out.append('SCALAR_ENCODER_GLOBALS_PASSED=False')
-    out.append('NET_ID=[("optuna_encoder_nr1056", "encoder"), ("optuna_scalarencoder_nr1111", "scalarencoder")]')
+    out.append('NET_ID=[("optuna_encoder_nr1056","encoder"),("optuna_scalarencoder_nr1111","scalarencoder")]')
     out.append('NET_FREEZE=["encoder", "scalarencoder"]')
 
     out.append('PRT_FRACTION["DM"]["training"]=1024')
