@@ -260,6 +260,12 @@ DECODER_DEFAULT_NLAYERS = 4
 # how many hidden features to have in the decoder
 DECODER_DEFAULT_NHIDDEN = 128
 
+# normal dropout in decoder MLP
+DECODER_DROPOUT = None
+
+# dropout in first layer of decoder MLP
+DECODER_VISIBLE_DROPOUT = None
+
 # how many layers to have in deformer MLP
 DEFORMER_NLAYERS = 4
 

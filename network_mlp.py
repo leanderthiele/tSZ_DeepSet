@@ -20,6 +20,7 @@ class _MLPLayer(nn.Sequential) :
                        activation=True,
                        activation_fct=DefaultFromCfg('MLP_DEFAULT_ACTIVATION'),
                        dropout=DefaultFromCfg('DROPOUT'),
+                       visible_dropout=DefaultFromCfg('VISIBLE_DROPOUT'),
                        bias_init=DefaultFromCfg('MLP_DEFAULT_BIAS_INIT')) :
         """
         set dropout to None if not desired
@@ -31,6 +32,8 @@ class _MLPLayer(nn.Sequential) :
             activation_fct = activation_fct()
         if isinstance(dropout, DefaultFromCfg) :
             dropout = dropout()
+        if isinstance(visible_dropout, DefaultFromCfg) :
+            visible_dropout = visible_dropout()
         if isinstance(bias_init, DefaultFromCfg) :
             bias_init = bias_init()
 
@@ -42,7 +45,7 @@ class _MLPLayer(nn.Sequential) :
         super().__init__(OrderedDict([('layernorm', nn.LayerNorm(Nin) if layernorm and input_is_hidden \
                                                     else nn.Identity()),
                                       ('dropout', nn.Dropout(p=dropout) if input_is_hidden and dropout is not None \
-                                                  else nn.Dropout(p=cfg.VISIBLE_DROPOUT) if dropout is not None and cfg.VISIBLE_DROPOUT is not None \
+                                                  else nn.Dropout(p=visible_dropout) if dropout is not None and visible_dropout is not None \
                                                   else nn.Identity()),
                                       ('linear', nn.Linear(Nin, Nout, bias=bias)),
                                       ('activation', eval('nn.%s%s'%(activation_fct, \
