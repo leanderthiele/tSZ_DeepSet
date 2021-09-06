@@ -217,7 +217,7 @@ class Network(nn.Module) :
             return [self.__combine(xi, b12[ii]) for ii, xi in enumerate(x)]
 
         if cfg.OUTPUT_NFEATURES == 1 :
-            x = b12 + self.scaling * torch.sinh(x)
+            x = torch.relu(b12 + self.scaling * torch.sinh(x))
         elif cfg.OUTPUT_NFEATURES == 2 :
             x = b12 * torch.relu(1 + x[..., 0].unsqueeze(-1)) \
                 + self.scaling * torch.sinh(x[..., 1].unsqueeze(-1))
