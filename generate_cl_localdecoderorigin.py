@@ -21,7 +21,7 @@ def generate_cl(trial) :
     out.append('LOCAL_PASS_N=False')
     out.append('LOCAL_CONCAT_WITH_N=True')
 
-    out.append('NET_ID=[("optuna_origin_nr862", "origin"), ("optuna_localdecoder_nr280", "local")]')
+    out.append('NET_ID=[("optuna_origin_nr862","origin"),("optuna_localdecoder_nr280","local")]')
     out.append('NET_FREEZE=["origin", "local"]')
 
     out.append('DECODER_DEFAULT_R_PASSED=True')
