@@ -8,7 +8,7 @@ def generate_cl(trial) :
     out.append('ENCODER_MLP_NLAYERS=3')
     out.append('ENCODER_DEFAULT_NLAYERS=0')
     out.append('ENCODER_DEFAULT_GLOBALS_MAXLAYER=0')
-    out.append('SCALAR_ENCODER_NLAYERS=3')
+    out.append('SCALAR_ENCODER_NLAYERS=1')
     out.append('SCALAR_ENCODER_MLP_NLAYERS=2')
     out.append('SCALAR_ENCODER_GLOBALS_PASSED=False')
     out.append('NET_ID=[("optuna_encoder_nr1056", "encoder"), ("optuna_scalarencoder_nr1111", "scalarencoder")]')
