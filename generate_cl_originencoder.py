@@ -53,7 +53,7 @@ def generate_cl(trial) :
     out.append('BASIS_NOISE=%.8f'%basis_noise)
 
     output_N_features = trial.suggest_categorical('output_N_features', (1, 2))
-    out.append('OUTPUT_N_FEATURES=%d'%output_N_features)
+    out.append('OUTPUT_NFEATURES=%d'%output_N_features)
 
 
     return out
