@@ -15,8 +15,10 @@ def generate_cl(trial) :
     out.append('PRT_FRACTION["DM"]["validation"]=1024')
 
     out.append('DECODER_DEFAULT_BASIS_PASSED=True')
-    out.append('DECODER_DEFAULT_GLOBALS_PASSED=True')
     out.append('DECODER_DEFAULT_R_PASSED=True')
+
+    globals_passed = trial.suggest_categorical('globals_passed', ('True', 'False'))
+    out.append('DECODER_DEFAULT_GLOBALS_PASSED=%s'%globals_passed)
 
     encoder_fixed = trial.suggest_categorical('encoder_fixed', (True, False))
     if encoder_fixed :
