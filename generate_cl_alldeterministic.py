@@ -61,7 +61,7 @@ def generate_cl(trial) :
     out.append('ENCODER_DEFAULT_NHIDDEN=%d'%encoder_N_hidden)
     out.append('NETWORK_DEFAULT_NLATENT=%d'%encoder_N_hidden)
 
-    decoder_N_layers = trial.suggest_int('decoder_N_layers', 2, 9)
+    decoder_N_layers = trial.suggest_int('decoder_N_layers', 2, 10)
     out.append('DECODER_DEFAULT_NLAYERS=%d'%decoder_N_layers)
 
     decoder_N_hidden = trial.suggest_int('decoder_N_hidden', 32, 256)
