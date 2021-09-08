@@ -41,7 +41,7 @@ def generate_cl(trial) :
     wd_encoder = trial.suggest_float('wd_encoder', 1e-8, 1e-3, log=True)
     out.append('WEIGHT_DECAY["encoder"]=%.8e'%wd_encoder)
 
-    wd_decoder = trial.suggest_float('wd_decoder', 1e-8, 1e-3, log=True)
+    wd_decoder = trial.suggest_float('wd_decoder', 1e-8, 1e-2, log=True)
     out.append('WEIGHT_DECAY["decoder"]=%.8e'%wd_decoder)
 
     encoder_globals_passed = trial.suggest_categorical('encoder_globals_passed', (True, False))
@@ -61,7 +61,7 @@ def generate_cl(trial) :
     out.append('ENCODER_DEFAULT_NHIDDEN=%d'%encoder_N_hidden)
     out.append('NETWORK_DEFAULT_NLATENT=%d'%encoder_N_hidden)
 
-    decoder_N_layers = trial.suggest_int('decoder_N_layers', 2, 8)
+    decoder_N_layers = trial.suggest_int('decoder_N_layers', 2, 9)
     out.append('DECODER_DEFAULT_NLAYERS=%d'%decoder_N_layers)
 
     decoder_N_hidden = trial.suggest_int('decoder_N_hidden', 32, 256)
@@ -73,7 +73,7 @@ def generate_cl(trial) :
     basis_noise = trial.suggest_float('basis_noise', 1e-1, 1e1, log=True)
     out.append('BASIS_NOISE=%.8e'%basis_noise)
 
-    dropout = trial.suggest_float('dropout', 0.0, 0.5)
+    dropout = trial.suggest_float('dropout', 0.0, 0.7)
     out.append('DECODER_DROPOUT=%.8e'%dropout)
 
     visible_dropout = trial.suggest_float('visible_dropout', 0.0, 0.5)
@@ -81,5 +81,8 @@ def generate_cl(trial) :
 
     N_DM = trial.suggest_int('N_DM', 1e2, 1e4, log=True)
     out.append('PRT_FRACTION["DM"]["training"]=%d'%N_DM)
+
+    output_N_features = trial.suggest_categorical('output_N_features', (1, 2))
+    out.append('OUTPUT_NFEATURES=%d'%output_N_features)
 
     return out
