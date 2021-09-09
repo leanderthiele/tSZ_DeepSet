@@ -17,6 +17,9 @@ EPOCHS = 100
 # NOTE disables early stopping!
 VALIDATION_EPOCHS = None
 
+# whether to do testing on the validation set
+TEST_ON_VALIDATION = True
+
 # whether to scale pressure by P200 internally
 SCALE_PTH = True
 
