@@ -6,7 +6,7 @@ from voxelize import Voxelize
 
 ROOT = '/scratch/gpfs/lthiele/tSZ_DeepSet_halos/rockstar/TNG'
 
-N = 128 # box sidelength
+N = 64 # box sidelength
 
 F = 2.5 # out to which radius (in units of R200c) we have particles
 
