@@ -115,7 +115,7 @@ def Training(training_loader=None, validation_loader=None, call_after_epoch=None
 
         end_time_validation = time()
         print('Time taken: training %f sec, validation %f sec'%((end_time_training-start_time_training),
-                                                                (end_time_validation-start_time_validation))
+                                                                (end_time_validation-start_time_validation)))
 
         # gather losses and save to file
         loss_record.end_epoch()
