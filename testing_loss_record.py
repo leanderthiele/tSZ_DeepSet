@@ -32,7 +32,7 @@ class TestingLossRecord :
         np.savez(os.path.join(cfg.RESULTS_PATH, 'loss_testing_%s.npz'%cfg.ID),
                  loss=np.array(self.loss_arr),
                  KLD=np.array(self.KLD_arr),
-                 guess_loss=np.array(self.KLD_arr),
+                 guess_loss=np.array(self.guess_loss_arr),
                  logM=np.array(self.logM_arr),
                  idx=np.array(self.idx_arr, dtype=int))
     #}}}
