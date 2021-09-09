@@ -7,7 +7,8 @@ def generate_cl(trial) :
 
     out.append('PRT_FRACTION["DM"]["validation"]=2048')
     out.append('PRT_FRACTION["TNG"]["validation"]=2048')
-    out.append('N_LOCAL=512')
+    out.append('PRT_FRACTION["DM"]["training"]=256')
+    out.append('N_LOCAL["validation"]=1024')
 
     out.append('ORIGIN_DEFAULT_NLAYERS=0')
     out.append('ORIGIN_MLP_NLAYERS=4')
@@ -56,5 +57,8 @@ def generate_cl(trial) :
 
     visible_dropout = trial.suggest_float('visible_dropout', 0.0, 0.3)
     out.append('DECODER_VISIBLE_DROPOUT=%.8e'%visible_dropout)
+
+    N_local = trial.suggest_int('N_local', 128, 512, log=True)
+    out.append('N_LOCAL["training"]=%d'%N_local)
 
     return out

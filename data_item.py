@@ -230,10 +230,10 @@ class DataItem :
         # (the choice of N=0.9 is good because it prevents anything from blowing up)
         N = np.full(len(TNG_coords), 0.9, dtype=np.float32)
 
-        x = np.zeros((len(TNG_coords), int(cfg.N_LOCAL), 3), dtype=np.float32)
+        x = np.zeros((len(TNG_coords), int(cfg.N_LOCAL[str(self.mode)]), 3), dtype=np.float32)
 
         if self.DM_vels is not None :
-            v = np.zeros((len(TNG_coords), int(cfg.N_LOCAL), 3), dtype=np.float32)
+            v = np.zeros((len(TNG_coords), int(cfg.N_LOCAL[str(self.mode)]), 3), dtype=np.float32)
         else :
             v = None
 
@@ -248,7 +248,7 @@ class DataItem :
 
                 N[ii] = len(prt_indices)
 
-                prt_indices = prt_indices[rng.integers(N[ii], size=int(cfg.N_LOCAL))]
+                prt_indices = prt_indices[rng.integers(N[ii], size=int(cfg.N_LOCAL[str(self.mode)]))]
 
                 x[ii, ...] = self.DM_coords[prt_indices]
 
