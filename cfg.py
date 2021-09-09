@@ -52,7 +52,7 @@ ONE_CYCLE_LR_KWARGS = dict(default={'max_lr': 1e-3, 'div_factor': 1000},
 HALO_CATALOG = 'halo_catalog.npz'
 
 # the resolution of the TNG grids
-TNG_RESOLUTION = 128
+TNG_RESOLUTION = 64
 
 # how many particles of each type to use per halo
 # if an integer or float larger than one, not the fraction but this number is used

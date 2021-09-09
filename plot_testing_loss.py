@@ -43,7 +43,7 @@ ax_loss.legend(loc='upper left', frameon=False)
 loss_quantifier = np.median(loss/guess_loss)
 ax_loss.text(0.95, 0.05, '%.4f'%loss_quantifier, transform=ax_loss.transAxes, ha='right', va='bottom')
 
-ax_KLD.scatter(guess_loss, KLD, s=3+20*(tlogm-vmin)/(vmax-vmin))
+ax_KLD.scatter(guess_loss, KLD, s=3+20*(logM-vmin)/(vmax-vmin))
 ax_KLD.set_xlim(min_lim, max_lim)
 ax_KLD.set_xscale('log')
 ax_KLD.set_xlabel('B12 loss')
