@@ -7,6 +7,7 @@ from init_proc import InitProc
 from data_modes import DataModes
 from data_set import DataSet
 from data_batch import DataBatch
+from merge_dicts import MergeDicts
 import cfg
 
 
@@ -50,6 +51,7 @@ class DataLoader(torch_DataLoader) :
         super().__init__(self.dataset,
                          collate_fn=DataBatch,
                          worker_init_fn=self.worker_pool.init_worker,
-                         shuffle=mode is DataModes.TRAINING,
-                         **cfg.DATALOADER_ARGS)
+                         **(cfg.DATALOADER_ARGS if mode is DataModes.TRAINING \
+                            else MergeDicts({'batch_size': 1, 'shuffle'=False}, \
+                                            cfg.DATALOADER_ARGS)))
     #}}}
