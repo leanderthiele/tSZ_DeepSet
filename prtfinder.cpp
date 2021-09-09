@@ -18,9 +18,6 @@ static const constexpr size_t Ninit = 128; // initial malloc size
 
 // ------------ forward declarations ------------------
 
-static inline size_t
-periodic_idx (int idx);
-
 static inline bool
 sph_cub_intersect (const float *x0, // origin of the sphere
                    float *cub, // coordinate of the cube (ul_corner)
@@ -174,23 +171,23 @@ find_idx_ranges (const float *x0,
     float Rsq_normalized = R_normalized * R_normalized;
 
     // now do the looping
-    for (int xx  = (int)(x0_normalized[0] - R_normalized) - 1;
-             xx <= (int)(x0_normalized[0] + R_normalized);
-           ++xx)
+    for (size_t xx  = (size_t)std::max(0, (int)(x0_normalized[0] - R_normalized) - 1);
+                xx <= (size_t)std::min((int)(Nside-1), (int)(x0_normalized[0] + R_normalized));
+              ++xx)
     {
-        const size_t idx_x = Nside * Nside * periodic_idx(xx);
+        const size_t idx_x = Nside * Nside * xx;
 
-        for (int yy  = (int)(x0_normalized[1] - R_normalized) - 1;
-                 yy <= (int)(x0_normalized[1] + R_normalized);
-               ++yy)
+        for (size_t yy  = (size_t)std::max(0, (int)(x0_normalized[1] - R_normalized) - 1);
+                    yy <= (size_t)std::min((int)(Nside-1), (int)(x0_normalized[1] + R_normalized));
+                  ++yy)
         {
-            const size_t idx_y = idx_x + Nside * periodic_idx(yy);
+            const size_t idx_y = idx_x + Nside * yy;
 
-            for (int zz  = (int)(x0_normalized[2] - R_normalized) - 1;
-                     zz <= (int)(x0_normalized[2] + R_normalized);
-                   ++zz)
+            for (size_t zz  = (size_t)std::max(0, (int)(x0_normalized[2] - R_normalized) - 1);
+                        zz <= (size_t)std::min((int)(Nside-1), (int)(x0_normalized[2] + R_normalized));
+                      ++zz)
             {
-                const size_t idx = idx_y + periodic_idx(zz);
+                const size_t idx = idx_y + zz;
 
                 float cub[] = { (float)xx, (float)yy, (float)zz };
 
@@ -307,14 +304,6 @@ find_indices (const float *x0,
     
     *err = 0;
     return out;
-}// }}}
-
-
-static inline size_t
-periodic_idx (int idx)
-{// {{{
-    static constexpr int N = (int)Nside;
-    return (N + idx%N) % N;
 }// }}}
 
 
