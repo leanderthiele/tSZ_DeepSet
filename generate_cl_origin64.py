@@ -5,8 +5,8 @@ def generate_cl(trial) :
     out.append('NET_ARCH=dict(origin=True,batt12=True,deformer=False,encoder=False,'\
                              'scalarencoder=False,decoder=False,vae=False,local=False)')
     
-    out.append('PRT_FRACTION["DM"]["validation"]=4096')
-    out.append('PRT_FRACTION["TNG"]["validation"]=8192')
+    out.append('PRT_FRACTION["DM"]["validation"]=8192')
+    out.append('PRT_FRACTION["TNG"]["validation"]=16384')
     out.append('VALIDATION_EPOCHS=10')
 
     lr = trial.suggest_float('lr', 1e-5, 1e-2, log=True)

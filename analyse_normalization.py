@@ -6,7 +6,7 @@ nets = ['encoder', 'local', 'vae', 'deformer', ]
 scalars = dict()
 desc = dict()
 
-with np.load('normalization_data_Sep2.npz') as f :
+with np.load('normalization_data_Sep9.npz') as f :
     for s in nets :
         scalars[s] = f['scalars_%s'%s]
         desc[s] = str(f['desc_%s'%s])
@@ -26,4 +26,4 @@ for s in nets :
     
     fig.suptitle(desc[s])
     
-    fig.savefig('normalization_hists_Sep2_%s.pdf'%s, bbox_inches='tight')
+    fig.savefig('normalization_hists_Sep9_%s.pdf'%s, bbox_inches='tight')
