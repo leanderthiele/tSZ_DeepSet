@@ -5,6 +5,8 @@ def generate_cl(trial) :
     out.append('NET_ARCH=dict(origin=True,batt12=True,deformer=True,encoder=False,'\
                              'scalarencoder=False,decoder=True,vae=False,local=True)')
 
+    out.append('VALIDATION_EPOCHS=10')
+
     out.append('PRT_FRACTION["DM"]["validation"]=2048')
     out.append('PRT_FRACTION["TNG"]["validation"]=2048')
     out.append('PRT_FRACTION["DM"]["training"]=256')
