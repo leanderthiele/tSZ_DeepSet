@@ -52,6 +52,6 @@ class DataLoader(torch_DataLoader) :
                          collate_fn=DataBatch,
                          worker_init_fn=self.worker_pool.init_worker,
                          **(cfg.DATALOADER_ARGS if mode is DataModes.TRAINING \
-                            else MergeDicts({'batch_size': 1, 'shuffle'=False}, \
+                            else MergeDicts({'batch_size': 1, 'shuffle': False}, \
                                             cfg.DATALOADER_ARGS)))
     #}}}
