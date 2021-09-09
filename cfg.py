@@ -17,6 +17,9 @@ EPOCHS = 100
 # NOTE disables early stopping!
 VALIDATION_EPOCHS = None
 
+# whether testing/validation set should include *all* TNG positions
+TEST_ON_ALL = False
+
 # whether to do testing on the validation set
 TEST_ON_VALIDATION = True
 

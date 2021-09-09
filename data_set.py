@@ -31,7 +31,8 @@ class DataSet(torch_DataSet) :
         self.halo_catalog = HaloCatalog(mode)
 
         # total number of objects across all processes
-        self.len_all = len(self.halo_catalog)
+        if mode is DataModes.TRAINING :
+            self.len_all = len(self.halo_catalog)
 
         # now slice the object we use for this process
         self.halo_catalog = self.halo_catalog[cfg.rank::cfg.world_size]
@@ -41,6 +42,17 @@ class DataSet(torch_DataSet) :
         if self.mode is DataModes.TRAINING :
             # check that our hack works
             assert len(self) % cfg.DATALOADER_ARGS['batch_size'] == 0
+
+        if self.mode is not DataModes.TRAINING and cfg.TEST_ON_ALL :
+            # construct the mapping from indices to halos and TNG chunks
+
+            assert cfg.PRT_FRACTION['TNG'][str(self.mode)] > 1
+            self.chunks = [] # each entry is (data_item_idx, chunk_idx)
+
+            for data_item_idx, d in enumerate(self.data_items) :
+                N_chunks = int(np.ceil(len(d.TNG_Pth) / cfg.PRT_FRACTION['TNG'][str(self.mode)]))
+                for ii in range(N_chunks) :
+                    self.chunks.append((data_item_idx, ii))
     #}}}
 
 
@@ -61,20 +73,41 @@ class DataSet(torch_DataSet) :
                  divisible by the WORLD_SIZE)
         """
     #{{{
-        if idx >= len(self.data_items) :
-            # we have hit some duplicate sample -- we take a random one now
-            # in order to avoid always having the same duplicate samples in the training set
-            # NOTE that at this point we have an rng available
-            idx = self.rng.integers(len(self.data_items))
+        if self.mode is DataModes.TRAINING or not cfg.TEST_ON_ALL :
+            # the usual procedure we use during training: randomly sample the DM and TNG particles
 
-        indices = dict(DM=self.__get_indices(self.data_items[idx].halo, 'DM'),
-                       TNG=self.__get_indices(self.data_items[idx].halo, 'TNG'))
+            if idx >= len(self.data_items) :
+                # we have hit some duplicate sample -- we take a random one now
+                # in order to avoid always having the same duplicate samples in the training set
+                # NOTE that at this point we have an rng available
+                assert self.mode is DataModes.TRAINING
+                idx = self.rng.integers(len(self.data_items))
 
-        return self.data_items[idx].sample_particles(indices,
-                                                     TNG_residuals_noise_rng=self.rng \
-                                                                             if self.mode is DataModes.TRAINING \
-                                                                             else None,
-                                                     local_rng=self.rng)
+            indices = dict(DM=self.__get_indices(self.data_items[idx].halo, 'DM'),
+                           TNG=self.__get_indices(self.data_items[idx].halo, 'TNG'))
+
+            return self.data_items[idx].sample_particles(indices,
+                                                         TNG_residuals_noise_rng=self.rng \
+                                                                                 if self.mode is DataModes.TRAINING \
+                                                                                 else None,
+                                                         local_rng=self.rng)
+
+        else :
+            # during testing, we need to be careful to do everything deterministically
+
+            data_item_idx, chunk_idx = self.chunks[idx]
+
+            idx_min = chunk_idx * cfg.PRT_FRACTION['TNG'][str(self.mode)]
+            idx_max = min(((chunk_idx+1) * cfg.PRT_FRACTION['TNG'][str(self.mode)],
+                          len(self.data_items[data_item_idx].TNG_Pth)))
+
+            indices = dict(DM=self.__get_indices(self.data_items[idx].halo, 'DM'),
+                           TNG=np.arange(idx_min, idx_max, dtype=int))
+
+            # FIXME need to think carefully about the RNGs here!
+            return self.data_items[data_item_idx].sample_particles(indices,
+                                                                   TNG_residuals_noise_rng=None,
+                                                                   local_rng=self.rng)
     #}}}
 
 
@@ -90,6 +123,9 @@ class DataSet(torch_DataSet) :
             # return the next larger integer that is divisible by the batch size
             bs = cfg.DATALOADER_ARGS['batch_size']
             return n + bs - n % bs
+
+        if cfg.TEST_ON_ALL :
+            return len(self.chunks)
 
         return len(self.data_items)
     #}}}
@@ -116,5 +152,6 @@ class DataSet(torch_DataSet) :
         # in practice, this should not be an issue and will make the sampling a lot faster
         # NOTE that we do not restrict to Nprt -- we can just as well mod this later.
         # NOTE if we replace by 2**32, it doesn't work anymore (only zeros) -- is this a numpy bug?
+        #      Yes it is, should be fixed soon!
         return self.rng.integers(2**34, size=Nindices)
     #}}}
