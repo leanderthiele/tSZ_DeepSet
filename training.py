@@ -1,4 +1,5 @@
 import os.path
+from time import time
 
 import numpy as np
 
@@ -62,6 +63,7 @@ def Training(training_loader=None, validation_loader=None, call_after_epoch=None
 
         model.train()
         print('epoch %d'%epoch)
+        start_time_training = time()
 
         for t, data in enumerate(training_loader) :
 
@@ -91,8 +93,11 @@ def Training(training_loader=None, validation_loader=None, call_after_epoch=None
             optimizer.step()
             optimizer.lr_step()
 
+        end_time_training = time()
+
 
         model.eval()
+        start_time_validation = time()
         
         for t, data in enumerate(validation_loader) :
             
@@ -107,6 +112,10 @@ def Training(training_loader=None, validation_loader=None, call_after_epoch=None
 
             loss_record.add_validation_loss(loss_list, KLD_list, loss_list_guess,
                                             np.log(data.M200c.cpu().detach().numpy()), data.idx)
+
+        end_time_validation = time()
+        print('Time taken: training %f sec, validation %f sec'%((end_time_training-start_time_training),
+                                                                (end_time_validation-start_time_validation))
 
         # gather losses and save to file
         loss_record.end_epoch()
