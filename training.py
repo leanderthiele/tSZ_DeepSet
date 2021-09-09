@@ -62,7 +62,6 @@ def Training(training_loader=None, validation_loader=None, call_after_epoch=None
     for epoch in range(cfg.EPOCHS) :
 
         model.train()
-        print('epoch %d'%epoch)
         start_time_training = time()
 
         for t, data in enumerate(training_loader) :
@@ -96,32 +95,45 @@ def Training(training_loader=None, validation_loader=None, call_after_epoch=None
         end_time_training = time()
 
 
-        model.eval()
         start_time_validation = time()
-        
-        for t, data in enumerate(validation_loader) :
+
+        if cfg.VALIDATION_EPOCHS is None or epoch >= cfg.EPOCHS - cfg.VALIDATION_EPOCHS :
+            # validate only if required
+
+            model.eval()
             
-            data = data.to_device()
+            for t, data in enumerate(validation_loader) :
+                
+                data = data.to_device()
 
-            with torch.no_grad() :
-                guess = batt12(data.M200c, data.TNG_radii, data.P200c)
-                prediction, KLD = model(data)
+                with torch.no_grad() :
+                    guess = batt12(data.M200c, data.TNG_radii, data.P200c)
+                    prediction, KLD = model(data)
 
-                _, loss_list, KLD_list = loss_fn(prediction, data.TNG_Pth, KLD, w=None, epoch=epoch)
-                _, loss_list_guess, _ = loss_fn(guess, data.TNG_Pth, w=None)
+                    _, loss_list, KLD_list = loss_fn(prediction, data.TNG_Pth, KLD, w=None, epoch=epoch)
+                    _, loss_list_guess, _ = loss_fn(guess, data.TNG_Pth, w=None)
 
-            loss_record.add_validation_loss(loss_list, KLD_list, loss_list_guess,
-                                            np.log(data.M200c.cpu().detach().numpy()), data.idx)
+                loss_record.add_validation_loss(loss_list, KLD_list, loss_list_guess,
+                                                np.log(data.M200c.cpu().detach().numpy()), data.idx)
+
+        else :
+            # add dummy validation loss for consistency (note that batch size == 1 for validation)
+            for t in range(len(validation_loader)) :
+                loss_record.add_validation_loss([0.0, ], [0.0, ], [0.0, ], np.zeros(1), np.zeros(1))
 
         end_time_validation = time()
-        print('Time taken: training %f sec, validation %f sec'%((end_time_training-start_time_training),
-                                                                (end_time_validation-start_time_validation)))
+
+        print('epoch %d: training %f sec, validation %f sec'%(epoch,
+                                                              (end_time_training-start_time_training),
+                                                              (end_time_validation-start_time_validation)))
 
         # gather losses and save to file
         loss_record.end_epoch()
 
         # if user requested, call their callback function
         if call_after_epoch is not None :
+            if cfg.VALIDATION_EPOCHS is not None :
+                print('WARNING: cfg.VALIDATION_EPOCHS is set but still call_after_epoch provided!')
             assert callable(call_after_epoch)
             call_after_epoch(loss_record)
 

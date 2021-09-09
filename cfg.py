@@ -12,6 +12,11 @@ ID = 'default'
 # for how many epochs to train
 EPOCHS = 100
 
+# how many epoch to validate for in the end
+# set to None to always validate
+# NOTE disables early stopping!
+VALIDATION_EPOCHS = None
+
 # whether to scale pressure by P200 internally
 SCALE_PTH = True
 
