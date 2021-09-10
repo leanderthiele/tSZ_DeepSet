@@ -297,6 +297,12 @@ DEFORMER_NHIDDEN = 128
 # whether globals will be passed to the deformer
 DEFORMER_GLOBALS_PASSED = True
 
+# dropout inside deformer MLP
+DEFORMER_DROPOUT = None
+
+# dropout for input of deformer MLP
+DEFORMER_VISIBLE_DROPOUT = None
+
 # number of latent variables in the VAE (x2 for variance & mean)
 VAE_NLATENT = 1
 

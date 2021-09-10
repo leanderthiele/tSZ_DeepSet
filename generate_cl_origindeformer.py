@@ -29,6 +29,12 @@ def generate_cl(trial) :
     globals_noise = trial.suggest_float('globals_noise', 1e-2, 1e1, log=True)
     out.append('GLOBALS_NOISE=%.8e'%globals_noise)
 
+    dropout = trial.suggest_categorical('dropout', 0.0, 0.5)
+    out.append('DEFORMER_DROPOUT=%.8e'%dropout)
+
+    visible_dropout = trial.suggest_categorical('visible_dropout', 0.0, 0.5)
+    out.append('DEFORMER_VISIBLE_DROPOUT=%.8e'%visible_dropout)
+
     fix_origin = trial.suggest_categorical('fix_origin', (True, False))
     if fix_origin :
         out.append('NET_FREEZE=["origin"]')

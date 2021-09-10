@@ -97,6 +97,8 @@ class Network(nn.Module) :
             if cfg.NET_ARCH['deformer'] :
                 self.deformer = NetworkDeformer(MLP_Nlayers=cfg.DEFORMER_NLAYERS,
                                                 MLP_Nhidden=cfg.DEFORMER_NHIDDEN,
+                                                dropout=cfg.DEFORMER_DROPOUT,
+                                                visible_dropout=cfg.DEFORMER_VISIBLE_DROPOUT,
                                                 layer_kwargs_dict=dict(last={'activation': False,
                                                                              'dropout': None,
                                                                              'bias_init': 'zeros_(%s)'}))
