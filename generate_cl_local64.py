@@ -15,7 +15,7 @@ def generate_cl(trial) :
 
     out.append('VALIDATION_EPOCHS=10')
     out.append('N_LOCAL["validation"]=512')
-    out.append('PRT_FRACTION["TNG"]["validation"]=2048')
+    out.append('PRT_FRACTION["TNG"]["validation"]=4096')
 
     # robust predictions we have from previous optuna run
     out.append('LOCAL_NLAYERS=2')
