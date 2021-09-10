@@ -27,9 +27,13 @@ def CubifyPrediction(path) :
     mask1 = r < 0.5
 
     # filter by radius outside of which we don't predict
-    mask2 = r[mask1] < cfg.RMAX
+    mask2 = r[mask1] < (cfg.RMAX / 5.0)
+
+    # numpy is a bit funny here, but this works
+    p1 = np.zeros(np.count_nonzero(mask1), dtype=np.float32)
+    p1[mask2] = p
 
     # now fill the box
-    box[mask1][mask2] = p
+    box[mask1] = p1
 
     return box.reshape((N, N, N))
