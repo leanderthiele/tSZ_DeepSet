@@ -161,7 +161,7 @@ class DataSet(torch_DataSet) :
         # NOTE if we replace by 2**32, it doesn't work anymore (only zeros) -- is this a numpy bug?
         #      Yes it is, should be fixed soon!
         if self.rng is not None :
-            assert self.mode is DataModes.TRAINING or not cfg.TEST_ON_ALL :
+            assert self.mode is DataModes.TRAINING or not cfg.TEST_ON_ALL
             _rng = self.rng
         else :
             assert ptype == 'DM'
