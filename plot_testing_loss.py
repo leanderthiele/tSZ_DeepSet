@@ -32,7 +32,8 @@ for ii, this_idx in enumerate(idx) :
     loss[ii] = np.sum(N_TNG_all[mask] * loss_all[mask]) / np.sum(N_TNG_all[mask])
     guess_loss[ii] = np.sum(N_TNG_all[mask] * guess_loss_all[mask]) / np.sum(N_TNG_all[mask])
     KLD[ii] = KLD_all[mask][0]
-    assert all(abs(KLD[ii]/kld-1) < 1e-5 for kld in KLD_all[mask])
+    if abs(KLD[ii] > 1e-7) : # avoid divide by zero
+        assert all(abs(KLD[ii]/kld-1) < 1e-5 for kld in KLD_all[mask])
     logM[ii] = logM_all[mask][0]
     assert all(abs(logM[ii]/logm-1) < 1e-5 for logm in logM_all[mask])
 
