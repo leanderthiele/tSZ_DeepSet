@@ -48,13 +48,29 @@ def Testing(loader=None) :
 
     T = len(loader)
 
+    this_idx = -1
+    all_predictions = np.empty(0, dtype=np.float32)
+    save_rng = np.random.default_rng(cfg.TESTING_SEED)
+
     for t, data in enumerate(loader) :
 
         assert isinstance(data, DataBatch)
-        
+
+        if data.idx[0] != this_idx \
+           and cfg.TEST_ON_ALL \
+           and cfg.TEST_SAVE_PROB is not None \
+           and len(all_predictions) != 0 :
+            # save according to probability
+            if save_rng.random() < cfg.TEST_SAVE_PROB :
+                all_predictions.tofile(os.path.join(cfg.RESULTS_PATH,
+                                                    'predictions_%s_idx%d.bin'%(cfg.ID, this_idx)))
+            # reset the array
+            all_predictions = np.empty(0, dtype=np.float32)
+
         # batch size is 1 for validation / testing
         assert len(data) == 1
-        print('%d / %d, idx = %d'%(t, T, data.idx[0]))
+        this_idx = data.idx[0]
+        print('%d / %d, idx = %d'%(t, T, this_idx))
 
         data = data.to_device()
 
@@ -69,6 +85,8 @@ def Testing(loader=None) :
                              np.log(data.M200c.cpu().detach().numpy()), data.idx,
                              # this works both for lists and tensors
                              [len(a) for a in data.TNG_Pth])
+
+        all_predictions = np.concatenate((all_predictions, prediction.cpu().detach().numpy()))
 
     loss_record.save()
 

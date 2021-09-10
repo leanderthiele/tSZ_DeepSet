@@ -23,6 +23,10 @@ TEST_ON_ALL = False
 # whether to do testing on the validation set
 TEST_ON_VALIDATION = True
 
+# whith what probability to save prediction on testing data to disk
+# Set to None in order not to save
+TEST_SAVE_PROB = None
+
 # whether to scale pressure by P200 internally
 SCALE_PTH = True
 
