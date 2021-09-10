@@ -86,7 +86,7 @@ def Testing(loader=None) :
                              # this works both for lists and tensors
                              [len(a) for a in data.TNG_Pth])
 
-        all_predictions = np.concatenate((all_predictions, prediction.cpu().detach().numpy()))
+        all_predictions = np.concatenate((all_predictions, prediction.cpu().detach().numpy().squeeze()))
 
     loss_record.save()
 
