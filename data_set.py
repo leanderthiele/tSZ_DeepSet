@@ -105,7 +105,7 @@ class DataSet(torch_DataSet) :
             idx_max = min(((chunk_idx+1) * cfg.PRT_FRACTION['TNG'][str(self.mode)], \
                           len(self.data_items[data_item_idx].TNG_Pth)))
 
-            indices = dict(DM=self.__get_indices(self.data_items[idx].halo, 'DM'),
+            indices = dict(DM=self.__get_indices(self.data_items[data_item_idx].halo, 'DM'),
                            TNG=np.arange(idx_min, idx_max, dtype=int))
 
             # for the local particles
