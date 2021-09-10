@@ -369,6 +369,7 @@ class DataItem :
         # NOTE the TNG residuals are directly from file and already normalized by P200c
 
         # give this instance some unique hash depending on the random indices passed
+        # Will be used to seed the RNG that generates noise on globals and basis
         # NOTE this hash is not necessarily positive, as the sums may well overflow
         out.hash = ( np.sum(indices['DM']) if self.has_DM else 0 ) \
                    + ( np.sum(indices['TNG']) if self.has_TNG else 0 ) \

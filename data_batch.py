@@ -70,6 +70,7 @@ class DataBatch :
                 self.DM_vels_local = None
 
         # get a random number generator if noise is required
+        # NOTE that this RNG is not used when testing, so no reproducibility required here
         rng = np.random.default_rng(sum(d.hash for d in data_items) % 2**32) if self.mode is DataModes.TRAINING else None
 
         # the globals if provided

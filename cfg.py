@@ -119,12 +119,15 @@ RESIDUALS_NBINS = 32
 # Set to None for no noise
 RESIDUALS_NOISE = None
 
-# seed that we use whenever we need something to be consistent between runs
+# seed that determines the split into training, validation, and testing sets
 CONSISTENT_SEED = 137
 
 # seed that we use for the random components of the network,
 # i.e. the VAE part (should be chosen to have good balance between 0 and 1 bits!)
 NETWORK_SEED = 1234567890123456789
+
+# seed that we use during testing to get reproducible results in choosing the DM particles etc.
+TESTING_SEED = 314159265
 
 # which globals to use -- set `none' to true if no globals are to be used
 GLOBALS_USE = dict(none=False,

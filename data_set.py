@@ -59,9 +59,13 @@ class DataSet(torch_DataSet) :
     def set_worker(self, seed) :
         """
         to be called from worker_init_fn to initialize the random number generator for this worker
+        Will not initialize the RNG if we need reproducible results
         """
     #{{{
-        self.rng = np.random.default_rng(seed % 2**32)
+        if self.mode is DataModes.TRAINING or not cfg.TEST_ON_ALL :
+            self.rng = np.random.default_rng(seed % 2**32)
+        else :
+            self.rng = None
     #}}}
 
 
@@ -98,16 +102,18 @@ class DataSet(torch_DataSet) :
             data_item_idx, chunk_idx = self.chunks[idx]
 
             idx_min = chunk_idx * cfg.PRT_FRACTION['TNG'][str(self.mode)]
-            idx_max = min(((chunk_idx+1) * cfg.PRT_FRACTION['TNG'][str(self.mode)],
+            idx_max = min(((chunk_idx+1) * cfg.PRT_FRACTION['TNG'][str(self.mode)], \
                           len(self.data_items[data_item_idx].TNG_Pth)))
 
             indices = dict(DM=self.__get_indices(self.data_items[idx].halo, 'DM'),
                            TNG=np.arange(idx_min, idx_max, dtype=int))
 
-            # FIXME need to think carefully about the RNGs here!
+            # for the local particles
+            _rng = np.random.default_rng((cfg.TESTING_SEED + idx) % 2**32)
+
             return self.data_items[data_item_idx].sample_particles(indices,
                                                                    TNG_residuals_noise_rng=None,
-                                                                   local_rng=self.rng)
+                                                                   local_rng=_rng)
     #}}}
 
 
@@ -145,7 +151,8 @@ class DataSet(torch_DataSet) :
         #      so the use of Nprt is not really tested and this field should be treated with caution
         Nprt = getattr(halo, 'Nprt_%d_%s'%(cfg.TNG_RESOLUTION, ptype))
         Nindices = int(cfg.PRT_FRACTION[ptype][str(self.mode)] * Nprt) \
-                   if isinstance(cfg.PRT_FRACTION[ptype][str(self.mode)], float) and cfg.PRT_FRACTION[ptype][str(self.mode)]<=1 \
+                   if isinstance(cfg.PRT_FRACTION[ptype][str(self.mode)], float) \
+                      and cfg.PRT_FRACTION[ptype][str(self.mode)]<=1 \
                    else int(cfg.PRT_FRACTION[ptype][str(self.mode)])
 
         # here we allow the possibility for duplicate entries
@@ -153,5 +160,13 @@ class DataSet(torch_DataSet) :
         # NOTE that we do not restrict to Nprt -- we can just as well mod this later.
         # NOTE if we replace by 2**32, it doesn't work anymore (only zeros) -- is this a numpy bug?
         #      Yes it is, should be fixed soon!
-        return self.rng.integers(2**34, size=Nindices)
+        if self.rng is not None :
+            assert self.mode is DataModes.TRAINING or not cfg.TEST_ON_ALL :
+            _rng = self.rng
+        else :
+            assert ptype == 'DM'
+            # always construct the same RNG for each halo so the same DM particles are sampled
+            _rng = np.random.default_rng((cfg.TESTING_SEED + halo.idx) % 2**32)
+
+        return _rng.integers(2**34, size=Nindices)
     #}}}
