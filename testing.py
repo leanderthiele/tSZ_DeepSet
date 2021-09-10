@@ -44,9 +44,17 @@ def Testing(loader=None) :
 
     loss_record = TestingLossRecord()
 
+    T = len(loader)
+
     for t, data in enumerate(loader) :
 
         assert isinstance(data, DataBatch)
+        
+        # batch size is 1 for validation / testing
+        print('%d / %d, idx = %d'%(t, T, data.idx.item()))
+
+        # FIXME debugging
+        print(data.DM_coords[0,0,...])
 
         data = data.to_device()
 
