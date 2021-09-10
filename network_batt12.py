@@ -22,12 +22,13 @@ class NetworkBatt12(nn.Module) :
 
         # this is what Battaglia+2012 fit for
         # we take the default values not from the B12 paper but from a simple fit using only the B12 model
-        self.register_parameter('A_P0', scalar_param(6.3351))
-        self.register_parameter('am_P0', scalar_param(0.5383))
-        self.register_parameter('A_xc', scalar_param(1.9009))
-        self.register_parameter('am_xc', scalar_param(-0.3837))
-        self.register_parameter('A_beta', scalar_param(11.3687))
-        self.register_parameter('am_beta', scalar_param(-0.1877))
+        # NOTE these have been updated to TNG_RESOLUTION=64 (about 10% improvement)
+        self.register_parameter('A_P0', scalar_param(3.9183))
+        self.register_parameter('am_P0', scalar_param(0.5705))
+        self.register_parameter('A_xc', scalar_param(2.8859))
+        self.register_parameter('am_xc', scalar_param(-0.8130))
+        self.register_parameter('A_beta', scalar_param(13.8758))
+        self.register_parameter('am_beta', scalar_param(-0.6282))
 
         if xc_fixed :
             self.A_xc.requires_grad = False
@@ -70,6 +71,7 @@ class NetworkBatt12(nn.Module) :
         A * (M200c / 1e14 Msun)**alpha_m
         """
     #{{{
+        # NOTE h is not really the Illustris h here, fitting parameters will absorbe
         return getattr(self, 'A_'+s) * (0.7 * M200c / 1e4).pow(getattr(self, 'am_'+s))
     #}}}
 
