@@ -24,6 +24,8 @@ def Testing(loader=None) :
 #{{{
     InitProc(0)
 
+    ArchiveCfg()
+
     if cfg.mpi_env_type is MPIEnvTypes.NOGPU :
         torch.set_num_threads(5)
 
