@@ -29,6 +29,7 @@ def generate_cl(trial) :
     out.append('ORIGIN_MLP_NLAYERS=3')
     out.append('ORIGIN_MLP_NHIDDEN=226')
     out.append('ORIGIN_DEFAULT_NHIDDEN=226')
+    out.append('BASIS_NOISE=None')
 
     lr_local = trial.suggest_float('lr_local', 1e-7, 1e-3, log=True)
     out.append('ONE_CYCLE_LR_KWARGS["local"]["max_lr"]=%.8e'%lr_local)
@@ -53,6 +54,9 @@ def generate_cl(trial) :
 
     gradient_clip = trial.suggest_float('gradient_clip', 1e-2, 1e0, log=True)
     out.append('GRADIENT_CLIP=%.8e'%gradient_clip)
+
+    globals_noise = trial.suggest_float('globals_noise', 5, 30)
+    out.append('GLOBALS_NOISE=%.8e'%globals_noise)
 
     origin_from_file = trial.suggest_categorical('origin_from_file', (True, False))
     local_from_file = trial.suggest_categorical('local_from_file', (True, False))
