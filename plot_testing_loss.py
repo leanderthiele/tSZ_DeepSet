@@ -14,16 +14,27 @@ import cfg
 ID = argv[1].replace('testing_', '').replace('.sbatch', '')
 
 with np.load(os.path.join(cfg.RESULTS_PATH, 'loss_testing_%s.npz'%ID)) as f :
-    loss = f['loss']
-    KLD = f['KLD']
-    guess_loss = f['guess_loss']
-    logM = f['logM']
-    idx = f['idx']
+    loss_all = f['loss']
+    KLD_all = f['KLD']
+    guess_loss_all = f['guess_loss']
+    logM_all = f['logM']
+    idx_all = f['idx']
+    N_TNG_all = f['N_TNG']
 
-# FIXME need to aggregate entries with the same index here.
-#       Requires us to save number of TNG partices in each chunk to disk
-#       (i.e. as part of TestingLossRecord)
-#       so that we can weight accordingly!
+idx = np.unique(idx_all)
+loss = np.empty(len(idx))
+KLD = np.empty(len(idx))
+guess_loss = np.empty(len(idx))
+logM = np.empty(len(idx))
+for ii, this_idx in enumerate(idx) :
+    mask = this_idx == idx_all 
+    # loss is MSE (no sqrt!), so this makes sense
+    loss[ii] = np.sum(N_TNG_all[mask] * loss_all[mask]) / np.sum(N_TNG_all[mask])
+    guess_loss[ii] = np.sum(N_TNG_all[mask] * guess_loss_all[mask]) / np.sum(N_TNG_all[mask])
+    KLD[ii] = KLD_all[mask][0]
+    assert all(abs(KLD[ii]/kld-1) < 1e-5 for kld in KLD_all[mask])
+    logM[ii] = logM_all[mask][0]
+    assert all(abs(logM[ii]/logm-1) < 1e-5 for logm in logM_all[mask])
 
 vmin = 8.518
 vmax = 11.534

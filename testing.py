@@ -56,9 +56,6 @@ def Testing(loader=None) :
         assert len(data) == 1
         print('%d / %d, idx = %d'%(t, T, data.idx[0]))
 
-        # FIXME debugging
-        print(data.DM_coords[0,0,...])
-
         data = data.to_device()
 
         with torch.no_grad() :
@@ -69,7 +66,9 @@ def Testing(loader=None) :
         _, loss_list, KLD_list = loss_fn(prediction, data.TNG_Pth, KLD, w=None)
 
         loss_record.add_loss(loss_list, KLD_list, loss_list_guess,
-                             np.log(data.M200c.cpu().detach().numpy()), data.idx)
+                             np.log(data.M200c.cpu().detach().numpy()), data.idx,
+                             # this works both for lists and tensors
+                             [len(a) for a in data.TNG_Pth])
 
     loss_record.save()
 
