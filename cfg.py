@@ -39,7 +39,7 @@ WEIGHT_DECAY = dict(default=1e-4,
 
 # how to construct the learning rate scheduler
 ONE_CYCLE_LR_KWARGS = dict(default={'max_lr': 1e-3, 'div_factor': 1000},
-                           batt12={'max_lr': 1e-2},
+                           batt12={'max_lr': 1e-3},
                            deformer={'max_lr': 1e-3},
                            origin={'max_lr': 3e-3},
                            encoder={'max_lr': 1e-2},
