@@ -53,7 +53,8 @@ def Testing(loader=None) :
         assert isinstance(data, DataBatch)
         
         # batch size is 1 for validation / testing
-        print('%d / %d, idx = %d'%(t, T, data.idx.item()))
+        assert len(data) == 1
+        print('%d / %d, idx = %d'%(t, T, data.idx[0]))
 
         # FIXME debugging
         print(data.DM_coords[0,0,...])
