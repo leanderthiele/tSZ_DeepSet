@@ -20,6 +20,11 @@ with np.load(os.path.join(cfg.RESULTS_PATH, 'loss_testing_%s.npz'%ID)) as f :
     logM = f['logM']
     idx = f['idx']
 
+# FIXME need to aggregate entries with the same index here.
+#       Requires us to save number of TNG partices in each chunk to disk
+#       (i.e. as part of TestingLossRecord)
+#       so that we can weight accordingly!
+
 vmin = 8.518
 vmax = 11.534
 
