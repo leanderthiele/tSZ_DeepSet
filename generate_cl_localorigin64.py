@@ -61,6 +61,12 @@ def generate_cl(trial) :
     globals_noise = trial.suggest_float('globals_noise', 5, 30)
     out.append('GLOBALS_NOISE=%.8e'%globals_noise)
 
+    dropout = trial.suggest_float('dropout', 0.0, 0.3)
+    out.append('DECODER_DROPOUT=%.8e'%dropout)
+
+    visible_dropout = trial.suggest_float('visible_dropout', 0.0, 0.3)
+    out.append('DECODER_VISIBLE_DROPOUT=%.8e'%visible_dropout)
+
     origin_from_file = trial.suggest_categorical('origin_from_file', (True, False))
     local_from_file = trial.suggest_categorical('local_from_file', (True, False))
 
@@ -71,5 +77,6 @@ def generate_cl(trial) :
         out.append('NET_ID=[("optuna_origin64_nr1017","origin","batt12"),]')
     elif not origin_from_file and local_from_file :
         out.append('NET_ID=[("optuna_local64_nr352","local"),]')
+
 
     return out
