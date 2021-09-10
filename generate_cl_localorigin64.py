@@ -13,8 +13,8 @@ def generate_cl(trial) :
     out.append('WEIGHT_DECAY["decoder"]=0')
 
     out.append('VALIDATION_EPOCHS=10')
-    out.append('N_PRT["DM"]["validation"]=1024')
     out.append('N_LOCAL["validation"]=512')
+    out.append('PRT_FRACTION["DM"]["validation"]=2048')
     out.append('PRT_FRACTION["TNG"]["validation"]=4096')
 
     # robust predictions we have from previous optuna runs
@@ -30,6 +30,9 @@ def generate_cl(trial) :
     out.append('ORIGIN_MLP_NHIDDEN=226')
     out.append('ORIGIN_DEFAULT_NHIDDEN=226')
     out.append('BASIS_NOISE=None')
+    out.append('PRT_FRACTION["DM"]["training"]=2048')
+    out.append('N_LOCAL["training"]=310')
+    out.append('R_LOCAL=310.0')
 
     lr_local = trial.suggest_float('lr_local', 1e-7, 1e-3, log=True)
     out.append('ONE_CYCLE_LR_KWARGS["local"]["max_lr"]=%.8e'%lr_local)
