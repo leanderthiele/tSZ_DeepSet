@@ -37,10 +37,10 @@ def generate_cl(trial) :
     N_hidden = trial.suggest_int('N_hidden', 64, 256)
     out.append('DEFORMER_NHIDDEN=%d'%N_hidden)
 
-    dropout = trial.suggest_categorical('dropout', 0.0, 0.5)
+    dropout = trial.suggest_categorical('dropout', 0.0, 0.8)
     out.append('DEFORMER_DROPOUT=%.8e'%dropout)
 
-    visible_dropout = trial.suggest_categorical('visible_dropout', 0.0, 0.5)
+    visible_dropout = trial.suggest_categorical('visible_dropout', 0.0, 0.8)
     out.append('DEFORMER_VISIBLE_DROPOUT=%.8e'%visible_dropout)
 
     origin_from_file = trial.suggest_categorical('origin_from_file', (True, False))
