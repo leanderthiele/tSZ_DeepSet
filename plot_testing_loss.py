@@ -4,6 +4,7 @@ command line arguments :
 """
 
 from sys import argv
+from time import ctime
 import os.path
 
 import numpy as np
@@ -13,7 +14,12 @@ import cfg
 
 ID = argv[1].replace('testing_', '').replace('.sbatch', '')
 
-with np.load(os.path.join(cfg.RESULTS_PATH, 'loss_testing_%s.npz'%ID)) as f :
+fname = os.path.join(cfg.RESULTS_PATH, 'loss_testing_%s.npz'%ID)
+
+print('Using file %s'%fname)
+print('\tlast modified: %s'%ctime(os.path.getmtime(fname)))
+
+with np.load(fname) as f :
     loss_all = f['loss']
     KLD_all = f['KLD']
     guess_loss_all = f['guess_loss']
