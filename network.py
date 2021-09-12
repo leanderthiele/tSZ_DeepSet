@@ -123,6 +123,8 @@ class Network(nn.Module) :
         assert isinstance(batch, DataBatch)
 
         if cfg.NET_ARCH['local'] :
+            # NOTE this has to come before the origin net since DM and TNG particles
+            #      may be shifted differently depending on cfg.ORIGIN_SHIFT_DM
             l = self.local(batch.TNG_coords, batch.DM_coords_local,
                            batch.DM_N_local, batch.basis, batch.DM_vels_local,
                            batch.P200c)
