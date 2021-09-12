@@ -19,7 +19,15 @@ halo_idx = int(argv[2])
 path_target = cfg._STORAGE_FILES['TNG']%(halo_idx, 'box_%d_cube_Pth'%cfg.TNG_RESOLUTION)
 path_prediction = os.path.join(cfg.RESULTS_PATH, 'predictions_testing_%s_idx%d.bin'%(ID, halo_idx))
 
-box_target = np.fromfile(path_target, dtype=np.float32).reshape([cfg.TNG_RESOLUTION,]*3)
+box_target = np.fromfile(path_target, dtype=np.float32)
+x = np.mgrid[-N//2:N//2, -N//2:N//2, -N//2:N//2].transpose(1,2,3,0).reshape((N*N*N, 3)).astype(np.float32)
+x /= N # now in the range [-0.5, 0.5]
+r = np.linalg.norm(x, axis=-1).flatten()
+mask = r < cfg.RMAX / 5.0
+box_target[mask] = 0
+box_target = box_target.reshape([cfg.TNG_RESOLUTION, ]*3])
+
+
 box_prediction = CubifyPrediction(path_prediction)
 
 if cfg.SCALE_PTH :
