@@ -347,11 +347,8 @@ ORIGIN_MLP_NLAYERS = 4
 # the individual MLPs in the origin network
 ORIGIN_MLP_NHIDDEN = 128
 
-# how the origin shift affects the DM positions:
-#     'none'    -- do not shift the DM particles
-#     'no_grad' -- shift but do not record it in autograd
-#     'all'     -- shift and record in autograd
-ORIGIN_EFFECT_ON_DM = 'all'
+# whether the origin shift will be applied to the input to encoder/scalarencoder
+ORIGIN_SHIFT_DM = True
 
 # default number of latent features in the space separating encoder and decoder
 NETWORK_DEFAULT_NLATENT = 128

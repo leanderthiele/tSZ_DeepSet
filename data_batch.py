@@ -125,15 +125,8 @@ class DataBatch :
                     initially)
         """
     #{{{
-        if cfg.ORIGIN_EFFECT_ON_DM == 'all' :
-            # allocate new tensor since otherwise pytorch complains about in-place op
+        if cfg.ORIGIN_SHIFT_DM :
             self.DM_coords = self.DM_coords - origin
-        elif cfg.ORIGIN_EFFECT_ON_DM == 'no_grad' :
-            with torch.no_grad() :
-                # here we can do in-place because there's no gradient flowing
-                self.DM_coords -= origin
-        else :
-            assert cfg.ORIGIN_EFFECT_ON_DM == 'none'
 
         self.TNG_coords = self.TNG_coords - origin
 

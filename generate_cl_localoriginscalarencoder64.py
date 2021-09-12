@@ -87,8 +87,8 @@ def generate_cl(trial) :
     globals_noise = trial.suggest_float('globals_noise', 5, 30)
     out.append('GLOBALS_NOISE=%.8e'%globals_noise)
 
-    origin_effect = trial.suggest_categorical('origin_effect', ('all', 'no_grad', 'none'))
-    out.append('ORIGIN_EFFECT_ON_DM="%s"'%origin_effect)
+    origin_shift_dm = trial.suggest_categorical('origin_shift_dm', ('True', 'False'))
+    out.append('ORIGIN_SHIFT_DM=%s'%origin_shift_dm)
 
 
     return out
