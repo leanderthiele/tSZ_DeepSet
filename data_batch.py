@@ -126,8 +126,15 @@ class DataBatch :
         """
     #{{{
         # NOTE it is possible that we have to allocate new tensors here since otherwise we are doing
-        #      and in-place operation
-        self.DM_coords = self.DM_coords - origin
+        #      an in-place operation
+        if cfg.ORIGIN_EFFECT_ON_DM == 'all' :
+            self.DM_coords = self.DM_coords - origin
+        elif cfg.ORIGIN_EFFECT_ON_DM == 'no_grad' :
+            with torch.no_grad() :
+                self.DM_coords = self.DM_coords - origin
+        else :
+            assert cfg.ORIGIN_EFFECT_ON_DM == 'none'
+
         self.TNG_coords = self.TNG_coords - origin
 
         # NOTE technically speaking it would be necessary to impose periodic boundary conditions
