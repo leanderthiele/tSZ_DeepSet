@@ -11,6 +11,9 @@ should be removed
 Third command line argument is whether early stopping should be applied (also int)
 
 Fourth command line argument is number of random sample initially.
+
+Fifth command line argument is whether there is a VAE involved
+(in which case we perform multi-objective optimization).
 """
 
 import os
@@ -43,6 +46,8 @@ REMOVE_PREVIOUS = bool(int(argv[2]))
 EARLY_STOPPING = bool(int(argv[3]))
 
 N_RANDOM = int(argv[4])
+
+HAS_VAE = bool(int(argv[5]))
 
 
 class MyPruner(BasePruner) :
@@ -192,13 +197,20 @@ class Objective :
         assert isinstance(loss_record, TrainingLossRecord)
         loss_curve = np.median(np.array(loss_record.validation_loss_arr)
                                / np.array(loss_record.validation_guess_loss_arr),
-                               axis = -1)
+                               axis=-1)
 
         # take the mean of the last few losses to make sure we are not in some spurious 
         # local minimum
         final_loss = np.mean(loss_curve[-5:])
 
-        return final_loss
+        if HAS_VAE :
+            # we first average the Gaussian loss over random seeds, then take the median
+            loss_curve_gaussian = np.median(np.mean(np.array(loss_record.validation_gauss_loss_arr), axis=-1)
+                                            / np.array(loss_record.validation_guess_loss_arr),
+                                            axis=-1)
+            final_gaussian_loss = np.mean(loss_curve[-5:])
+
+        return final_loss, final_gaussian_loss if HAS_VAE else final_loss 
     #}}}
 
 
@@ -225,6 +237,7 @@ if __name__ == '__main__' :
     study = optuna.create_study(sampler=TPESampler(n_startup_trials=N_RANDOM),
                                 study_name=IDENT,
                                 storage='sqlite:///%s.db'%IDENT,
+                                directions=["minimize", ] * (1+HAS_VAE),
                                 load_if_exists=True)
 
     # construct our objective callable
