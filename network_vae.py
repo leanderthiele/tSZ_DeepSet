@@ -57,7 +57,7 @@ class NetworkVAE(nn.Module) :
 
         if gaussian :
             # draw random latent space variables
-            return torch.randn(x.shape[0], self.Nlatent, device=x.device, generator=_rng), None
+            return torch.randn(x.shape[0], self.Nlatent, device=x.device, generator=_rng)
 
         scalars, _ = self.create_scalars(x)
 
