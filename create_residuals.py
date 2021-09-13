@@ -23,7 +23,7 @@ model.load_state_dict(checkpoint, strict=True)
 
 model.eval()
 
-loader = DataLoader(mode=DataModes.ALL)
+loader = DataLoader(mode=DataModes.ALL, load_TNG_residuals=False)
 
 RBINS = np.linspace(cfg.RESIDUALS_RMIN, cfg.RESIDUALS_RMAX, num=cfg.RESIDUALS_NBINS+1)
 RCENTERS = 0.5*(RBINS[:-1] + RBINS[1:])
