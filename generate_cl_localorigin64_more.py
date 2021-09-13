@@ -10,7 +10,6 @@ def generate_cl(trial) :
     out.append('DECODER_DEFAULT_R_PASSED=True')
     out.append('DECODER_DEFAULT_GLOBALS_PASSED=True')
     out.append('DECODER_DEFAULT_BASIS_PASSED=False')
-    out.append('WEIGHT_DECAY["decoder"]=0')
 
     out.append('VALIDATION_EPOCHS=10')
     out.append('N_LOCAL["validation"]=512')
