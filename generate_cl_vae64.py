@@ -11,7 +11,9 @@ def generate_cl(trial) :
     out.append('DECODER_DEFAULT_GLOBALS_PASSED=True')
     out.append('DECODER_DEFAULT_BASIS_PASSED=False')
 
-    out.append('VALIDATION_EPOCHS=10')
+# FIXME
+# We have removed this for debugging purposes
+#    out.append('VALIDATION_EPOCHS=10')
     out.append('N_LOCAL["validation"]=512')
     out.append('PRT_FRACTION["DM"]["validation"]=2048')
     out.append('PRT_FRACTION["TNG"]["validation"]=4096')
