@@ -82,7 +82,7 @@ for t, data in enumerate(loader) :
     data = data.to_device()
 
     with torch.no_grad() :
-        prediction = model(data)
+        prediction, _ = model(data)
 
     all_p = np.concatenate((all_p, prediction.cpu().detach().numpy().squeeze()))
     all_t = np.concatenate((all_t, data.TNG_Pth.cpu().detach().numpy().squeeze()))
