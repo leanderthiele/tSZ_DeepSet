@@ -28,8 +28,10 @@ loader = DataLoader(mode=DataModes.ALL)
 RBINS = np.linspace(cfg.RESIDUALS_RMIN, cfg.RESIDUALS_RMAX, num=cfg.RESIDUALS_NBINS+1)
 RCENTERS = 0.5*(RBINS[:-1] + RBINS[1:])
 
+halo_catalog = dict(np.load(cfg.HALO_CATALOG))
+
 # store intermediate data here
-binned_residuals = np.zeros((len(loader), cfg.RESIDUALS_NBINS))
+binned_residuals = np.zeros((halo_catalog['Nobjects'], cfg.RESIDUALS_NBINS))
 
 def get_binned(x, indices) :
     out = np.empty(cfg.RESIDUALS_NBINS)
@@ -37,38 +39,55 @@ def get_binned(x, indices) :
         out[ii] = np.mean(x[indices==ii])
     return out
 
+assert cfg.TEST_ON_ALL
+
+T = len(loader)
+
+this_idx = -1
+all_r = np.empty(0, dtype=np.float32)
+all_p = np.empty(0, dtype=np.float32)
+all_t = np.empty(0, dtype=np.float32)
+
 for t, data in enumerate(loader) :
 
     assert isinstance(data, DataBatch)
+
+    if data.idx[0] != this_idx and len(all_r) != 0 :
+        # we have arrived at a new object and need to store the data for the old one
+        sorter = np.argsort(all_r)
+        all_r = all_r[sorter]
+        all_p = all_p[sorter]
+        all_t = all_t[sorter]
+
+        indices = np.digitize(all_r, RBINS) - 1
+        assert np.min(indices) == 0
+
+        p_binned = get_binned(all_p, indices)
+        t_binned = get_binned(all_t, indices)
+
+        # safety measure
+        assert np.count_nonzero(binned_residuals[this_idx, :]) == 0
+
+        binned_residuals[this_idx, :] = (t_binned - p_binned) / p_binned   
+
+        # reset arrays
+        all_r = np.empty(0, dtype=np.float32)
+        all_p = np.empty(0, dtype=np.float32)
+        all_t = np.empty(0, dtype=np.float32)
+
+    assert len(data) == 1
+    this_idx = data.idx[0]
+    print('%d / %d, idx = %d'%(t, T, this_idx))
+
     data = data.to_device()
 
     with torch.no_grad() :
         prediction = model(data)
 
-    r_npy = data.TNG_radii.cpu().detach().numpy().squeeze()
-    p_npy = prediction.cpu().detach().numpy().squeeze()
-    t_npy = data.TNG_Pth.cpu().detach().numpy().squeeze()
+    all_p = np.concatenate((all_p, prediction.cpu().detach().numpy().squeeze()))
+    all_t = np.concatenate((all_t, data.TNG_Pth.cpu().detach().numpy().squeeze()))
+    all_r = np.concatenate((all_r, data.TNG_radii.cpu().detach().numpy().squeeze()))
 
-    for ii in range(len(r_npy)) :
-        r = r_npy[ii]
-        p = p_npy[ii]
-        t = t_npy[ii]
-
-        sorter = np.argsort(r)
-        r = r[sorter]
-        p = p[sorter]
-        t = t[sorter]
-
-        indices = np.digitize(r, RBINS) - 1
-        assert np.min(indices) == 0
-
-        p_binned = get_binned(p, indices)
-        t_binned = get_binned(t, indices)
-
-        # safety measure
-        assert np.count_nonzero(binned_residuals[data.idx[ii], :]) == 0
-
-        binned_residuals[data.idx[ii], :] = (t_binned - p_binned) / p_binned   
 
 # now we have all the binned data and should normalize it
 # We only use the training set for normalization purposes
