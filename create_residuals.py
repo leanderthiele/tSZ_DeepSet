@@ -1,5 +1,3 @@
-# TODO ensure that we are noise-less, load network from file (must be consistent)
-
 import os.path
 
 import numpy as np
@@ -9,7 +7,6 @@ import torch.nn as nn
 
 from init_proc import InitProc
 from network import Network
-from network_batt12 import NetworkBatt12
 from data_loader import DataLoader
 from data_batch import DataBatch
 from data_modes import DataModes
@@ -26,7 +23,6 @@ model.eval()
 loader = DataLoader(mode=DataModes.ALL, load_TNG_residuals=False)
 
 RBINS = np.linspace(cfg.RESIDUALS_RMIN, cfg.RESIDUALS_RMAX, num=cfg.RESIDUALS_NBINS+1)
-RCENTERS = 0.5*(RBINS[:-1] + RBINS[1:])
 
 halo_catalog = dict(np.load(cfg.HALO_CATALOG))
 
@@ -34,7 +30,7 @@ halo_catalog = dict(np.load(cfg.HALO_CATALOG))
 binned_residuals = np.zeros((halo_catalog['Nobjects'], cfg.RESIDUALS_NBINS))
 
 def get_binned(x, indices) :
-    out = np.empty(cfg.RESIDUALS_NBINS)
+    out = np.zeros(cfg.RESIDUALS_NBINS)
     for ii in range(cfg.RESIDUALS_NBINS) :
         out[ii] = np.mean(x[indices==ii])
     return out
@@ -60,7 +56,6 @@ for t, data in enumerate(loader) :
         all_t = all_t[sorter]
 
         indices = np.digitize(all_r, RBINS) - 1
-        assert np.min(indices) == 0
 
         p_binned = get_binned(all_p, indices)
         t_binned = get_binned(all_t, indices)
