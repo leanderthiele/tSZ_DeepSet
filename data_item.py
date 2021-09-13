@@ -179,7 +179,9 @@ class DataItem :
 
     def __get_TNG_residuals(self) :
     #{{{
-        return np.fromfile(self.halo.storage_TNG['residuals'], dtype=np.float32)
+        # we have a single NaN in this data, due to an empty radial bin.
+        # Should not be problematic.
+        return np.nan_to_num(np.fromfile(self.halo.storage_TNG['residuals'], dtype=np.float32))
     #}}}
 
 
