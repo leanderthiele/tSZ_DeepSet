@@ -19,6 +19,7 @@ class TrainingLossRecord :
         self.validation_loss_arr = []
         self.validation_KLD_arr = []
         self.validation_guess_loss_arr = []
+        self.validation_gauss_loss_arr = []
         self.validation_logM_arr = []
         self.validation_idx_arr = []
 
@@ -33,6 +34,7 @@ class TrainingLossRecord :
         self.this_validation_loss_arr = []
         self.this_validation_KLD_arr = []
         self.this_validation_guess_loss_arr = []
+        self.this_validation_gauss_loss_arr = []
         self.this_validation_logM_arr = []
         self.this_validation_idx_arr = []
     #}}}
@@ -48,11 +50,14 @@ class TrainingLossRecord :
     #}}}
 
 
-    def add_validation_loss(self, loss_list, KLD_list, loss_list_guess, logM_list, idx_list) :
+    def add_validation_loss(self, loss_list, KLD_list, loss_list_guess, loss_list_gauss, logM_list, idx_list) :
     #{{{
         self.this_validation_loss_arr.extend(loss_list)
         self.this_validation_KLD_arr.extend(KLD_list)
         self.this_validation_guess_loss_arr.extend(loss_list_guess)
+        if loss_list_gauss is not None :
+            # transpose the list of lists here, to get shape [halo, seed]
+            self.this_validation_gauss_loss_arr.extend(map(list, zip(*loss_list_gauss)))
         self.this_validation_logM_arr.extend(logM_list)
         self.this_validation_idx_arr.extend(idx_list)
     #}}}
@@ -71,6 +76,8 @@ class TrainingLossRecord :
         self.validation_loss_arr.append(self.this_validation_loss_arr)
         self.validation_KLD_arr.append(self.this_validation_KLD_arr)
         self.validation_guess_loss_arr.append(self.this_validation_guess_loss_arr)
+        if len(self.this_validation_gauss_loss_arr) > 0 :
+            self.validation_gauss_loss_arr.append(self.this_validation_gauss_loss_arr)
         self.validation_logM_arr.append(self.this_validation_logM_arr)
         self.validation_idx_arr.append(self.this_validation_idx_arr)
 
@@ -85,6 +92,7 @@ class TrainingLossRecord :
         self.this_validation_loss_arr = []
         self.this_validation_KLD_arr = []
         self.this_validation_guess_loss_arr = []
+        self.this_validation_gauss_loss_arr = []
         self.this_validation_logM_arr = []
         self.this_validation_idx_arr = []
 
@@ -98,6 +106,7 @@ class TrainingLossRecord :
                  validation=np.array(self.validation_loss_arr),
                  validation_KLD=np.array(self.validation_KLD_arr),
                  validation_guess=np.array(self.validation_guess_loss_arr),
+                 validation_gauss=np.array(self.validation_gauss_loss_arr),
                  validation_logM=np.array(self.validation_logM_arr),
                  validation_idx=np.array(self.validation_idx_arr, dtype=int))
     #}}}

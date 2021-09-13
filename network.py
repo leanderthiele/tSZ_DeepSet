@@ -126,6 +126,7 @@ class Network(nn.Module) :
         recon_seed  ... single integer, can be used to deterministically set the RNG
                         in VAE reconstruction
         gauss_seeds ... list of integers, to generate several Gaussian outputs
+                        or a single integer denoting the number of Gaussian outputs
 
         Returns:
             recon_prediction  ... the reconstructed prediction (tensor)
@@ -179,7 +180,10 @@ class Network(nn.Module) :
         if cfg.NET_ARCH['vae'] :
             z, KLD = self.vae(batch.TNG_residuals, gaussian=False, seed=recon_seed)
             if gauss_seeds is not None :
-                z_gauss = [self.vae(batch.TNG_residuals, gaussian=True, seed=seed) for seed in gauss_seeds]
+                if isinstance(gauss_seeds, list) :
+                    z_gauss = [self.vae(batch.TNG_residuals, gaussian=True, seed=seed) for seed in gauss_seeds]
+                else :
+                    z_gauss = [self.vae(batch.TNG_residuals, gaussian=True) for _ in range(gauss_seeds)]
             else :
                 z_gauss = None
         else :

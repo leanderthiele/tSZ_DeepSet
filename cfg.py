@@ -17,6 +17,10 @@ EPOCHS = 100
 # NOTE disables early stopping!
 VALIDATION_EPOCHS = None
 
+# number of Gaussian latent spaces that will be drawn during validation/testing
+# Set to None to not perform this action
+N_GAUSS = None
+
 # whether testing/validation set should include *all* TNG positions
 TEST_ON_ALL = False
 
