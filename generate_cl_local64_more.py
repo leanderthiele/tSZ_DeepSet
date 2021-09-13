@@ -24,7 +24,7 @@ def generate_cl(trial) :
     out.append('N_LOCAL["training"]=310')
 
     start_nr = trial.suggest_categorical('start_nr', (352, 265, 845, 413, 520))
-    out.append('NET_ID=["optuna_local64_nr%d"]'%start_nr)
+    out.append('NET_ID="optuna_local64_nr%d"'%start_nr)
 
     R_local = {352: 309.0541588966063,
                265: 340.9711356248012,
