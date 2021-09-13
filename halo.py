@@ -32,7 +32,7 @@ class Halo :
         
         self.storage_TNG = dict(coords=cfg._STORAGE_FILES['TNG']%(halo_index, 'box_%d_coords'%cfg.TNG_RESOLUTION),
                                 Pth=cfg._STORAGE_FILES['TNG']%(halo_index, 'box_%d_Pth'%cfg.TNG_RESOLUTION),
-                                residuals=cfg._STORAGE_FILES['TNG']%(halo_index, 'residuals'))
+                                residuals=cfg._STORAGE_FILES['TNG']%(halo_index, 'residuals_%s'%cfg.RESIDUALS_NET_ID))
 
         self.idx = halo_index
     #}}}

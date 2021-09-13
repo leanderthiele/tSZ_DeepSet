@@ -114,6 +114,9 @@ NET_ID = None
 SAMPLE_FRACTIONS = dict(validation=0.2,
                         testing=0.1)
 
+# ID of the network with respect to which we take the residuals
+RESIDUALS_NET_ID = None
+
 # binning of the pressure residuals with respect to a simple network
 RESIDUALS_RMIN = 0.0
 RESIDUALS_RMAX = 2.5
