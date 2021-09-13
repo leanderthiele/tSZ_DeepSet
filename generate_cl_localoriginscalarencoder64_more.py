@@ -43,7 +43,7 @@ def generate_cl(trial) :
 
     N_layers_encoder = {870: 0, 313: 1, 701: 1, 629: 1, 837: 0}
 
-    MLP_N_layers_encoder = {870 : 2, 313: 4, 701: 2, 629: 3, 837; 2}
+    MLP_N_layers_encoder = {870 : 2, 313: 4, 701: 2, 629: 3, 837: 2}
 
     N_hidden_encoder = {870: 153, 313: 144, 701: 122, 629: 147, 837: 147}
 
