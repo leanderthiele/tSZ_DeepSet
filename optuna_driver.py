@@ -9,6 +9,8 @@ with the same IDENT should be discarded and the resulting data products (SQL dat
 should be removed
 
 Third command line argument is whether early stopping should be applied (also int)
+
+Fourth command line argument is number of random sample initially.
 """
 
 import os
@@ -39,6 +41,8 @@ generate_cl_lib = importlib.import_module('generate_cl_%s'%IDENT)
 REMOVE_PREVIOUS = bool(int(argv[2]))
 
 EARLY_STOPPING = bool(int(argv[3]))
+
+N_RANDOM = int(argv[4])
 
 
 class MyPruner(BasePruner) :
@@ -218,7 +222,7 @@ if __name__ == '__main__' :
     optuna.logging.get_logger('optuna').addHandler(logging.StreamHandler(sys.stdout))
 
     # set up our study (loads from data base if exists)
-    study = optuna.create_study(sampler=TPESampler(n_startup_trials=20),
+    study = optuna.create_study(sampler=TPESampler(n_startup_trials=N_RANDOM),
                                 study_name=IDENT,
                                 storage='sqlite:///%s.db'%IDENT,
                                 load_if_exists=True)
