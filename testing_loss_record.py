@@ -12,17 +12,21 @@ class TestingLossRecord :
         self.loss_arr = []
         self.KLD_arr = []
         self.guess_loss_arr = []
+        self.gauss_loss_arr = []
         self.logM_arr = []
         self.idx_arr = []
         self.N_TNG_arr = []
     #}}}
 
 
-    def add_loss(self, loss_list, KLD_list, loss_list_guess, logM_list, idx_list, N_TNG_list) :
+    def add_loss(self, loss_list, KLD_list, loss_list_guess, loss_list_gauss, logM_list, idx_list, N_TNG_list) :
     #{{{
         self.loss_arr.extend(loss_list)
         self.KLD_arr.extend(KLD_list)
         self.guess_loss_arr.extend(loss_list_guess)
+        if loss_list_gauss is not None :
+            # transpose the list of lists here, to get shape [halo, seed]
+            self.gauss_loss_arr.extend(map(list, zip(*loss_list_gauss)))
         self.logM_arr.extend(logM_list)
         self.idx_arr.extend(idx_list)
         self.N_TNG_arr.extend(N_TNG_list)
@@ -35,6 +39,7 @@ class TestingLossRecord :
                  loss=np.array(self.loss_arr),
                  KLD=np.array(self.KLD_arr),
                  guess_loss=np.array(self.guess_loss_arr),
+                 gauss_loss=np.array(self.gauss_loss_arr),
                  logM=np.array(self.logM_arr),
                  idx=np.array(self.idx_arr, dtype=int),
                  N_TNG=np.array(self.N_TNG_arr, dtype=int))

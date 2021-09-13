@@ -42,7 +42,7 @@ with np.load(os.path.join(cfg.RESULTS_PATH, 'loss_%s.npz'%ID)) as f :
     vmean = np.median(f['validation'], axis=-1)
     vgmean = np.median(f['validation_guess'], axis=-1)
     vkldmean = np.mean(f['validation_KLD'], axis=-1)
-    if 'validation_gauss' in f :
+    if 'validation_gauss' in f and len(f['validation_gauss']) > 0 :
         vgauss = f['validation_gauss'][epoch,:]
         all_vgauss = f['validation_gauss']
     else :
@@ -65,7 +65,7 @@ ax_epoch_loss.scatter(vg, v, label='validation', s=3+20*(vlogm-vmin)/(vmax-vmin)
 if vgauss is not None :
     ax_epoch_loss.scatter(vg, np.mean(vgauss, axis=-1), label='<validation gauss>', s=3+20*(vlogm-vmin)/(vmax-vmin))
     for ii in range(vgauss.shape[1]) :
-        ax_epoch_loss.scatter(vg, vgauss[:, ii], label='validation gauss' if ii==0 else None, color='black', s=0.1)
+        ax_epoch_loss.scatter(vg, vgauss[:, ii], label='validation gauss' if ii==0 else None, c='black', s=0.1)
 ax_epoch_loss.set_yscale('log')
 ax_epoch_loss.set_xscale('log')
 min_lim = 0.9*min((ax_epoch_loss.get_xlim()[0], ax_epoch_loss.get_ylim()[0]))

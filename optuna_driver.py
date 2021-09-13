@@ -193,6 +193,7 @@ class Objective :
         print('***One training loop (#%d) took %f seconds'%(trial.number, end_time-start_time))
 
         assert isinstance(loss_record, TrainingLossRecord)
+
         loss_curve = np.median(np.array(loss_record.validation_loss_arr)
                                / np.array(loss_record.validation_guess_loss_arr),
                                axis=-1)

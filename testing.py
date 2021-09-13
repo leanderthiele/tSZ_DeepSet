@@ -50,6 +50,10 @@ def Testing(loader=None) :
 
     this_idx = -1
     all_predictions = np.empty(0, dtype=np.float32)
+    if cfg.NET_ARCH['vae'] and cfg.N_GAUSS is not None :
+        all_gaussian_predictions = [np.empty(0, dtype=np.float32) for _ in range(cfg.N_GAUSS)]
+    else :  
+        all_gaussian_predictions = None
     save_rng = np.random.default_rng(cfg.TESTING_SEED)
 
     for t, data in enumerate(loader) :
@@ -64,8 +68,15 @@ def Testing(loader=None) :
             if save_rng.random() < cfg.TEST_SAVE_PROB :
                 all_predictions.tofile(os.path.join(cfg.RESULTS_PATH,
                                                     'predictions_%s_idx%d.bin'%(cfg.ID, this_idx)))
-            # reset the array
+                if all_gaussian_predictions is not None :
+                    for ii, gpi in enumerate(all_gaussian_predictions) :
+                        gpi.tofile(os.path.join(cfg.RESULTS_PATH,
+                                                'predictions_%s_idx%d_seed%d.bin'%(cfg.ID, this_idx, ii))
+            # reset the array(s)
             all_predictions = np.empty(0, dtype=np.float32)
+
+            if all_gaussian_predictions is not None :
+                all_gaussian_predictions = [np.empty(0, dtype=np.float32) for _ in range(cfg.N_GAUSS)]
 
         # batch size is 1 for validation / testing
         assert len(data) == 1
@@ -76,17 +87,27 @@ def Testing(loader=None) :
 
         with torch.no_grad() :
             guess = batt12(data.M200c, data.TNG_radii, data.P200c)
-            prediction, KLD = model(data)
+            prediction, gaussian_predictions, KLD = model(data)
 
         _, loss_list_guess, _ = loss_fn(guess, data.TNG_Pth, w=None)
         _, loss_list, KLD_list = loss_fn(prediction, data.TNG_Pth, KLD, w=None)
 
-        loss_record.add_loss(loss_list, KLD_list, loss_list_guess,
+        if gaussian_predictions is not None :
+            _, loss_list_gauss, _ = [loss_fn(gpi, data.TNG_Pth, w=None) for gpi in gaussian_predictions]
+        else :
+            loss_list_gauss = None
+
+        loss_record.add_loss(loss_list, KLD_list, loss_list_guess, loss_list_gauss,
                              np.log(data.M200c.cpu().detach().numpy()), data.idx,
                              # this works both for lists and tensors
                              [len(a) for a in data.TNG_Pth])
 
         all_predictions = np.concatenate((all_predictions, prediction.cpu().detach().numpy().squeeze()))
+
+        if gaussian_predictions is not None :
+            all_gaussian_predictions = [np.concatenate((all_gaussian_predictions[ii],
+                                                        gpi.cpu().detach().numpy().squeeze()))
+                                        for ii, gpi in enumerate(gaussian_predictions)]
 
     loss_record.save()
 
