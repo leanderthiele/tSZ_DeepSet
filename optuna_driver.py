@@ -174,14 +174,12 @@ class Objective :
             loss_record = Training(training_loader=self.training_loader,
                                    validation_loader=self.validation_loader,
                                    call_after_epoch=call_after_epoch if EARLY_STOPPING else None)
-        # TODO the following can be made nicer with several excepts
+        except TrainingAbort :
+            print('WARNING Training() finished prematuraly because loss curve did not look good.')
+            return 20.0
+        except (AssertionError, TrialPruned) as e :
+            raise e from None
         except Exception as e :
-            # there are some exceptions where we know we really should abort
-            if isinstance(e, TrainingAbort) :
-                print('WARNING Training() finished prematuraly because loss curve did not look good.')
-                return 20.0
-            if isinstance(e, (AssertionError, TrialPruned)) :
-                raise e from None
             if self.n_trials == 1 :
                 # we are in the first run overall, it is highly unlikely that we encountered something
                 # like OOM for which we would want to continue.
