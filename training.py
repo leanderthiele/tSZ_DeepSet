@@ -115,7 +115,7 @@ def Training(training_loader=None, validation_loader=None, call_after_epoch=None
                     
                     if gaussian_predictions is not None :
                         # shape: [gauss seed, halo]
-                        _, loss_list_gauss, _ = [loss_fn(gpi, data.TNG_Pth, w=None) for gpi in gaussian_predictions]
+                        loss_list_gauss = [loss_fn(gpi, data.TNG_Pth, w=None)[1] for gpi in gaussian_predictions]
                     else :
                         loss_list_gauss = None
 

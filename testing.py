@@ -95,7 +95,7 @@ def Testing(loader=None) :
         _, loss_list, KLD_list = loss_fn(prediction, data.TNG_Pth, KLD, w=None)
 
         if gaussian_predictions is not None :
-            _, loss_list_gauss, _ = [loss_fn(gpi, data.TNG_Pth, w=None) for gpi in gaussian_predictions]
+            loss_list_gauss = [loss_fn(gpi, data.TNG_Pth, w=None)[1] for gpi in gaussian_predictions]
         else :
             loss_list_gauss = None
 
