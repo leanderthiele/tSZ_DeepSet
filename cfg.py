@@ -310,9 +310,6 @@ DEFORMER_VISIBLE_DROPOUT = None
 # number of latent variables in the VAE (x2 for variance & mean)
 VAE_NLATENT = 1
 
-# whether the latent variables in the VAE are to be computed or randomly drawn
-VAE_RAND_LATENT = False
-
 # number of layers in VAE MLP
 VAE_NLAYERS = 4
 
@@ -331,8 +328,7 @@ KLD_ANNEALING_START = 0.2
 # when to finish KLD annealing (in units of # epochs)
 KLD_ANNEALING_END = 0.8
 
-# how many layers we have in the origin encoder (other settings equal to the usual encoder
-#    at least for now)
+# how many layers we have in the origin encoder
 ORIGIN_DEFAULT_NLAYERS = 3
 
 # default number of neurons in the outer layers of the MLPs

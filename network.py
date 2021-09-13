@@ -10,6 +10,7 @@ from network_batt12 import NetworkBatt12
 from network_local import NetworkLocal
 from network_vae import NetworkVAE
 from data_batch import DataBatch
+from data_modes import DataModes
 import cfg
 
 
@@ -118,9 +119,24 @@ class Network(nn.Module) :
     #}}}
 
  
-    def forward(self, batch) :
+    def forward(self, batch, recon_seed=None, gauss_seeds=None) :
+        """
+        batch ... DataBatch instance holding all the data
+        Following only apply if cfg.NET_ARCH['vae'] :
+        recon_seed  ... single integer, can be used to deterministically set the RNG
+                        in VAE reconstruction
+        gauss_seeds ... list of integers, to generate several Gaussian outputs
+
+        Returns:
+            recon_prediction  ... the reconstructed prediction (tensor)
+            gauss_predictions ... the Gaussian predictions (list)
+            KLD               ... negative KL divergence
+        """
     #{{{ 
         assert isinstance(batch, DataBatch)
+
+        if gauss_seeds is not None :
+            assert batch.mode is not DataModes.TRAINING
 
         if cfg.NET_ARCH['local'] :
             # NOTE this has to come before the origin net since DM and TNG particles
@@ -128,6 +144,8 @@ class Network(nn.Module) :
             l = self.local(batch.TNG_coords, batch.DM_coords_local,
                            batch.DM_N_local, batch.basis, batch.DM_vels_local,
                            batch.P200c)
+        else :
+            l = None
 
         if cfg.NET_ARCH['origin'] :
             # first find the shifted origin, shape [batch, 2, 3]
@@ -151,7 +169,7 @@ class Network(nn.Module) :
 
         if cfg.NET_ARCH['encoder'] :
             # encode the DM field
-            x = self.encoder(batch.DM_coords, v=batch.DM_vels, u=batch.u, basis=batch.basis)
+            e = self.encoder(batch.DM_coords, v=batch.DM_vels, u=batch.u, basis=batch.basis)
 
         if cfg.NET_ARCH['scalarencoder'] :
             s = self.scalarencoder(batch.DM_coords, v=batch.DM_vels,
@@ -159,20 +177,14 @@ class Network(nn.Module) :
                                    basis=batch.basis if self.scalarencoder.basis_passed else None)
 
         if cfg.NET_ARCH['vae'] :
-            z, KLD = self.vae(batch.TNG_residuals)
+            z, KLD = self.vae(batch.TNG_residuals, gaussian=False, seed=recon_seed)
+            if gauss_seeds is not None :
+                z_gauss = [self.vae(batch.TNG_residuals, gaussian=True, seed=seed) for seed in gauss_seeds]
+            else :
+                z_gauss = None
         else :
             KLD = torch.zeros(len(batch))
-
-        if cfg.NET_ARCH['decoder'] :
-            # decode at the TNG particle positions
-            x = self.decoder(batch.TNG_coords,
-                             h=x if cfg.NET_ARCH['encoder'] else None,
-                             s=s if cfg.NET_ARCH['scalarencoder'] else None,
-                             r=batch.TNG_radii if self.decoder.r_passed else None,
-                             u=batch.u if self.decoder.globals_passed else None,
-                             basis=batch.basis if self.decoder.basis_passed else None,
-                             local=l if self.decoder.local_passed else None,
-                             vae=z if cfg.NET_ARCH['vae'] else None)
+            z_gauss = None
 
         if cfg.NET_ARCH['batt12'] :
             if cfg.NET_ARCH['deformer'] :
@@ -186,23 +198,59 @@ class Network(nn.Module) :
 
             # now evaluate the (modified) Battaglia+2012 model at the deformed radial coordinates
             b12 = self.batt12(batch.M200c, r_b12, batch.P200c)
+        else :
+            b12 = None
 
+        if cfg.NET_ARCH['decoder'] :
+            # decode at the TNG particle positions
+            decoder_kwargs = {'x': batch.TNG_coords,
+                              'h': e if cfg.NET_ARCH['encoder'] else None,
+                              's': s if cfg.NET_ARCH['scalarencoder'] else None,
+                              'r': batch.TNG_radii if self.decoder.r_passed else None,
+                              'u': batch.u if self.decoder.globals_passed else None,
+                              'basis': batch.basis if self.decoder.basis_passed else None,
+                              'local': l if self.decoder.local_passed else None}
+            x = self.decoder(vae=z if cfg.NET_ARCH['vae'] else None, **decoder_kwargs)
+
+            if z_gauss is not None :
+                x_gauss = [self.decoder(vae=zi, **decoder_kwargs) for zi in z_gauss]
+            else :
+                x_gauss = None
+        else :
+            x = None
+            x_gauss=None
+
+        f = self.__output(x, l, b12)
+
+        if x_gauss is not None :
+            f_gauss = [self.__output(xi, l, b12) for xi in x_gauss]
+
+        return f, f_gauss, KLD
+    #}}}
+
+
+    def __output(self, x, l, b12) :
+        """
+        Computes the final output from
+            x   ... decoder output
+            l   ... local output
+            b12 ... Batt12 output
+        """
+    #{{{
         if cfg.NET_ARCH['decoder'] and not cfg.NET_ARCH['batt12'] :
             # TODO why not use exp here?
-            x = self.scaling * torch.relu(torch.sinh(x))
+            return self.scaling * torch.relu(torch.sinh(x))
         elif cfg.NET_ARCH['decoder'] and cfg.NET_ARCH['batt12'] :
-            x = self.__combine(x, b12)
+            return self.__combine(x, b12)
         elif not cfg.NET_ARCH['decoder'] and not cfg.NET_ARCH['local'] and cfg.NET_ARCH['batt12'] :
-            x = b12
+            return b12
         elif not cfg.NET_ARCH['decoder'] and cfg.NET_ARCH['local'] and cfg.NET_ARCH['batt12'] :
-            x = self.__combine(l, b12)
+            return self.__combine(l, b12)
         elif not cfg.NET_ARCH['decoder'] and cfg.NET_ARCH['local'] and not cfg.NET_ARCH['batt12'] :
             # TODO why not use exp here?
-            x = self.scaling * torch.relu(torch.sinh(l))
+            return self.scaling * torch.relu(torch.sinh(l))
         else :
             raise RuntimeError('Should not happen!')
-
-        return x, KLD
     #}}}
 
 

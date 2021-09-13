@@ -9,13 +9,10 @@ class NetworkVAE(nn.Module) :
     
     def __init__(self,
                  Nlatent=DefaultFromCfg('VAE_NLATENT'),
-                 rand_latent=DefaultFromCfg('VAE_RAND_LATENT'),
                  **MLP_kwargs) :
     #{{{
         if isinstance(Nlatent, DefaultFromCfg) :
             Nlatent = Nlatent()
-        if isinstance(rand_latent, DefaultFromCfg) :
-            rand_latent = rand_latent()
 
         super().__init__()
 
@@ -23,7 +20,6 @@ class NetworkVAE(nn.Module) :
             self.mlp = NetworkMLP(cfg.RESIDUALS_NBINS, 2*Nlatent, **MLP_kwargs)
 
         self.Nlatent = Nlatent
-        self.rand_latent = rand_latent
 
         # we initialize this to None so that when the network is put in DDP mode
         # not the same RNG is copied to all the processes
@@ -39,13 +35,15 @@ class NetworkVAE(nn.Module) :
     #}}}
     
 
-    def forward(self, x) :
+    def forward(self, x, gaussian, seed=None) :
         """
         x ... the input, of shape [batch, Nbins]. 
-              Must also be passed when rand_latent is True as this is a convenient way
+              Must also be passed when gaussian is True as this is a convenient way
               to get the batch size and device
+        gaussian ... whether the output is a pure N(0,1) number or sampled from the encoded distribution
+        seed ... integer to manually initialize the RNG (otherwise the internal RNG will be used)
 
-        Returns the encoded latent space representation and the KL loss (None if rand_latent is True)
+        Returns the encoded latent space representation and the KL loss (only if gaussian=False)
         where the KL loss is not summed over batch, i.e. a [batch] tensor
         """
     #{{{ 
@@ -53,9 +51,14 @@ class NetworkVAE(nn.Module) :
             # seed with different number for each process
             self.rng = torch.Generator(device=x.device).manual_seed((cfg.NETWORK_SEED+cfg.rank) % 2**63)
 
-        if self.rand_latent :
+        if seed is not None :
+            _rng = torch.Generator(device=x.device).manual_seed(seed)
+        else :
+            _rng = self.rng
+
+        if gaussian :
             # draw random latent space variables
-            return torch.randn(x.shape[0], self.Nlatent, device=x.device, generator=self.rng), None
+            return torch.randn(x.shape[0], self.Nlatent, device=x.device, generator=_rng), None
 
         scalars, _ = self.create_scalars(x)
 
@@ -65,7 +68,7 @@ class NetworkVAE(nn.Module) :
         logvar = h[:, self.Nlatent:]
 
         # compute the latent space variables
-        z = mu + torch.exp(0.5*logvar) * torch.randn(x.shape[0], self.Nlatent, device=x.device, generator=self.rng)
+        z = mu + torch.exp(0.5*logvar) * torch.randn(x.shape[0], self.Nlatent, device=x.device, generator=_rng)
 
         # compute negative KL divergence
         KLD = -0.5 * torch.sum(1 + logvar - mu.square() - logvar.exp(), dim=1) 
