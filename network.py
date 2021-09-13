@@ -228,6 +228,8 @@ class Network(nn.Module) :
 
         if x_gauss is not None :
             f_gauss = [self.__output(xi, l, b12) for xi in x_gauss]
+        else :
+            f_gauss = None
 
         return f, f_gauss, KLD
     #}}}
