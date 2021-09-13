@@ -119,7 +119,7 @@ RESIDUALS_NET_ID = None
 
 # binning of the pressure residuals with respect to a simple network
 RESIDUALS_RMIN = 0.0
-RESIDUALS_RMAX = 2.5
+RESIDUALS_RMAX = 2.0
 RESIDUALS_NBINS = 32
 
 # noise on the pressure residuals (absolute value, data has stddev=1)

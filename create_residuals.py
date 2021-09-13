@@ -29,7 +29,7 @@ RBINS = np.linspace(cfg.RESIDUALS_RMIN, cfg.RESIDUALS_RMAX, num=cfg.RESIDUALS_NB
 RCENTERS = 0.5*(RBINS[:-1] + RBINS[1:])
 
 # store intermediate data here
-binned_residuals = np.empty((len(loader), cfg.RESIDUALS_NBINS))
+binned_residuals = np.zeros((len(loader), cfg.RESIDUALS_NBINS))
 
 def get_binned(x, indices) :
     out = np.empty(cfg.RESIDUALS_NBINS)
@@ -49,8 +49,6 @@ for t, data in enumerate(loader) :
     p_npy = prediction.cpu().detach().numpy().squeeze()
     t_npy = data.TNG_Pth.cpu().detach().numpy().squeeze()
 
-    print(r_npy.shape)
-
     for ii in range(len(r_npy)) :
         r = r_npy[ii]
         p = p_npy[ii]
@@ -66,6 +64,9 @@ for t, data in enumerate(loader) :
 
         p_binned = get_binned(p, indices)
         t_binned = get_binned(t, indices)
+
+        # safety measure
+        assert np.count_nonzero(binned_residuals[data.idx[ii], :]) == 0
 
         binned_residuals[data.idx[ii], :] = (t_binned - p_binned) / p_binned   
 
