@@ -1,19 +1,8 @@
 """
 This is the driver code for optuna. The idea is that we specify as the first command
-line arguments a string IDENT,
+line arguments a string <ident>,
 such that generate_cl_<IDENT>.py exports a function generate_cl(trial)
 which returns the command line arguments for a specific run (as a list ['ARG=value', ...]).
-
-Second command line argument is an integer which if non-zero means that any previous runs
-with the same IDENT should be discarded and the resulting data products (SQL database, loss curves, ...)
-should be removed
-
-Third command line argument is whether early stopping should be applied (also int)
-
-Fourth command line argument is number of random sample initially.
-
-Fifth command line argument is whether there is a VAE involved
-(in which case we perform multi-objective optimization).
 """
 
 import os
@@ -25,6 +14,7 @@ import logging
 import importlib
 import subprocess
 from time import time
+from argparse import ArgumentParser
 
 import numpy as np
 import optuna
@@ -38,16 +28,23 @@ from training import Training
 from training_loss_record import TrainingLossRecord
 import cfg
 
-IDENT = argv[1]
-generate_cl_lib = importlib.import_module('generate_cl_%s'%IDENT)
+ARG_PARSER = ArgumentParser()
+ARG_PARSER.add_argument('ident', type=str, nargs='?',
+                        help='identifier for the current run. A file generate_cl_<ident>.py has to exist.')
+ARG_PARSER.add_argument('-rm', '--remove-previous', action='store_true',
+                        help='whether data produced by previous runs with same <ident> should be removed.')
+ARG_PARSER.add_argument('-es', '--early-stopping', action='store_true',
+                        help='whether some early stopping should be applied (probably not usable at the moment)')
+ARG_PARSER.add_argument('-nr', '--num-random', type=int, default=20,
+                        help='number of initial random trials')
+ARG_PARSER.add_argument('-vae', '--has-vae', action='store_true',
+                        help='set if architecture has probabilistic component, requiring multi-objective optimization.')
 
-REMOVE_PREVIOUS = bool(int(argv[2]))
+ARGS = ARG_PARSER.parse_args()
 
-EARLY_STOPPING = bool(int(argv[3]))
 
-N_RANDOM = int(argv[4])
-
-HAS_VAE = bool(int(argv[5]))
+# import the library containing the function we use to generate trial command lines
+generate_cl_lib = importlib.import_module('generate_cl_%s'%ARGS.ident)
 
 
 class MyPruner(BasePruner) :
@@ -155,7 +152,7 @@ class Objective :
         cl = generate_cl_lib.generate_cl(trial)
 
         # the ID for this run (use the nr to be fairly sure we really only have the number afterwards)
-        ID = 'optuna_%s_nr%d'%(IDENT, trial.number)
+        ID = 'optuna_%s_nr%d'%(ARGS.ident, trial.number)
 
         # set the environment variables that will be used by the training process
         os.environ['TSZ_DEEP_SET_CFG'] = ' '.join('--%s'%s for s in cl + ['ID="%s"'%ID, ])
@@ -173,7 +170,7 @@ class Objective :
         try :
             loss_record = Training(training_loader=self.training_loader,
                                    validation_loader=self.validation_loader,
-                                   call_after_epoch=call_after_epoch if EARLY_STOPPING else None)
+                                   call_after_epoch=call_after_epoch if ARGS.early_stopping else None)
         except TrainingAbort :
             print('WARNING Training() finished prematuraly because loss curve did not look good.')
             return 20.0
@@ -202,30 +199,30 @@ class Objective :
         # local minimum
         final_loss = np.mean(loss_curve[-5:])
 
-        if HAS_VAE :
+        if ARGS.has_vae :
             # we first average the Gaussian loss over random seeds, then take the median
             loss_curve_gaussian = np.median(np.mean(np.array(loss_record.validation_gauss_loss_arr), axis=-1)
                                             / np.array(loss_record.validation_guess_loss_arr),
                                             axis=-1)
             final_gaussian_loss = np.mean(loss_curve[-5:])
 
-        return final_loss, final_gaussian_loss if HAS_VAE else final_loss 
+        return final_loss, final_gaussian_loss if ARGS.has_vae else final_loss 
     #}}}
 
 
 # main driver code
 if __name__ == '__main__' :
     
-    if REMOVE_PREVIOUS :
-        print('REMOVE_PREVIOUS==True, will delete all previously generated data with same IDENT')
+    if ARGS.remove_previous :
+        print('remove-previous==True, will delete all previously generated data with same <ident>')
         # the SQL data base where optuna puts its stuff
-        db_fname = '%s.db'%IDENT
+        db_fname = '%s.db'%ARGS.ident
         if os.path.isfile(db_fname) :
             os.remove(db_fname)
         for prefix, suffix in [('loss', 'npz'), ('cfg', 'py'), ('model', 'pt')] :
             # this is not ideal because glob doesn't know regular expressions, but should be
-            # safe unless we do something stupid like taking ..._nr as IDENT
-            fnames = glob(os.path.join(cfg.RESULTS_PATH, '%s_optuna_%s_nr[0-9]*.%s'%(prefix, IDENT, suffix)))
+            # safe unless we do something stupid like taking ..._nr as ident
+            fnames = glob(os.path.join(cfg.RESULTS_PATH, '%s_optuna_%s_nr[0-9]*.%s'%(prefix, ARGS.ident, suffix)))
             for fname in fnames :
                 os.remove(fname)
 
@@ -233,10 +230,10 @@ if __name__ == '__main__' :
     optuna.logging.get_logger('optuna').addHandler(logging.StreamHandler(sys.stdout))
 
     # set up our study (loads from data base if exists)
-    study = optuna.create_study(sampler=TPESampler(n_startup_trials=N_RANDOM),
-                                study_name=IDENT,
-                                storage='sqlite:///%s.db'%IDENT,
-                                directions=["minimize", ] * (1+HAS_VAE),
+    study = optuna.create_study(sampler=TPESampler(n_startup_trials=ARGS.num_random),
+                                study_name=ARGS.ident,
+                                storage='sqlite:///%s.db'%ARGS.ident,
+                                directions=["minimize", ] * (1+ARGS.has_vae),
                                 load_if_exists=True)
 
     # construct our objective callable
