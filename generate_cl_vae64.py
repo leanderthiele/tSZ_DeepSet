@@ -64,7 +64,7 @@ def generate_cl(trial) :
     residuals_noise = trial.suggest_float('residuals_noise', 1e-2, 1e1, log=True)
     out.append('RESIDUALS_NOISE=%.8e'%residuals_noise)
 
-    kld_scaling = trial.suggest_float('kld_scaling', 1e-5, 1e0, log=True)
+    kld_scaling = trial.suggest_float('kld_scaling', 1e-6, 1e0, log=True)
     out.append('KLD_SCALING=%.8e'%kld_scaling)
 
     kld_annealing_start = trial.suggest_float('kld_annealing_start', 0.0, 0.3)
