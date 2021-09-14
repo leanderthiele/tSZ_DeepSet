@@ -40,6 +40,10 @@ ARG_PARSER.add_argument('-vae', '--has-vae', action='store_true',
 
 ARGS = ARG_PARSER.parse_args()
 
+# give some print output to have a record
+print('**** optuna_driver.py starting with settings ****')
+print(ARGS)
+
 
 # import the library containing the function we use to generate trial command lines
 generate_cl_lib = importlib.import_module('generate_cl_%s'%ARGS.ident)
