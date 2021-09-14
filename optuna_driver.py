@@ -7,12 +7,10 @@ which returns the command line arguments for a specific run (as a list ['ARG=val
 
 import os
 import os.path
-from sys import argv
 from glob import glob
 import sys
 import logging
 import importlib
-import subprocess
 from time import time
 from argparse import ArgumentParser
 
@@ -204,7 +202,7 @@ class Objective :
             loss_curve_gaussian = np.median(np.mean(np.array(loss_record.validation_gauss_loss_arr), axis=-1)
                                             / np.array(loss_record.validation_guess_loss_arr),
                                             axis=-1)
-            final_gaussian_loss = np.mean(loss_curve[-5:])
+            final_gaussian_loss = np.mean(loss_curve_gaussian[-5:])
 
         return final_loss, final_gaussian_loss if ARGS.has_vae else final_loss 
     #}}}
