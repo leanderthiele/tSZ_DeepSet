@@ -27,7 +27,7 @@ from training_loss_record import TrainingLossRecord
 import cfg
 
 ARG_PARSER = ArgumentParser()
-ARG_PARSER.add_argument('ident', type=str, nargs='?',
+ARG_PARSER.add_argument('ident', type=str,
                         help='identifier for the current run. A file generate_cl_<ident>.py has to exist.')
 ARG_PARSER.add_argument('-rm', '--remove-previous', action='store_true',
                         help='whether data produced by previous runs with same <ident> should be removed.')
