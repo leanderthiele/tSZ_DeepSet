@@ -6,6 +6,8 @@ We require this knowledge to properly standardize the input
 for the local network.
 """
 
+# FIXME this script is currently broken as it uses the old libprtfinder.so interface!
+
 import ctypes as ct
 
 import numpy as np
