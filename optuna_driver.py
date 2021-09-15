@@ -208,7 +208,7 @@ class Objective :
                                             axis=-1)
             final_gaussian_loss = np.mean(loss_curve_gaussian[-5:])
 
-        return (final_loss, final_gaussian_loss if ARGS.has_vae) else final_loss 
+        return (final_loss, final_gaussian_loss) if ARGS.has_vae else final_loss 
     #}}}
 
 
