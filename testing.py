@@ -71,7 +71,7 @@ def Testing(loader=None) :
                 if all_gaussian_predictions is not None :
                     for ii, gpi in enumerate(all_gaussian_predictions) :
                         gpi.tofile(os.path.join(cfg.RESULTS_PATH,
-                                                'predictions_%s_idx%d_seed%d.bin'%(cfg.ID, this_idx, ii))
+                                                'predictions_%s_idx%d_seed%d.bin'%(cfg.ID, this_idx, ii)))
             # reset the array(s)
             all_predictions = np.empty(0, dtype=np.float32)
 
