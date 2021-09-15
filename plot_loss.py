@@ -103,7 +103,7 @@ e = np.arange(epochs)
 ax_mean_loss.plot(e, np.median(all_t/all_tg, axis=-1), label='training')
 ax_mean_loss.plot(e, np.median(all_v/all_vg, axis=-1), label='validation')
 if all_vgauss is not None :
-    ax_mean_loss.plot(e, np.mean(all_vgauss/all_vg[:,:,None], axis=(-1,-2)), label='validation gauss')
+    ax_mean_loss.plot(e, np.median(np.mean(all_vgauss, axis=-1)/all_vg, axis=-1), label='validation gauss')
 ax_mean_loss.set_xlabel('epoch')
 ax_mean_loss.set_ylabel('median(network/B12)')
 ax_mean_loss.legend(loc='upper right', frameon=False)
