@@ -10,7 +10,7 @@ def generate_cl(trial) :
     out.append('DECODER_DEFAULT_GLOBALS_PASSED=True')
     out.append('DECODER_DEFAULT_BASIS_PASSED=False')
 
-    out.append('VALIDATION_EPOCHS=10')
+    out.append('VALIDATION_EPOCHS=6')
     out.append('N_LOCAL["validation"]=512')
     out.append('PRT_FRACTION["DM"]["validation"]=2048')
     out.append('PRT_FRACTION["TNG"]["validation"]=4096')
@@ -39,7 +39,7 @@ def generate_cl(trial) :
     # we want the decoder to be fairly expressive because we believe that there are some prior volume
     # effects at play here
     out.append('DECODER_DEFAULT_NLAYERS=4')
-    out.append('DECODER_DEFAULT_NHIDDEN=200')
+    out.append('DECODER_DEFAULT_NHIDDEN=196')
 
     lr = trial.suggest_float('lr', 1e-6, 1e-3, log=True)
     out.append('ONE_CYCLE_LR_KWARGS["decoder"]["max_lr"]=%.8e'%lr)

@@ -48,10 +48,10 @@ class NetworkVAE(nn.Module) :
     #{{{ 
         if self.rng is None :
             # seed with different number for each process
-            self.rng = torch.Generator(device=x.device).manual_seed((cfg.NETWORK_SEED+cfg.rank) % 2**63)
+            self.rng = torch.Generator(device=x.device).manual_seed(int((cfg.NETWORK_SEED+cfg.rank) % 2**63))
 
         if seed is not None :
-            _rng = torch.Generator(device=x.device).manual_seed(seed)
+            _rng = torch.Generator(device=x.device).manual_seed(int(seed))
         else :
             _rng = self.rng
 
