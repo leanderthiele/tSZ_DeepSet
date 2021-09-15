@@ -25,7 +25,9 @@ class HaloCatalog(list) :
         assert all(not hasattr(h, 'u_avg') and not hasattr(h, 'u_std') for h in halos)
         train_halos = halos if mode is DataModes.TRAINING \
                       else HaloCatalog(DataModes.TRAINING, compute_dglobals=False)
-        u = np.array([GlobalFields(h) for h in train_halos])
+
+        # we load all global scalars here, irrespective of cfg.GLOBALS_USE
+        u = np.array([GlobalFields(h, restrict=False) for h in train_halos])
         u_avg = np.mean(u, axis=0)
         u_std = np.std(u, axis=0)
 
@@ -37,7 +39,7 @@ class HaloCatalog(list) :
         # if we are training and there are global fields, need to populate the dglobals
         # member variable for the noise generation
         if compute_dglobals \
-           and len(GlobalFields) != 0 \
+           and GlobalFields.len_all() != 0 \
            and mode is DataModes.TRAINING :
             
             # ok, this is probably not efficient but who cares, these arrays are small
@@ -45,9 +47,9 @@ class HaloCatalog(list) :
             for ii in range(len(halos)) :
                 
                 # some distributions are two-sided, so let's take two values here
-                dglobals = np.empty((len(GlobalFields), 2))
+                dglobals = np.empty((GlobalFields.len_all(), 2))
 
-                for jj in range(len(GlobalFields)) :
+                for jj in range(GlobalFields.len_all()) :
 
                     diffs = np.delete(u[:,jj], ii) - u[ii,jj]
                     neg_diffs = - diffs[diffs<0]

@@ -141,10 +141,8 @@ NETWORK_SEED = 1234567890123456789
 # seed that we use during testing to get reproducible results in choosing the DM particles etc.
 TESTING_SEED = 314159265
 
-# which globals to use -- set `none' to true if no globals are to be used
-GLOBALS_USE = dict(none=False,
-                   #-------#
-                   logM=True,
+# which globals to use
+GLOBALS_USE = dict(logM=True,
                    Xoff=True,
                    Voff=True,
                    CM=True,
@@ -160,10 +158,13 @@ GLOBALS_USE = dict(none=False,
 # set to None if no noise desired
 GLOBALS_NOISE = 5.0
 
-# which basis vectors to use -- set `none' to true if no basis vectors are to be used
-BASIS_USE = dict(none=False,
-                 #--------#
-                 ang_mom=True,
+# amount of noise added to the logarithmic mass
+# (mass is a bit special so we treat it separately from the other globals)
+# set to None if no noise desired
+MASS_NOISE = 5.0
+
+# which basis vectors to use
+BASIS_USE = dict(ang_mom=True,
                  CM=True,
                  inertia=True,
                  vel_dispersion=True)

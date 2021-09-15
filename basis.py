@@ -25,7 +25,7 @@ class Basis(np.ndarray, metaclass=FixedLenVec) :
         assert isinstance(halo, Halo)
 
         # make sure no typos in BASIS_USE dict
-        assert set(cfg.BASIS_USE.keys()) == {'none', 'ang_mom', 'CM', 'inertia', 'vel_dispersion'}
+        assert set(cfg.BASIS_USE.keys()) == {'ang_mom', 'CM', 'inertia', 'vel_dispersion'}
 
         _, v = LA.eigh(halo.inertia)
         v = v.T # more intuitive
@@ -86,8 +86,8 @@ class Basis(np.ndarray, metaclass=FixedLenVec) :
         should not be used directly, adapt if more features are added to the global vector
         """
     #{{{ 
-        return (not cfg.BASIS_USE['none']) * (cfg.BASIS_USE['ang_mom']
-                                              + cfg.BASIS_USE['CM']
-                                              + 3 * cfg.BASIS_USE['inertia']
-                                              + 3 * cfg.BASIS_USE['vel_dispersion'])
+        return cfg.BASIS_USE['ang_mom'] \
+               + cfg.BASIS_USE['CM'] \
+               + 3 * cfg.BASIS_USE['inertia'] \
+               + 3 * cfg.BASIS_USE['vel_dispersion']
     #}}}

@@ -79,7 +79,7 @@ def _parse_cmd_line() :
         if from_env_var :
             assert cfg_key not in ['DATALOADER_ARGS', 'HALO_CATALOG',
                                    'SAMPLE_FRACTIONS', 'CONSISTENT_SEED', 'RMAX',
-                                   'GLOBALS_USE', 'TNG_RESOLUTION', 'USE_VELOCITIES', ]
+                                   'TNG_RESOLUTION', 'USE_VELOCITIES', ]
 
         # if indexing is involved, also do some basic checks
         if getitem_idx is not None :
