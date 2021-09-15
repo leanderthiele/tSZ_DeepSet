@@ -125,7 +125,9 @@ def Training(training_loader=None, validation_loader=None, call_after_epoch=None
         else :
             # add dummy validation loss for consistency (note that batch size == 1 for validation)
             for t in range(len(validation_loader)) :
-                loss_record.add_validation_loss([0.0, ], [0.0, ], [0.0, ], [[0.0, ], ]*cfg.N_GAUSS, np.zeros(1), np.zeros(1))
+                loss_record.add_validation_loss([0.0, ], [0.0, ], [0.0, ],
+                                                [[0.0, ], ]*(cfg.N_GAUSS if cfg.N_GAUSS is not None else 0),
+                                                np.zeros(1), np.zeros(1))
 
         end_time_validation = time()
 

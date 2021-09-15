@@ -89,7 +89,10 @@ def Testing(loader=None) :
             guess = batt12(data.M200c, data.TNG_radii, data.P200c)
             prediction, gaussian_predictions, KLD = model(data,
                                                           recon_seed=cfg.TESTING_SEED+this_idx,
-                                                          gauss_seeds=[cfg.TESTING_SEED+this_idx*cfg.N_GAUSS+ii for ii in range(cfg.N_GAUSS)])
+                                                          gauss_seeds=[cfg.TESTING_SEED+this_idx*cfg.N_GAUSS+ii \
+                                                                       for ii in range(cfg.N_GAUSS)] \
+                                                                       if cfg.N_GAUSS is not None \
+                                                                       else None)
 
         _, loss_list_guess, _ = loss_fn(guess, data.TNG_Pth, w=None)
         _, loss_list, KLD_list = loss_fn(prediction, data.TNG_Pth, KLD, w=None)
