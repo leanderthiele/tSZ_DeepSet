@@ -86,7 +86,7 @@ if Nidx :
 
 ax_epoch_loss.set_xlabel('B12 loss')
 ax_epoch_loss.set_ylabel('network loss')
-ax_epoch_loss.legend(loc='upper left', frameon=False)
+ax_epoch_loss.legend(loc='upper left', frameon=False, ncol=2)
 ax_epoch_loss.text(0.95, 0.05, 'epoch %d'%(epoch), transform=ax_epoch_loss.transAxes, ha='right', va='bottom', color='green')
 
 ax_epoch_kld.scatter(tg, tkld, label='training', s=3+20*(tlogm-vmin)/(vmax-vmin))
