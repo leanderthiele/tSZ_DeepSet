@@ -43,7 +43,7 @@ for ii, this_idx in enumerate(idx) :
     loss[ii] = np.sum(N_TNG_all[mask] * loss_all[mask]) / np.sum(N_TNG_all[mask])
     guess_loss[ii] = np.sum(N_TNG_all[mask] * guess_loss_all[mask]) / np.sum(N_TNG_all[mask])
     if gauss_loss is not None :
-        gauss_loss[ii] = np.sum(N_TNG_all[mask] * gauss_loss_all[mask], axis=0) / np.sum(N_TNG_all[mask])
+        gauss_loss[ii] = np.sum(N_TNG_all[mask][:,None] * gauss_loss_all[mask], axis=0) / np.sum(N_TNG_all[mask])
     KLD[ii] = KLD_all[mask][0]
     if abs(KLD[ii] > 1e-7) : # avoid divide by zero
         assert all(abs(KLD[ii]/kld-1) < 1e-5 for kld in KLD_all[mask])
