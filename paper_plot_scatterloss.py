@@ -2,6 +2,7 @@ import os.path
 from time import ctime
 
 import numpy as np
+from scipy.interpolate import UnivariateSpline
 from matplotlib import pyplot as plt
 
 import cfg
@@ -11,16 +12,16 @@ IDs = {'origin64': ('Origin+GNFW', 'blue'),
        'localorigin64': ('Local+Origin+GNFW', 'magenta'),
        'vae64_nr440': ('Local+Origin+GNFW+Stochasticity', 'cyan')}
 
-MARKER_SCALE = 1.0
+MARKER_SCALE = 0.5
 
 EXCESS_SPACE = 0.1
 
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(figsize=(5,5))
 ax_linear = ax.twiny()
 
 guess_loss = None
 
-for ID, (label, color) in IDs.items() :
+for ID, (label, color) in list(IDs.items())[::-1] :
     
     fname = os.path.join(cfg.RESULTS_PATH, 'loss_testing_%s.npz'%ID)
     print('Using file %s'%fname)
@@ -59,10 +60,20 @@ for ID, (label, color) in IDs.items() :
     else :
         assert np.allclose(guess_loss, guess_loss_here)
 
+    loss_quantifier = np.median(loss/guess_loss)
+
     vmin = 8.518
     vmax = 11.534
-    ax.scatter(guess_loss, loss, label=label,
+    ax.scatter(guess_loss, loss, label='%s (%.2f)'%(label, loss_quantifier),
                s=MARKER_SCALE*(3+20*(logM-vmin)/(vmax-vmin)), c=color)
+
+    spline_kwargs = {} # TODO deal with this later
+
+    sorter = np.argsort(guess_loss)
+    spl = UnivariateSpline(np.log(guess_loss[sorter]), np.log(loss[sorter]), **spline_kwargs)
+    x = np.linspace(np.min(np.log(guess_loss)), np.max(np.log(guess_loss)))
+    y = spl(x)
+    ax.plot(np.exp(x), np.exp(y), color=color)
 
     if gauss_loss is not None :
         lg = np.log(guess_loss)
@@ -72,7 +83,13 @@ for ID, (label, color) in IDs.items() :
         parts = ax_linear.violinplot(gauss_loss.T, positions=(lg-lg_min)/(lg_max-lg_min),
                                      showmeans=False, showextrema=False, widths=0.02)
         for pc in parts['bodies'] :
-            pc.set_facecolor(color)
+            pc.set_facecolor('none')
+            pc.set_edgecolor(color)
+
+        spl = UnivariateSpline(np.log(guess_loss[sorter]),
+                               np.log(np.mean(gauss_loss, axis=-1)[sorter]), **spline_kwargs)
+        y = spl(x)
+        ax.plot(np.exp(x), np.exp(y), color=color, linestyle='dashed')
 
 ax.set_xlabel('GNFW loss')
 ax.set_ylabel('network loss')
@@ -83,8 +100,10 @@ ax.set_xscale('log')
 min_lim = (1-EXCESS_SPACE)*min((ax.get_xlim()[0], ax.get_ylim()[0]))
 max_lim = (1+EXCESS_SPACE)*max((ax.get_xlim()[1], ax.get_ylim()[1]))
 ax.plot([min_lim, max_lim], [min_lim, max_lim], linestyle='dashed', color='black')
-ax.set_xlim(min_lim, max_lim)
-ax.set_ylim(min_lim, max_lim)
+#ax.set_xlim(min_lim, max_lim)
+#ax.set_ylim(min_lim, max_lim)
+ax.set_xlim(3e-3, 2e-1)
+ax.set_ylim(7e-4, 2e-1)
 
 # now we need to figure out how to adjust limits on our fake axis with linear scale
 lg = np.log(guess_loss)
@@ -100,4 +119,4 @@ ax_linear.set_xticks([])
 
 ax.legend(loc='upper left', frameon=False)
 
-plt.show()
+fig.savefig('scatterloss.pdf', bbox_inches='tight')
