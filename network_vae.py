@@ -55,10 +55,14 @@ class NetworkVAE(nn.Module) :
         else :
             _rng = self.rng
 
-        if gaussian :
-            # draw random latent space variables
-            return torch.randn(x.shape[0], self.Nlatent, device=x.device, generator=_rng)
+        # compute standard normal random numbers
+        r = torch.randn(x.shape[0], self.Nlatent, device=x.device, generator=_rng)
 
+        if gaussian :
+            # just return the random numbers
+            return r
+
+        # not Gaussian, i.e. we need to perform reconstruction
         scalars, _ = self.create_scalars(x)
 
         # pass through the network
@@ -66,8 +70,7 @@ class NetworkVAE(nn.Module) :
         mu = h[:, :self.Nlatent]
         logvar = h[:, self.Nlatent:]
 
-        # compute the latent space variables
-        z = mu + torch.exp(0.5*logvar) * torch.randn(x.shape[0], self.Nlatent, device=x.device, generator=_rng)
+        z = mu + torch.exp(0.5*logvar) * r
 
         # compute negative KL divergence
         KLD = -0.5 * torch.sum(1 + logvar - mu.square() - logvar.exp(), dim=1) 
