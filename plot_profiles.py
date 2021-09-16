@@ -24,9 +24,8 @@ halo_idx = int(argv[2])
 
 N = cfg.TNG_RESOLUTION
 x = np.mgrid[-N//2:N//2, -N//2:N//2, -N//2:N//2].transpose(1,2,3,0).reshape((N*N*N, 3)).astype(np.float32)
-x *= 2.5 / N # now in the range [-2.5, 2.5]
-r_target = np.linalg.norm(x, axis=-1).flatten()
-r_prediction = r_target[r_target < cfg.RMAX]
+x *= 5.0 / N # now in the range [-2.5, 2.5]
+r = np.linalg.norm(x, axis=-1).flatten()
 
 path_target = cfg._STORAGE_FILES['TNG']%(halo_idx, 'box_%d_cube_Pth'%cfg.TNG_RESOLUTION)
 path_prediction = os.path.join(cfg.RESULTS_PATH,
@@ -69,7 +68,7 @@ xc = A_xc * (0.7 * halo_globals['M200c'] / 1e4)**am_xc
 beta = A_beta * (0.7 * halo_globals['M200c'] / 1e4)**am_beta
 
 # be careful to do the binning identically
-box_b12 = P0 * ((r_target+1e-3)/xc)**(-0.3) * (1 + (r_target+1e-3)/xc)**(-beta)
+box_b12 = P0 * ((r+1e-3)/xc)**(-0.3) * (1 + (r+1e-3)/xc)**(-beta)
 
 def get_binned(radii, values) :
     assert len(radii) == len(values)
@@ -79,10 +78,10 @@ def get_binned(radii, values) :
         out[ii] = np.mean(values[indices==ii])
     return out
 
-target_binned = get_binned(r_target, box_target)
-prediction_binned = get_binned(r_prediction, box_prediction)
-gaussian_prediction_binned = [get_binned(r_prediction, bgp) for bgp in box_gaussian_prediction]
-b12_binned = get_binned(r_target, box_b12)
+target_binned = get_binned(r, box_target)
+prediction_binned = get_binned(r, box_prediction)
+gaussian_prediction_binned = [get_binned(r, bgp) for bgp in box_gaussian_prediction]
+b12_binned = get_binned(r, box_b12)
 
 
 fig, ax = plt.subplots()
@@ -91,11 +90,12 @@ ax.plot(RCENTERS, target_binned, label='target')
 ax.plot(RCENTERS, prediction_binned, label='reconstruction')
 ax.plot(RCENTERS, b12_binned, label='GNFW')
 for ii, gp in enumerate(gaussian_prediction_binned) :
-    ax.plot(RCENTERS, gp, label='gauss #%d'%ii)
+    ax.plot(RCENTERS, gp, label='gauss #%d'%ii, linestyle='dashed')
 
 ax.set_yscale('log')
 ax.set_xlim(RMIN, RMAX)
 ax.set_xlabel('R/R200')
 ax.set_ylabel('P/P200')
+ax.legend(loc='upper right')
 
 plt.show()
