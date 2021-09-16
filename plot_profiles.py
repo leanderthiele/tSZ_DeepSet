@@ -24,9 +24,9 @@ halo_idx = int(argv[2])
 
 N = cfg.TNG_RESOLUTION
 x = np.mgrid[-N//2:N//2, -N//2:N//2, -N//2:N//2].transpose(1,2,3,0).reshape((N*N*N, 3)).astype(np.float32)
-x /= N # now in the range [-0.5, 0.5]
+x *= 2.5 / N # now in the range [-2.5, 2.5]
 r_target = np.linalg.norm(x, axis=-1).flatten()
-r_prediction = r_target[r_target < cfg.RMAX / 5.0]
+r_prediction = r_target[r_target < cfg.RMAX]
 
 path_target = cfg._STORAGE_FILES['TNG']%(halo_idx, 'box_%d_cube_Pth'%cfg.TNG_RESOLUTION)
 path_prediction = os.path.join(cfg.RESULTS_PATH,
