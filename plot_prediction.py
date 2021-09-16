@@ -47,16 +47,29 @@ if cfg.SCALE_PTH :
             / cfg._OMEGA_M / halo_globals['R200c']
     box_target /= P200c
 
-fig, ax = plt.subplots(ncols=3, nrows=2+len(box_gaussian_prediction))
+fig, ax = plt.subplots(nrows=3, ncols=2+len(box_gaussian_prediction), gridspec_kw={'hspace': 0, 'wspace': 0})
+ax = ax.T
 ax_target = ax[0]
 ax_prediction = ax[1]
+if len(ax) > 2 :
+    ax_gaussian = ax[2:]
 
 for ii in range(3) :
+    transf = lambda x : np.log(x)
     vmin = 0
-    vmax = np.max(np.log(np.sum(box_target, axis=ii)))
-    ax_target[ii].matshow(np.log(np.sum(box_target, axis=ii)), vmin=vmin, vmax=vmax)    
-    ax_prediction[ii].matshow(np.log(np.sum(box_prediction, axis=ii)), vmin=vmin, vmax=vmax)
+    vmax = np.max(transf(np.sum(box_target, axis=ii)))
+    ax_target[ii].matshow(transf(np.sum(box_target, axis=ii)), vmin=vmin, vmax=vmax)    
+    ax_prediction[ii].matshow(transf(np.sum(box_prediction, axis=ii)), vmin=vmin, vmax=vmax)
     for jj, bgp in enumerate(box_gaussian_prediction) :
-        ax[2+jj][ii].matshow(np.log(np.sum(bgp, axis=ii)), vmin=vmin, vmax=vmax)
+        ax_gaussian[jj][ii].matshow(transf(np.sum(bgp, axis=ii)), vmin=vmin, vmax=vmax)
+
+for a in ax.flatten() :
+    a.set_xticks([])
+    a.set_yticks([])
+
+ax_target[0].set_title('target')
+ax_prediction[0].set_title('reconstruction')
+for ii, a in enumerate(ax_gaussian) :
+    a[0].set_title('gauss #%d'%ii)
 
 plt.show()
