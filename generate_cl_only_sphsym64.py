@@ -8,6 +8,7 @@ def generate_cl(trial) :
     out.append('VALIDATION_EPOCHS=6')
     out.append('PRT_FRACTION["DM"]["training"]=512')
     out.append('PRT_FRACTION["DM"]["validation"]=2048')
+    out.append('PRT_FRACTION["TNG"]["validation"]=4096')
 
     out.append('ORIGIN_DEFAULT_NLAYERS=0')
     out.append('ORIGIN_MLP_NLAYERS=3')
@@ -43,5 +44,8 @@ def generate_cl(trial) :
 
     mass_noise = trial.suggest_float('mass_noise', 0.0, 20.0)
     out.append('MASS_NOISE=%.8e'%mass_noise)
+
+    gradient_clip = trial.suggest_float('gradient_clip', 1e-1, 1e1, log=True)
+    out.append('GRADIENT_CLIP=%.8e'%gradient_clip)
 
     return out
