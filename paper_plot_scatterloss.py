@@ -6,16 +6,16 @@ from matplotlib import pyplot as plt
 
 import cfg
 
-IDs = {'origin64': 'Origin+GNFW',
-       'local64': 'Local',
-       'localorigin64': 'Local+Origin+GNFW',
-       'vae64_nr440': 'Local+Origin+GNFW+Stochasticity'}
+IDs = {'origin64': ('Origin+GNFW', 'blue'),
+       'local64': ('Local', 'green'),
+       'localorigin64': ('Local+Origin+GNFW', 'magenta'),
+       'vae64_nr440': ('Local+Origin+GNFW+Stochasticity', 'cyan')}
 
 MARKER_SCALE = 1.0
 
 fig, ax = plt.subplots()
 
-for ID, label in IDs.items() :
+for ID, (label, color) in IDs.items() :
     
     fname = os.path.join(cfg.RESULTS_PATH, 'loss_testing_%s.npz'%ID)
     print('Using file %s'%fname)
@@ -51,11 +51,12 @@ for ID, label in IDs.items() :
     vmin = 8.518
     vmax = 11.534
     ax.scatter(guess_loss, loss, label=label,
-               s=MARKER_SCALE*(3+20*(logM-vmin)/(vmax-vmin)))
+               s=MARKER_SCALE*(3+20*(logM-vmin)/(vmax-vmin)), c=color)
 
     if gauss_loss is not None :
-        ax.violinplot(gauss_loss, positions=guess_loss, showmeans=True,
-                      label='%s gaussian codes'%label)
+        parts = ax.violinplot(gauss_loss, positions=guess_loss, showmeans=True)
+        for pc in parts['bodies'] :
+            pc.set_facecolor(color)
 
 ax.set_yscale('log')
 ax.set_xscale('log')
