@@ -75,7 +75,7 @@ def generate_cl(trial) :
     out.append('MASS_NOISE=%.8e'%mass_noise)
 
     dropout = trial.suggest_float('dropout', 0.0, 0.1)
-    out.append('DECODER_DROPOOUT=%.8e'%dropout)
+    out.append('DECODER_DROPOUT=%.8e'%dropout)
 
     visible_dropout= trial.suggest_float('visible_dropout', 0.0, 0.6)
     out.append('DECODER_VISIBLE_DROPOUT=%.8e'%visible_dropout)
