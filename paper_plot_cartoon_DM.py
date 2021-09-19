@@ -39,13 +39,21 @@ x_in = x[mask]
 x_out = x[~mask]
 
 # now do the plotting
-fig, ax = plt.subplots(figsize=(1,1))
+fig_local, ax_local = plt.subplots(figsize=ctn.FIGSIZE)
+fig_origin, ax_origin = plt.subplots(figsize=ctn.FIGSIZE)
 
-ax.scatter(x_out[:, 0], x_out[:, 1], c='black', s=ctn.MARKER_SIZE)
-ax.scatter(x_in[:, 0], x_in[:, 1], c='green', s=ctn.MARKER_SIZE)
+ax_local.scatter(x_out[:, 0], x_out[:, 1], c='black', s=ctn.MARKER_SIZE)
+ax_local.scatter(x_in[:, 0], x_in[:, 1], c='green', s=ctn.MARKER_SIZE)
 
-ax.set_frame_on(False)
-ax.set_xticks([])
-ax.set_yticks([])
+ax_origin.scatter(x[:, 0], x[:, 1], c='green', s=ctn.MARKER_SIZE)
 
-fig.savefig('cartoon_local.png', bbox_inches='tight', transparent=True, pad_inches=0, dpi=1000)
+ax_local.set_frame_on(False)
+ax_local.set_xticks([])
+ax_local.set_yticks([])
+
+ax_origin.set_frame_on(False)
+ax_origin.set_xticks([])
+ax_origin.set_yticks([])
+
+fig_local.savefig('cartoon_local.png', bbox_inches='tight', transparent=True, pad_inches=0, dpi=1000)
+fig_origin.savefig('cartoon_origin.png', bbox_inches='tight', transparent=True, pad_inches=0, dpi=1000)

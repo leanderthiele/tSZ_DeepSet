@@ -12,4 +12,5 @@ SLAB_DEPTH = 1e-3
 # plot options
 MARKER_SIZE = 0.1
 
-
+# figure size
+FIGSIZE = (1, 1)
