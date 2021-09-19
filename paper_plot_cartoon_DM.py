@@ -42,8 +42,9 @@ x_out = x[~mask]
 fig_local, ax_local = plt.subplots(figsize=ctn.FIGSIZE)
 fig_origin, ax_origin = plt.subplots(figsize=ctn.FIGSIZE)
 
-ax_local.scatter(x_out[:, 0], x_out[:, 1], c='black', s=ctn.MARKER_SIZE)
+ax_local.scatter(x_out[:, 0], x_out[:, 1], c='grey', s=ctn.MARKER_SIZE)
 ax_local.scatter(x_in[:, 0], x_in[:, 1], c='green', s=ctn.MARKER_SIZE)
+ax_local.scatter([ctn.LOCAL_POS[0],], [ctn.LOCAL_POS[1],], s=10, marker='x', c='red', linewidth=ctn.MARKER_WIDTH)
 
 ax_origin.scatter(x[:, 0], x[:, 1], c='green', s=ctn.MARKER_SIZE)
 
