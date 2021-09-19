@@ -8,9 +8,9 @@ from matplotlib import pyplot as plt
 import cfg
 
 IDs = {'origin64': ('Origin+GNFW', 'blue'),
-       'local64': ('Local', 'green'),
-       'localorigin64': ('Local+Origin+GNFW', 'magenta'),
-       'vae64_nr440': ('Local+Origin+GNFW+Stochasticity', 'cyan')}
+       'local64': ('Local', 'cyan'),
+       'localorigin64_again_200epochs': ('Local+Origin+GNFW', 'magenta'),
+       'vae64_nr440': ('Local+Origin+GNFW+Stochasticity', 'green')}
 
 MARKER_SCALE = 0.5
 
