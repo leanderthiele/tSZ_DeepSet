@@ -10,7 +10,7 @@ halo_catalog = dict(np.load(cfg.HALO_CATALOG))
 
 halo = Halo(halo_catalog, ctn.HALO_IDX)
 
-N = 50 # number of pixels in image
+N = 200 # number of pixels in image
 
 x = np.mgrid[-N//2:N//2, -N//2:N//2].transpose(1,2,0).reshape((N, N, 2)).astype(np.float32)
 x *= 2 * cfg.RMAX / N # now in the range [-2.0, 2.0]
@@ -31,15 +31,17 @@ beta = A_beta * (0.7 * halo.M200c / 1e4)**am_beta
 # be careful to do the binning identically
 img = P0 * ((r+1e-3)/xc)**(-0.3) * (1 + (r+1e-3)/xc)**(-beta)
 
+img[r > cfg.RMAX] = np.NaN
+
 
 fig_b12, ax_b12 = plt.subplots(figsize=ctn.FIGSIZE)
 
-ax_b12.matshow(np.log(img), vmin=-8.507391, vmax=0,
+ax_b12.matshow(np.log(img[1:, 1:]), vmin=-8.507391, vmax=0,
                extent=(-cfg.RMAX, cfg.RMAX, -cfg.RMAX, cfg.RMAX))
 circle_center = (-0.3, 0.3)
 circle_kwargs = dict(facecolor='none', edgecolor='black', linestyle='dashed', linewidth=0.3)
-ax_b12.add_artist(Circle(circle_center, radius=1.5, **circle_kwargs))
-ax_b12.add_artist(Circle(circle_center, radius=0.7, **circle_kwargs))
+ax_b12.add_artist(Circle(circle_center, radius=1.65, **circle_kwargs))
+ax_b12.add_artist(Circle(circle_center, radius=0.9, **circle_kwargs))
 ax_b12.add_artist(Circle(circle_center, radius=0.2, **circle_kwargs))
 ax_b12.arrow(*circle_center, *(-x-np.sign(x)*cfg.RMAX/N for x in circle_center), width=5e-2, head_width=15e-2,
              length_includes_head=True, facecolor='black', edgecolor='none', fill=True)
