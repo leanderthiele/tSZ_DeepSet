@@ -10,6 +10,7 @@ def generate_cl(trial) :
     out.append('OUTPUT_NFEATURES=2')
     out.append('DECODER_DEFAULT_R_PASSED=True')
     out.append('DECODER_DEFAULT_GLOBALS_PASSED=True')
+    out.append('DECODER_DEFAULT_BASIS_PASSED=False')
 
     out.append('VALIDATION_EPOCHS=6')
     out.append('N_LOCAL["validation"]=512')
@@ -61,9 +62,6 @@ def generate_cl(trial) :
 
     mass_noise = trial.suggest_float('mass_noise', 6.0, 30.0)
     out.append('MASS_NOISE=%.8e'%mass_noise)
-
-    basis_passed = trial.suggest_categorical('basis_passed', ('True', 'False'))
-    out.append('DECODER_DEFAULT_BASIS_PASSED=%s'%basis_passed)
 
 
     return out
