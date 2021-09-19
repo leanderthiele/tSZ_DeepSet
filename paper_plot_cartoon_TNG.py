@@ -17,7 +17,7 @@ p = p.reshape((N, N, N))
 x = np.mgrid[-N//2:N//2, -N//2:N//2, -N//2:N//2].transpose(1,2,3,0).reshape((N, N, N, 3)).astype(np.float32)
 x *= 5.0 / N # now in the range [-2.5, 2.5]
 r = np.linalg.norm(x, axis=-1)
-p[r > cfg.RMAX] = 0
+p[r > cfg.RMAX] = np.NaN
 
 # restrict to RMAX
 idx_max = int(N/2 * cfg.RMAX/2.5)
@@ -25,6 +25,9 @@ idx_max = int(N/2 * cfg.RMAX/2.5)
 p = p[N//2-idx_max+1:N//2+idx_max, N//2-idx_max+1:N//2+idx_max, N//2-idx_max+1:N//2+idx_max]
 
 fig_target, ax_target = plt.subplots(figsize=ctn.FIGSIZE)
+
+print(np.nanmin(np.log(p[:, :, N//2].T)))
+print(np.nanmax(np.log(p[:, :, N//2].T)))
 
 ax_target.matshow(np.log(p[:, :, N//2].T), origin='lower', extent=(-cfg.RMAX, cfg.RMAX, -cfg.RMAX, cfg.RMAX))
 ax_target.scatter([ctn.LOCAL_POS[0],], [ctn.LOCAL_POS[1],], s=10, marker='x', c='red', linewidth=ctn.MARKER_WIDTH)
