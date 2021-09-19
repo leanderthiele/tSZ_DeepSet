@@ -16,4 +16,4 @@ MARKER_SIZE = 0.1
 FIGSIZE = (1, 1)
 
 # marker width
-MARKER_WIDTH = 0.3
+MARKER_WIDTH = 1.0
