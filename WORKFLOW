@@ -52,10 +52,6 @@ In general steps are dependent on earlier ones, unless indicated otherwise.
     Operates on all DM files (text & binary), but only the TNG text files.
     Creates cfg.HALO_CATALOG
 
-# PROBABLY NO LONGER NECESSARY AS WE ARE VOXELIZING THE PARTICLES
-# x) run remove_TNG_outliers.py to remove particles with extremely high
-#    pressures that would make training difficult for us.
-
  8) run create_boxes.py which will run voxelize to create the downsampled
     electron pressure on a grid
     Operates on the TNG binary & text files and creates the files
@@ -69,15 +65,7 @@ In general steps are dependent on earlier ones, unless indicated otherwise.
  9) run create_Nprt.py which will add the Nprt fields to the halo catalog.
     [now we know how many TNG particles we have]
 
-10) train a simple network (modified B12 + origin shift)
+10) train a simple network (e.g. GNFW + Origin)
 
 11) evaluate this network on the entire data set to find the residuals,
-    using residuals.py
-    NOTE: generated files have no indication of the used resolution...
-
-12) bin the residuals, using bin_residuals.py
-    Now we have the input for the VAE part of the larger architecture.
-    Creates the files
-        TNG_%d_residuals
-    NOTE: generated files have no indication of the used resolution...
-    DEPENDENCIES: cfg.RESIDUALS_{RMIN, RMAX, NBINS}
+    using create_residuals.py
