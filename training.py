@@ -78,7 +78,8 @@ def Training(training_loader=None, validation_loader=None, call_after_epoch=None
 
             prediction, _, KLD = model(data)
 
-            loss, loss_list, KLD_list = loss_fn(prediction, data.TNG_Pth, KLD, w=None, epoch=epoch)
+            loss, loss_list, KLD_list = loss_fn(prediction, data.TNG_Pth, KLD,
+                                                w=None, epoch=epoch, guess_loss=loss_list_guess)
 
             loss_record.add_training_loss(loss_list, KLD_list, loss_list_guess, 
                                           np.log(data.M200c.cpu().detach().numpy()), data.idx)
@@ -110,8 +111,9 @@ def Training(training_loader=None, validation_loader=None, call_after_epoch=None
                     guess = batt12(data.M200c, data.TNG_radii, data.P200c)
                     prediction, gaussian_predictions, KLD = model(data, gauss_seeds=cfg.N_GAUSS)
 
-                    _, loss_list, KLD_list = loss_fn(prediction, data.TNG_Pth, KLD, w=None, epoch=epoch)
                     _, loss_list_guess, _ = loss_fn(guess, data.TNG_Pth, w=None)
+                    _, loss_list, KLD_list = loss_fn(prediction, data.TNG_Pth, KLD,
+                                                     w=None, epoch=epoch, guess_loss=loss_list_guess)
                     
                     if gaussian_predictions is not None :
                         # shape: [gauss seed, halo]

@@ -37,6 +37,8 @@ ARG_PARSER.add_argument('-nr', '--num-random', type=int, default=20,
                         help='number of initial random trials')
 ARG_PARSER.add_argument('-vae', '--has-vae', action='store_true',
                         help='set if architecture has probabilistic component, requiring multi-objective optimization.')
+ARG_PARSER.add_argument('-kld', '--use-kld', action='store_true',
+                        help='to include KL divergence in multi-objective optimization, only relevant if has-vae.')
 
 ARGS = ARG_PARSER.parse_args()
 
@@ -208,7 +210,13 @@ class Objective :
                                             axis=-1)
             final_gaussian_loss = np.mean(loss_curve_gaussian[-5:])
 
-        return (final_loss, final_gaussian_loss) if ARGS.has_vae else final_loss 
+            if ARGS.use_kld :
+                kld_curve = np.mean(np.array(loss_record.validation_KLD_arr), axis=-1)
+
+                final_kld = np.mean(kld_curve[-5:])
+
+        return ((final_loss, final_gaussian_loss, final_kld) if ARGS.use_kld \
+                else (final_loss, final_gaussian_loss)) if ARGS.has_vae else final_loss 
     #}}}
 
 
@@ -235,7 +243,7 @@ if __name__ == '__main__' :
     study = optuna.create_study(sampler=TPESampler(n_startup_trials=ARGS.num_random),
                                 study_name=ARGS.ident,
                                 storage='sqlite:///%s.db'%ARGS.ident,
-                                directions=["minimize", ] * (1+ARGS.has_vae),
+                                directions=["minimize", ] * (1+ARGS.has_vae*(1+ARGS.use_kld)),
                                 load_if_exists=True)
 
     # construct our objective callable

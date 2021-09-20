@@ -324,6 +324,9 @@ VAE_NHIDDEN = 128
 # scaling of the KL divergence loss
 KLD_SCALING = 1e-5
 
+# whether to normalize KLD with GFNW benchmark loss
+KLD_NORM = False
+
 # KLD annealing (if True, we anneal from an AE to a VAE with the given KLD scaling)
 KLD_ANNEALING = True
 
