@@ -5,6 +5,7 @@ The network architecture consists mostly of DeepSets and MLPs, enabling
 a modular, interpretable design that operates directly on the simulation
 representation as a set of dark matter (DM) particles.
 
+![](cartoon.png)
 
 ## Dependencies
 
@@ -87,7 +88,7 @@ representation as a set of dark matter (DM) particles.
    * [network\_scalarencoder.py](network_scalarencoder.py) cluster-scale scalar DeepSet
    * [network\_mlp.py](network_mlp.py) single MLP
    * [network\_layer.py](network_layer.py) DeepSet primitive
-   .
+
    Initialization of the network in [init\_model.py](init_model.py).
 
 8. Driver code is in
@@ -110,7 +111,7 @@ representation as a set of dark matter (DM) particles.
     * [cubify\_prediction.py](cubify_prediction.py)
     * [plot\_testing\_loss.py](plot_testing_loss.py)
     * [plot\_prediction.py](plot_prediction.py)
-    * [plot\_profiles.py]((plot_profiles.py)
+    * [plot\_profiles.py](plot_profiles.py)
 
 12. Files ``paper_plot_*.py`` were used to generate publication figures.
 
