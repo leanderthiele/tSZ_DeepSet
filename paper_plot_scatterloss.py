@@ -5,17 +5,23 @@ import numpy as np
 from scipy.interpolate import UnivariateSpline
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg
+from matplotlib.transforms import TransformedBbox, Bbox
+from matplotlib.image import BboxImage
+from matplotlib.legend_handler import HandlerBase
 
 import cfg
 
 IDs = {'origin64': ('Origin+GNFW', 'blue'),
        'local64': ('Local', 'cyan'),
-       'localorigin64_again_200epochs_wbasis': ('Local+Origin+GNFW', 'magenta'),
+       'localorigin64_again_200epochs_wbasis_nr116': ('Local+Origin+GNFW', 'magenta'),
        'vae64_nr440': ('Local+Origin+GNFW+Stochasticity', 'green')}
 
 MARKER_SCALE = 0.5
 
 EXCESS_SPACE = 0.1
+
+legend_objs = {}
+legend_handlers = {}
 
 fig, ax = plt.subplots(figsize=(5,5))
 ax_linear = ax.twiny()
@@ -65,10 +71,9 @@ for ID, (label, color) in list(IDs.items())[::-1] :
 
     vmin = 8.518
     vmax = 11.534
-    ax.scatter(guess_loss, loss, label='%s %s (%.2f)'%(label,
-                                                       '' if gauss_loss is None else 'reconstruction',
-                                                       loss_quantifier),
-               s=MARKER_SCALE*(3+20*(logM-vmin)/(vmax-vmin)), c=color)
+    legend_objs[ax.scatter(guess_loss, loss, s=MARKER_SCALE*(3+20*(logM-vmin)/(vmax-vmin)), c=color)] \
+        = '%s %s (%.2f)'%(label, '' if gauss_loss is None else 'reconstructed', loss_quantifier)
+               
 
     spline_kwargs = {} # TODO deal with this later
 
@@ -79,9 +84,11 @@ for ID, (label, color) in list(IDs.items())[::-1] :
     ax.plot(np.exp(x), np.exp(y), color=color)
 
     if gauss_loss is not None :
-        OPACITY = 0.1
+        OPACITY = 0.5
 
         violinplot_kwargs = dict(showmeans=False, showextrema=False, widths=0.02)
+
+        loss_quantifier = np.median(np.mean(gauss_loss, axis=-1)/guess_loss)
 
         lg = np.log(guess_loss)
         lg_min = np.min(lg)
@@ -94,16 +101,51 @@ for ID, (label, color) in list(IDs.items())[::-1] :
             pc.set_edgecolor(color)
             pc.set_alpha(OPACITY)
 
+        # draw some fake stuff to attach label to
+        fake_point = ax.scatter([0,], [0,], marker='')
+
+        legend_objs[fake_point] = '%s sampled (%.2f)'%(label, loss_quantifier)
+
         spl = UnivariateSpline(np.log(guess_loss[sorter]),
                                np.log(np.mean(gauss_loss, axis=-1)[sorter]), **spline_kwargs)
         y = spl(x)
         ax.plot(np.exp(x), np.exp(y), color=color, alpha=OPACITY)
 
         # let's do some *serious* hacking here to get a nice legend
-        fig_fake, ax_fake = plt.subplots(figsize=(1,1))
-        canvas = FigureCanvasAgg(fig)
-        ax_fake.violinplot(gauss_loss[0], **violinplot_kwargs)
-        fig_fake.show()
+        fig_fake, ax_fake = plt.subplots(figsize=(1,1), dpi=100)
+        canvas = FigureCanvasAgg(fig_fake)
+        parts_fake = ax_fake.violinplot(np.random.randn(1000), positions=[0,], **violinplot_kwargs)
+        for pc in parts_fake['bodies'] :
+            pc.set_facecolor('none')
+            pc.set_edgecolor(color)
+            pc.set_linewidth(5)
+            pc.set_alpha(OPACITY)
+        ax_fake.set_frame_on(False)
+        ax_fake.set_xticks([])
+        ax_fake.set_yticks([])
+        ax_fake.set_xlim(-2*violinplot_kwargs['widths'], 2*violinplot_kwargs['widths'])
+        fig_fake.tight_layout(pad=0)
+        canvas.draw()
+        buf = np.asarray(canvas.buffer_rgba())
+        
+        class ImgHandler(HandlerBase) :
+            def create_artists(self, legend, orig_handle, xdescent, ydescent, width, height, fontsize, trans) :
+                sx, sy = self.img_stretch
+                bb = Bbox.from_bounds(xdescent-sx, ydescent-sy, width+sx, height+sy)
+                tbb = TransformedBbox(bb, trans)
+                img = BboxImage(tbb)
+                img.set_data(self.img_data)
+                img.set_interpolation('hermite')
+                self.update_prop(img, orig_handle, legend)
+                return [img,]
+            def set_img(self, a, img_stretch=(0,0)) :
+                self.img_data = a
+                self.img_stretch = img_stretch
+        
+        custom_handler = ImgHandler()
+        custom_handler.set_img(buf)
+
+        legend_handlers[fake_point] = custom_handler
 
 
 ax.set_xlabel('GNFW loss')
@@ -114,7 +156,7 @@ ax.set_xscale('log')
 
 min_lim = (1-EXCESS_SPACE)*min((ax.get_xlim()[0], ax.get_ylim()[0]))
 max_lim = (1+EXCESS_SPACE)*max((ax.get_xlim()[1], ax.get_ylim()[1]))
-ax.plot([min_lim, max_lim], [min_lim, max_lim], linestyle='dashed', color='black')
+ax.plot([min_lim, max_lim], [min_lim, max_lim], linestyle='dashed', color='black', zorder=-10)
 #ax.set_xlim(min_lim, max_lim)
 #ax.set_ylim(min_lim, max_lim)
 ax.set_xlim(3e-3, 2e-1)
@@ -132,6 +174,7 @@ ax_linear.set_xlim(add_min, 1+add_max)
 
 ax_linear.set_xticks([])
 
-ax.legend(loc='upper left', frameon=False)
+ax.legend(list(legend_objs.keys()), list(legend_objs.values()), handler_map=legend_handlers,
+          loc='upper left', frameon=False)
 
-fig.savefig('scatterloss.pdf', bbox_inches='tight')
+fig.savefig('scatterloss.pdf', bbox_inches='tight', pad=0, dpi=4000)
