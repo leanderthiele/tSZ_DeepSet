@@ -18,7 +18,7 @@ def generate_cl(trial) :
     out.append('PRT_FRACTION["DM"]["validation"]=2048')
     out.append('PRT_FRACTION["TNG"]["validation"]=4096')
 
-    out.append('N_GAUSS=5')
+    out.append('N_GAUSS=10')
 
     # robust predictions we have from previous optuna runs
     out.append('LOCAL_NLAYERS=2')
@@ -48,9 +48,6 @@ def generate_cl(trial) :
     out.append('KLD_ANNEALING_END=0.5')
     out.append('VAE_NHIDDEN=196')
     out.append('VAE_NLAYERS=3')
-
-    # things we learnt from second optuna run
-    out.append('MASS_NOISE=20.0')
 
     out.append('GRADIENT_CLIP=0.7')
 
