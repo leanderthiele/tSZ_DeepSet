@@ -182,6 +182,8 @@ class Network(nn.Module) :
                               mode='code' if batch.mode is DataModes.TRAINING else 'mean',
                               seed=recon_seed)
             if gauss_seeds is not None :
+                assert batch.mode is not DataModes.TRAINING
+
                 if isinstance(gauss_seeds, list) :
                     z_gauss = [self.vae(batch.TNG_residuals, mode='gaussian', seed=seed) for seed in gauss_seeds]
                 else :
