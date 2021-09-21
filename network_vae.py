@@ -34,18 +34,23 @@ class NetworkVAE(nn.Module) :
     #}}}
     
 
-    def forward(self, x, gaussian, seed=None) :
+    def forward(self, x, mode, seed=None) :
         """
         x ... the input, of shape [batch, Nbins]. 
               Must also be passed when gaussian is True as this is a convenient way
               to get the batch size and device
-        gaussian ... whether the output is a pure N(0,1) number or sampled from the encoded distribution
+        mode ... how to produce the output.
+                     'code' ... do the encoding and convolve with N(0,1) number
+                     'gaussian' ... simply return a N(0,1) random number
+                     'mean' ... return the mean of the code (deterministic)
         seed ... integer to manually initialize the RNG (otherwise the internal RNG will be used)
 
         Returns the encoded latent space representation and the KL loss (only if gaussian=False)
         where the KL loss is not summed over batch, i.e. a [batch] tensor
         """
     #{{{ 
+        assert mode in ['code', 'gaussian', 'mean', ]
+
         if self.rng is None :
             # seed with different number for each process
             self.rng = torch.Generator(device=x.device).manual_seed(int((cfg.NETWORK_SEED+cfg.rank) % 2**63))
@@ -58,7 +63,7 @@ class NetworkVAE(nn.Module) :
         # compute standard normal random numbers
         r = torch.randn(x.shape[0], self.Nlatent, device=x.device, generator=_rng)
 
-        if gaussian :
+        if mode == 'gaussian' :
             # just return the random numbers
             return r
 
@@ -70,10 +75,14 @@ class NetworkVAE(nn.Module) :
         mu = h[:, :self.Nlatent]
         logvar = h[:, self.Nlatent:]
 
-        z = mu + torch.exp(0.5*logvar) * r
-
         # compute negative KL divergence
         KLD = -0.5 * torch.sum(1 + logvar - mu.square() - logvar.exp(), dim=1) 
+
+        if mode == 'mean' :
+            assert seed is None
+            z = mu
+        else :
+            z = mu + torch.exp(0.5*logvar) * r
 
         return z, KLD
     #}}}

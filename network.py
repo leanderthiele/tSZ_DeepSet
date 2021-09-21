@@ -178,12 +178,14 @@ class Network(nn.Module) :
                                    basis=batch.basis if self.scalarencoder.basis_passed else None)
 
         if cfg.NET_ARCH['vae'] :
-            z, KLD = self.vae(batch.TNG_residuals, gaussian=False, seed=recon_seed)
+            z, KLD = self.vae(batch.TNG_residuals,
+                              mode='code' if batch.mode is DataModes.TRAINING else 'mean',
+                              seed=recon_seed)
             if gauss_seeds is not None :
                 if isinstance(gauss_seeds, list) :
-                    z_gauss = [self.vae(batch.TNG_residuals, gaussian=True, seed=seed) for seed in gauss_seeds]
+                    z_gauss = [self.vae(batch.TNG_residuals, mode='gaussian', seed=seed) for seed in gauss_seeds]
                 else :
-                    z_gauss = [self.vae(batch.TNG_residuals, gaussian=True) for _ in range(gauss_seeds)]
+                    z_gauss = [self.vae(batch.TNG_residuals, mode='gaussian') for _ in range(gauss_seeds)]
             else :
                 z_gauss = None
         else :

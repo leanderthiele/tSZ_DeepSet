@@ -88,7 +88,6 @@ def Testing(loader=None) :
         with torch.no_grad() :
             guess = batt12(data.M200c, data.TNG_radii, data.P200c)
             prediction, gaussian_predictions, KLD = model(data,
-                                                          recon_seed=cfg.TESTING_SEED+this_idx,
                                                           gauss_seeds=[cfg.TESTING_SEED+this_idx*cfg.N_GAUSS+ii \
                                                                        for ii in range(cfg.N_GAUSS)] \
                                                                        if cfg.N_GAUSS is not None \
