@@ -38,7 +38,8 @@ ARG_PARSER.add_argument('-nr', '--num-random', type=int, default=20,
 ARG_PARSER.add_argument('-vae', '--has-vae', action='store_true',
                         help='set if architecture has probabilistic component, requiring multi-objective optimization.')
 ARG_PARSER.add_argument('-kld', '--use-kld', action='store_true',
-                        help='to include KL divergence in multi-objective optimization, only relevant if has-vae.')
+                        help='to include KL divergence instead of mean gaussian loss '\
+                             'in multi-objective optimization, only relevant if has-vae.')
 
 ARGS = ARG_PARSER.parse_args()
 
@@ -204,19 +205,19 @@ class Objective :
         final_loss = np.mean(loss_curve[-5:])
 
         if ARGS.has_vae :
-            # we first average the Gaussian loss over random seeds, then take the median
-            loss_curve_gaussian = np.median(np.mean(np.array(loss_record.validation_gauss_loss_arr), axis=-1)
-                                            / np.array(loss_record.validation_guess_loss_arr),
-                                            axis=-1)
-            final_gaussian_loss = np.mean(loss_curve_gaussian[-5:])
-
             if ARGS.use_kld :
                 kld_curve = np.mean(np.array(loss_record.validation_KLD_arr), axis=-1)
 
                 final_kld = np.mean(kld_curve[-5:])
+            else :
+                # we first average the Gaussian loss over random seeds, then take the median
+                loss_curve_gaussian = np.median(np.mean(np.array(loss_record.validation_gauss_loss_arr), axis=-1)
+                                                / np.array(loss_record.validation_guess_loss_arr),
+                                                axis=-1)
+                final_gaussian_loss = np.mean(loss_curve_gaussian[-5:])
 
-        return ((final_loss, final_gaussian_loss, final_kld) if ARGS.use_kld \
-                else (final_loss, final_gaussian_loss)) if ARGS.has_vae else final_loss 
+
+        return (final_loss, final_kld if ARGS.use_kld else final_gaussian_loss) if ARGS.has_vae else final_loss 
     #}}}
 
 
@@ -243,7 +244,7 @@ if __name__ == '__main__' :
     study = optuna.create_study(sampler=TPESampler(n_startup_trials=ARGS.num_random),
                                 study_name=ARGS.ident,
                                 storage='sqlite:///%s.db'%ARGS.ident,
-                                directions=["minimize", ] * (1+ARGS.has_vae*(1+ARGS.use_kld)),
+                                directions=["minimize", ] * (1+ARGS.has_vae),
                                 load_if_exists=True)
 
     # construct our objective callable
