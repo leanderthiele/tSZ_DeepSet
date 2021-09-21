@@ -36,7 +36,7 @@ img[r > cfg.RMAX] = np.NaN
 
 fig_b12, ax_b12 = plt.subplots(figsize=ctn.FIGSIZE)
 
-ax_b12.matshow(np.log(img[1:, 1:]), vmin=-8.507391, vmax=0,
+ax_b12.matshow(np.log(img[1:, 1:]), vmin=-8.2964525, vmax=1.32657490,
                extent=(-cfg.RMAX, cfg.RMAX, -cfg.RMAX, cfg.RMAX))
 circle_center = (-0.3, 0.3)
 circle_kwargs = dict(facecolor='none', edgecolor='black', linestyle='dashed', linewidth=0.3)
