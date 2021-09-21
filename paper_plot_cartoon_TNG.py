@@ -29,7 +29,7 @@ fig_target, ax_target = plt.subplots(figsize=ctn.FIGSIZE)
 print(np.nanmin(np.log(p[:, :, N//2].T)))
 print(np.nanmax(np.log(p[:, :, N//2].T)))
 
-ax_target.matshow(np.log(p[:, :, N//2].T), origin='lower', extent=(-cfg.RMAX, cfg.RMAX, -cfg.RMAX, cfg.RMAX))
+ax_target.matshow(np.log(p[:, :, p.shape[2]//2].T), origin='lower', extent=(-cfg.RMAX, cfg.RMAX, -cfg.RMAX, cfg.RMAX))
 ax_target.scatter([ctn.LOCAL_POS[0],], [ctn.LOCAL_POS[1],], s=10, marker='x', c='red', linewidth=ctn.MARKER_WIDTH)
 
 ax_target.set_frame_on(False)
