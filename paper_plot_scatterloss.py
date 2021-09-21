@@ -4,12 +4,13 @@ from time import ctime
 import numpy as np
 from scipy.interpolate import UnivariateSpline
 from matplotlib import pyplot as plt
+from matplotlib.backends.backend_agg import FigureCanvasAgg
 
 import cfg
 
 IDs = {'origin64': ('Origin+GNFW', 'blue'),
        'local64': ('Local', 'cyan'),
-       'localorigin64_again_200epochs': ('Local+Origin+GNFW', 'magenta'),
+       'localorigin64_again_200epochs_wbasis': ('Local+Origin+GNFW', 'magenta'),
        'vae64_nr440': ('Local+Origin+GNFW+Stochasticity', 'green')}
 
 MARKER_SCALE = 0.5
@@ -64,7 +65,9 @@ for ID, (label, color) in list(IDs.items())[::-1] :
 
     vmin = 8.518
     vmax = 11.534
-    ax.scatter(guess_loss, loss, label='%s (%.2f)'%(label, loss_quantifier),
+    ax.scatter(guess_loss, loss, label='%s %s (%.2f)'%(label,
+                                                       '' if gauss_loss is None else 'reconstruction',
+                                                       loss_quantifier),
                s=MARKER_SCALE*(3+20*(logM-vmin)/(vmax-vmin)), c=color)
 
     spline_kwargs = {} # TODO deal with this later
@@ -76,20 +79,32 @@ for ID, (label, color) in list(IDs.items())[::-1] :
     ax.plot(np.exp(x), np.exp(y), color=color)
 
     if gauss_loss is not None :
+        OPACITY = 0.1
+
+        violinplot_kwargs = dict(showmeans=False, showextrema=False, widths=0.02)
+
         lg = np.log(guess_loss)
         lg_min = np.min(lg)
         lg_max = np.max(lg)
         # plot this on the [0, 1] x-scale
         parts = ax_linear.violinplot(gauss_loss.T, positions=(lg-lg_min)/(lg_max-lg_min),
-                                     showmeans=False, showextrema=False, widths=0.02)
+                                     **violinplot_kwargs)
         for pc in parts['bodies'] :
             pc.set_facecolor('none')
             pc.set_edgecolor(color)
+            pc.set_alpha(OPACITY)
 
         spl = UnivariateSpline(np.log(guess_loss[sorter]),
                                np.log(np.mean(gauss_loss, axis=-1)[sorter]), **spline_kwargs)
         y = spl(x)
-        ax.plot(np.exp(x), np.exp(y), color=color, linestyle='dashed')
+        ax.plot(np.exp(x), np.exp(y), color=color, alpha=OPACITY)
+
+        # let's do some *serious* hacking here to get a nice legend
+        fig_fake, ax_fake = plt.subplots(figsize=(1,1))
+        canvas = FigureCanvasAgg(fig)
+        ax_fake.violinplot(gauss_loss[0], **violinplot_kwargs)
+        fig_fake.show()
+
 
 ax.set_xlabel('GNFW loss')
 ax.set_ylabel('network loss')
