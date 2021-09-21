@@ -22,8 +22,9 @@ EXCESS_SPACE = 0.1
 
 legend_objs = {}
 legend_handlers = {}
+splines = []
 
-fig, ax = plt.subplots(figsize=(5,5))
+fig, ax = plt.subplots(figsize=(7,5))
 ax_linear = ax.twiny()
 
 guess_loss = None
@@ -79,6 +80,7 @@ for ID, (label, color) in list(IDs.items())[::-1] :
 
     sorter = np.argsort(guess_loss)
     spl = UnivariateSpline(np.log(guess_loss[sorter]), np.log(loss[sorter]), **spline_kwargs)
+    splines.append(spl)
     x = np.linspace(np.min(np.log(guess_loss)), np.max(np.log(guess_loss)))
     y = spl(x)
     ax.plot(np.exp(x), np.exp(y), color=color)
@@ -108,6 +110,7 @@ for ID, (label, color) in list(IDs.items())[::-1] :
 
         spl = UnivariateSpline(np.log(guess_loss[sorter]),
                                np.log(np.mean(gauss_loss, axis=-1)[sorter]), **spline_kwargs)
+        splines.append(spl)
         y = spl(x)
         ax.plot(np.exp(x), np.exp(y), color=color, alpha=OPACITY)
 
@@ -131,14 +134,14 @@ for ID, (label, color) in list(IDs.items())[::-1] :
         class ImgHandler(HandlerBase) :
             def create_artists(self, legend, orig_handle, xdescent, ydescent, width, height, fontsize, trans) :
                 sx, sy = self.img_stretch
-                bb = Bbox.from_bounds(xdescent-sx, ydescent-sy, width+sx, height+sy)
+                bb = Bbox.from_bounds(xdescent-sx, ydescent-sy, width+2*sx, height+2*sy)
                 tbb = TransformedBbox(bb, trans)
                 img = BboxImage(tbb)
                 img.set_data(self.img_data)
                 img.set_interpolation('hermite')
                 self.update_prop(img, orig_handle, legend)
                 return [img,]
-            def set_img(self, a, img_stretch=(0,0)) :
+            def set_img(self, a, img_stretch=(0,2)) :
                 self.img_data = a
                 self.img_stretch = img_stretch
         
@@ -147,12 +150,21 @@ for ID, (label, color) in list(IDs.items())[::-1] :
 
         legend_handlers[fake_point] = custom_handler
 
-
-ax.set_xlabel('GNFW loss')
+ax.set_xlabel('benchmark loss')
 ax.set_ylabel('network loss')
 
 ax.set_yscale('log')
 ax.set_xscale('log')
+
+# make a nice arrow and text
+arrow_end_x = 8e-2
+arrow_end_y = min(np.exp(s(arrow_end_x)) for s in splines)
+print(arrow_end_x)
+print(arrow_end_y)
+
+ax.arrow(arrow_end_x, arrow_end_y, 1, 1,
+         width=1, transform=ax.transData,
+         facecolor='black', edgecolor='none', fill=True, length_includes_head=True, head_starts_at_zero=False)
 
 min_lim = (1-EXCESS_SPACE)*min((ax.get_xlim()[0], ax.get_ylim()[0]))
 max_lim = (1+EXCESS_SPACE)*max((ax.get_xlim()[1], ax.get_ylim()[1]))
