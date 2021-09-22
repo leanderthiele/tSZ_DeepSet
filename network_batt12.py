@@ -26,15 +26,13 @@ class NetworkBatt12(nn.Module) :
         self.register_parameter('A_P0', scalar_param(3.9183))
         self.register_parameter('am_P0', scalar_param(0.5705))
         
-        if xc_fixed :
-            self.A_xc = 2.8859
-            self.am_xc = -0.8310
-        else :
-            self.register_parameter('A_xc', scalar_param(2.8859))
-            self.register_parameter('am_xc', scalar_param(-0.8130))
+        self.register_parameter('A_xc', scalar_param(2.8859))
+        self.register_parameter('am_xc', scalar_param(-0.8130))
 
         self.register_parameter('A_beta', scalar_param(13.8758))
         self.register_parameter('am_beta', scalar_param(-0.6282))
+
+        self.xc_fixed = xc_fixed
     #}}}
     
 
@@ -49,6 +47,11 @@ class NetworkBatt12(nn.Module) :
         (units depend on cfg.SCALE_PTH)
         """
     #{{{
+        # do this here so no interference with InitModel
+        if self.xc_fixed :
+            self.A_xc.requires_grad = False
+            self.am_xc.requires_grad = False
+
         if isinstance(r, list) :
             return [self(torch.tensor([M200c[ii],], requires_grad=False), ri)
                     for ii, ri in enumerate(r)]
