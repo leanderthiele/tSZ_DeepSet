@@ -14,7 +14,7 @@ import cfg
 IDs = {'origin64': ('Origin+GNFW', 'blue'),
        'local64': ('Local', 'cyan'),
        'localorigin64_again_200epochs_wbasis_nr116': ('Local+Origin+GNFW', 'magenta'),
-       'vae64_nr440': ('Local+Origin+GNFW+Stochasticity', 'green')}
+       'vae64_200epochs_usekld_nr1477': ('Local+Origin+GNFW+Stochasticity', 'green')}
 
 MARKER_SCALE = 0.5
 
@@ -23,6 +23,7 @@ EXCESS_SPACE = 0.1
 legend_objs = {}
 legend_handlers = {}
 splines = []
+markers = []
 
 fig, ax = plt.subplots(figsize=(7,5))
 ax_linear = ax.twiny()
@@ -72,8 +73,9 @@ for ID, (label, color) in list(IDs.items())[::-1] :
 
     vmin = 8.518
     vmax = 11.534
+    markers.extend(zip(guess_loss, loss))
     legend_objs[ax.scatter(guess_loss, loss, s=MARKER_SCALE*(3+20*(logM-vmin)/(vmax-vmin)), c=color)] \
-        = '%s %s (%.2f)'%(label, '' if gauss_loss is None else 'reconstructed', loss_quantifier)
+        = '%s %s ($\mathcal{L}_{\sf opt}=%.2f$)'%(label, '' if gauss_loss is None else 'reconstructed', loss_quantifier)
                
 
     spline_kwargs = {} # TODO deal with this later
@@ -106,7 +108,7 @@ for ID, (label, color) in list(IDs.items())[::-1] :
         # draw some fake stuff to attach label to
         fake_point = ax.scatter([0,], [0,], marker='')
 
-        legend_objs[fake_point] = '%s sampled (%.2f)'%(label, loss_quantifier)
+        legend_objs[fake_point] = '%s sampled ($\mathcal{L}_{\sf opt}=%.2f$)'%(label, loss_quantifier)
 
         spl = UnivariateSpline(np.log(guess_loss[sorter]),
                                np.log(np.mean(gauss_loss, axis=-1)[sorter]), **spline_kwargs)
@@ -156,23 +158,30 @@ ax.set_ylabel('network loss')
 ax.set_yscale('log')
 ax.set_xscale('log')
 
-# make a nice arrow and text
-arrow_end_x = 8e-2
-arrow_end_y = min(np.exp(s(arrow_end_x)) for s in splines)
-print(arrow_end_x)
-print(arrow_end_y)
-
-ax.arrow(arrow_end_x, arrow_end_y, 1, 1,
-         width=1, transform=ax.transData,
-         facecolor='black', edgecolor='none', fill=True, length_includes_head=True, head_starts_at_zero=False)
-
 min_lim = (1-EXCESS_SPACE)*min((ax.get_xlim()[0], ax.get_ylim()[0]))
 max_lim = (1+EXCESS_SPACE)*max((ax.get_xlim()[1], ax.get_ylim()[1]))
-ax.plot([min_lim, max_lim], [min_lim, max_lim], linestyle='dashed', color='black', zorder=-10)
+ax.plot([min_lim, max_lim], [min_lim, max_lim], linestyle='dashed', color='grey', zorder=-10)
 #ax.set_xlim(min_lim, max_lim)
 #ax.set_ylim(min_lim, max_lim)
 ax.set_xlim(3e-3, 2e-1)
 ax.set_ylim(7e-4, 2e-1)
+
+# for all annotations
+annotation_kwargs = dict(arrowprops={'arrowstyle': '->'}, ha='left', va='top')
+
+# annotate smoothing splines
+arrow_end_x = 8e-2
+arrow_end_y = min(np.exp(s(np.log(arrow_end_x))) for s in splines)
+ax.annotate('smoothing splines', (arrow_end_x, arrow_end_y), xytext=(6e-2,6e-3),
+            **annotation_kwargs)
+
+# annotate markers
+arrow_end_x_lims = [2e-2, 4e-2]
+arrow_end_x, arrow_end_y = min(filter(lambda x: arrow_end_x_lims[0] < x[0] < arrow_end_x_lims[1], markers),
+                               key=lambda x: x[1])
+ax.annotate('each marker = one cluster,\nsize ~ mass', (arrow_end_x, arrow_end_y), xytext=(4e-2,1.5e-3),
+            **annotation_kwargs)
+
 
 # now we need to figure out how to adjust limits on our fake axis with linear scale
 lg = np.log(guess_loss)
