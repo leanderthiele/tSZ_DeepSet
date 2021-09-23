@@ -1,6 +1,6 @@
 """
 command line arguments :
-    [1] ID
+    [1...] ID(s)
 """
 
 from sys import argv
@@ -65,11 +65,11 @@ for _argv in argv[1:] :
     vmin = 8.518
     vmax = 11.534
 
-    ax_loss.scatter(guess_loss, loss, label='reconstruction %s'%ID, s=3+20*(logM-vmin)/(vmax-vmin))
+    l = ax_loss.scatter(guess_loss, loss, label='reconstruction %s'%ID, s=3+20*(logM-vmin)/(vmax-vmin))
     if gauss_loss is not None :
         ax_loss.scatter(guess_loss, np.mean(gauss_loss, axis=1), label='<gaussian> %s'%ID, s=3+20*(logM-vmin)/(vmax-vmin))
         for ii in range(gauss_loss.shape[1]) :
-            ax_loss.scatter(guess_loss, gauss_loss[:, ii], label='gaussian %s'%ID if ii==0 else None, c='black', s=0.1)
+            ax_loss.scatter(guess_loss, gauss_loss[:, ii], label='gaussian %s'%ID if ii==0 else None, s=0.1, c=plt.getp(l, 'facecolor'))
 
     this_min_lim = 0.9*min((ax_loss.get_xlim()[0], ax_loss.get_ylim()[0]))
     this_max_lim = 1.1*max((ax_loss.get_xlim()[1], ax_loss.get_ylim()[1]))
