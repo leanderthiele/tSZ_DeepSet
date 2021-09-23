@@ -17,6 +17,9 @@ fig, ax = plt.subplots(ncols=2)
 ax_loss = ax[0]
 ax_KLD = ax[1]
 
+ax_loss.set_yscale('log')
+ax_loss.set_xscale('log')
+
 min_lim = None
 max_lim = None
 
@@ -90,11 +93,7 @@ for _argv in argv[1:] :
 
     ax_KLD.scatter(guess_loss, KLD, s=3+20*(logM-vmin)/(vmax-vmin))
 
-print(min_lim)
-print(max_lim)
 ax_loss.plot([min_lim, max_lim], [min_lim, max_lim], linestyle='dashed', color='black')
-ax_loss.set_yscale('log')
-ax_loss.set_xscale('log')
 ax_loss.set_xlim(min_lim, max_lim)
 ax_loss.set_ylim(min_lim, max_lim)
 ax_loss.set_xlabel('B12 loss')
