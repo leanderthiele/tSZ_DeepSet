@@ -18,7 +18,7 @@ for fname in fnames :
 
     try :
         delta_t = ( d['datetime_complete']-d['datetime_start'] ).sum()
-    except KeyError :
+    except (KeyError, TypeError) :
         print('%s not yet populated'%fname)
         continue
     
@@ -32,3 +32,4 @@ for fname in fnames :
 
 print('-------------------------------------')
 print('%s total'%str(total_time.round('s')))
+print('= %.0f hours'%(total_time.total_seconds()/60/60))
