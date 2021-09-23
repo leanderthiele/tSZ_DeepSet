@@ -167,18 +167,27 @@ ax.set_xlim(3e-3, 2e-1)
 ax.set_ylim(7e-4, 2e-1)
 
 # for all annotations
-annotation_kwargs = dict(arrowprops={'arrowstyle': '->'}, ha='left', va='top')
+annotation_kwargs = dict(# arrow properties
+                         arrowprops={'arrowstyle': '-|>', 'fill': True, 'edgecolor': 'grey', 'facecolor': 'grey'},
+                         # text properties
+                         ha='left', va='top', color='grey', bbox={'visible': False, 'boxstyle': 'square, pad=0'})
 
 # annotate smoothing splines
 arrow_end_x = 8e-2
 arrow_end_y = min(np.exp(s(np.log(arrow_end_x))) for s in splines)
-ax.annotate('smoothing splines', (arrow_end_x, arrow_end_y), xytext=(6e-2,6e-3),
+ax.annotate('smoothing\nsplines', (arrow_end_x, arrow_end_y), xytext=(8e-2,1e-2),
+            **annotation_kwargs)
+
+# annotate dashed line
+arrow_end_x = 1e-2
+ax.annotate('benchmark', (arrow_end_x, arrow_end_x), xytext=(6e-3,2e-2),
             **annotation_kwargs)
 
 # annotate markers
 arrow_end_x_lims = [2e-2, 4e-2]
 arrow_end_x, arrow_end_y = min(filter(lambda x: arrow_end_x_lims[0] < x[0] < arrow_end_x_lims[1], markers),
                                key=lambda x: x[1])
+annotation_kwargs['arrowprops']['relpos'] = (0, 0.75)
 ax.annotate('each marker = one cluster,\nsize ~ mass', (arrow_end_x, arrow_end_y), xytext=(4e-2,1.5e-3),
             **annotation_kwargs)
 
