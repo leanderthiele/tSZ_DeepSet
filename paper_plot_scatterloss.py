@@ -14,18 +14,20 @@ import cfg
 IDs = {'origin64_ontestingset': ('Origin+GNFW', 'blue'),
        'local64_ontestingset': ('Local', 'cyan'),
        'localorigin64_again_200epochs_wbasis_nr116_ontestingset': ('Local+Origin+GNFW', 'magenta'),
-       'vae64_200epochs_usekld_onelatent_nr2074_ontestingset': ('Local+Origin+GNFW+Stochasticity', 'green')}
+       'vae64_200epochs_usekld_onelatent_nr2074_ontestingset': ('Local+Origin+GNFW+Stochastic', 'green')}
 
 MARKER_SCALE = 0.5
 
 EXCESS_SPACE = 0.1
+
+LABEL_SPACE = '             '
 
 legend_objs = {}
 legend_handlers = {}
 splines = []
 markers = []
 
-fig, ax = plt.subplots(figsize=(7,5))
+fig, ax = plt.subplots(figsize=(9,5))
 ax_linear = ax.twiny()
 
 guess_loss = None
@@ -75,7 +77,7 @@ for ID, (label, color) in list(IDs.items())[::-1] :
     vmax = 11.534
     markers.extend(zip(guess_loss, loss))
     legend_objs[ax.scatter(guess_loss, loss, s=MARKER_SCALE*(3+20*(logM-vmin)/(vmax-vmin)), c=color)] \
-        = '%s %s ($\mathcal{L}_{\sf opt}=%.2f$)'%(label, '' if gauss_loss is None else 'reconstructed', loss_quantifier)
+        = '%.2f %s %s %s'%(loss_quantifier, LABEL_SPACE, label, '' if gauss_loss is None else 'reconstructed')
                
 
     spline_kwargs = {} # TODO deal with this later
@@ -108,7 +110,7 @@ for ID, (label, color) in list(IDs.items())[::-1] :
         # draw some fake stuff to attach label to
         fake_point = ax.scatter([0,], [0,], marker='')
 
-        legend_objs[fake_point] = '%s sampled ($\mathcal{L}_{\sf opt}=%.2f$)'%(label, loss_quantifier)
+        legend_objs[fake_point] = '%.2f %s %s sampled'%(loss_quantifier, LABEL_SPACE, label)
 
         spl = UnivariateSpline(np.log(guess_loss[sorter]),
                                np.log(np.mean(gauss_loss, axis=-1)[sorter]), **spline_kwargs)
@@ -160,7 +162,8 @@ ax.set_xscale('log')
 
 min_lim = (1-EXCESS_SPACE)*min((ax.get_xlim()[0], ax.get_ylim()[0]))
 max_lim = (1+EXCESS_SPACE)*max((ax.get_xlim()[1], ax.get_ylim()[1]))
-ax.plot([min_lim, max_lim], [min_lim, max_lim], linestyle='dashed', color='grey', zorder=-10)
+legend_objs[ax.plot([min_lim, max_lim], [min_lim, max_lim], linestyle='dashed', color='grey', zorder=-10)[0]] \
+    = '1.00 %s benchmark'%LABEL_SPACE
 #ax.set_xlim(min_lim, max_lim)
 #ax.set_ylim(min_lim, max_lim)
 ax.set_xlim(4e-3, 2e-1)
@@ -188,7 +191,7 @@ arrow_end_x_lims = [2e-2, 4e-2]
 arrow_end_x, arrow_end_y = min(filter(lambda x: arrow_end_x_lims[0] < x[0] < arrow_end_x_lims[1], markers),
                                key=lambda x: x[1])
 annotation_kwargs['arrowprops']['relpos'] = (0, 0.75)
-ax.annotate('each marker = one cluster,\nsize ~ mass', (arrow_end_x, arrow_end_y), xytext=(3e-2,1.5e-3),
+ax.annotate('each marker = one cluster,\nsize ~ mass $M_{200}$', (arrow_end_x, arrow_end_y), xytext=(3e-2,1.5e-3),
             **annotation_kwargs)
 
 
@@ -204,7 +207,10 @@ ax_linear.set_xlim(add_min, 1+add_max)
 
 ax_linear.set_xticks([])
 
-ax.legend(list(legend_objs.keys()), list(legend_objs.values()), handler_map=legend_handlers,
-          loc='upper left', frameon=False)
+leg = ax.legend(list(legend_objs.keys()), list(legend_objs.values()), handler_map=legend_handlers,
+                loc='upper left', frameon=False,
+                title='         $\mathcal{L}_{\sf opt}$ (Eq. 3)     included network modules')
+leg._legend_box.align='left'
+ax.plot([4.3e-3, 8.2e-2], [0.127, ]*2, color='black', linewidth=0.1)
 
 fig.savefig('scatterloss.pdf', bbox_inches='tight', pad=0, dpi=4000)
