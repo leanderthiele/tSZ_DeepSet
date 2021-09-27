@@ -20,7 +20,7 @@ MARKER_SCALE = 0.5
 
 EXCESS_SPACE = 0.1
 
-LABEL_SPACE = '             '
+LABEL_SPACE = '              '
 
 legend_objs = {}
 legend_handlers = {}
@@ -80,12 +80,12 @@ for ID, (label, color) in list(IDs.items())[::-1] :
         = '%.2f %s %s %s'%(loss_quantifier, LABEL_SPACE, label, '' if gauss_loss is None else 'reconstructed')
                
 
-    spline_kwargs = {} # TODO deal with this later
+    spline_kwargs = {'s': 15, 'k': 5} # TODO deal with this later
 
     sorter = np.argsort(guess_loss)
     spl = UnivariateSpline(np.log(guess_loss[sorter]), np.log(loss[sorter]), **spline_kwargs)
     splines.append(spl)
-    x = np.linspace(np.min(np.log(guess_loss)), np.max(np.log(guess_loss)))
+    x = np.linspace(np.min(np.log(guess_loss)), np.max(np.log(guess_loss)), num=1000)
     y = spl(x)
     ax.plot(np.exp(x), np.exp(y), color=color)
 
@@ -176,7 +176,7 @@ annotation_kwargs = dict(# arrow properties
                          ha='left', va='top', color='grey', bbox={'visible': False, 'boxstyle': 'square, pad=0'})
 
 # annotate smoothing splines
-arrow_end_x = 4e-2
+arrow_end_x = 3.5e-2
 arrow_end_y = min(np.exp(s(np.log(arrow_end_x))) for s in splines)
 ax.annotate('smoothing\nsplines', (arrow_end_x, arrow_end_y), xytext=(4e-2,5e-3),
             **annotation_kwargs)
@@ -209,8 +209,8 @@ ax_linear.set_xticks([])
 
 leg = ax.legend(list(legend_objs.keys()), list(legend_objs.values()), handler_map=legend_handlers,
                 loc='upper left', frameon=False,
-                title='         $\mathcal{L}_{\sf opt}$ (Eq. 3)     included network modules')
+                title='         $\mathcal{L}_{\sf opt}$ (Eq. 3)%sincluded network modules'%(' '*5+'$\,$'))
 leg._legend_box.align='left'
-ax.plot([4.3e-3, 8.2e-2], [0.127, ]*2, color='black', linewidth=0.1)
+ax.plot([4.3e-3, 7e-2], [0.129, ]*2, color='black', linewidth=0.4)
 
 fig.savefig('scatterloss.pdf', bbox_inches='tight', pad=0, dpi=4000)
