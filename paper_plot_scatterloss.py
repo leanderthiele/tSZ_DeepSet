@@ -176,9 +176,9 @@ annotation_kwargs = dict(# arrow properties
                          ha='left', va='top', color='grey', bbox={'visible': False, 'boxstyle': 'square, pad=0'})
 
 # annotate smoothing splines
-arrow_end_x = 3.5e-2
+arrow_end_x = 3e-2
 arrow_end_y = min(np.exp(s(np.log(arrow_end_x))) for s in splines)
-ax.annotate('smoothing\nsplines', (arrow_end_x, arrow_end_y), xytext=(3.6e-2,5e-3),
+ax.annotate('smoothing\nsplines', (arrow_end_x, arrow_end_y), xytext=(3e-2,5e-3),
             **annotation_kwargs)
 
 # annotate dashed line
@@ -187,11 +187,11 @@ ax.annotate('benchmark', (arrow_end_x, arrow_end_x), xytext=(6e-3/1.4,2e-2/1.5),
             **annotation_kwargs)
 
 # annotate markers
-arrow_end_x_lims = [2e-2, 4e-2]
+arrow_end_x_lims = [6e-2, 7e-2]
 arrow_end_x, arrow_end_y = min(filter(lambda x: arrow_end_x_lims[0] < x[0] < arrow_end_x_lims[1], markers),
                                key=lambda x: x[1])
-annotation_kwargs['arrowprops']['relpos'] = (0, 0.75)
-ax.annotate('each marker = one cluster,\nsize ~ mass $M_{200}$', (arrow_end_x, arrow_end_y), xytext=(2.7e-2,1.5e-3),
+annotation_kwargs['arrowprops']['relpos'] = (0.2, 1)
+ax.annotate('each marker = one cluster,\nsize ~ mass $M_{200}$', (arrow_end_x, arrow_end_y), xytext=(6e-2,5e-3),
             **annotation_kwargs)
 
 
@@ -213,8 +213,8 @@ leg = ax.legend(list(legend_objs.keys()), list(legend_objs.values()), handler_ma
 leg._legend_box.align='left'
 ax.plot([4.3e-3, 7e-2], [0.129, ]*2, color='black', linewidth=0.4)
 
-t = ax.text(0.95, 0.2,
-            r'${\sf loss} = \sum_{|\vec r| < 2R_{200}}\left(\frac{\hat P_e(\vec r) - P_e(\vec r)}{P_{200}}\right)^{\!\!2}$',
+t = ax.text(1.005, 0.07,
+            r'\large ${\sf loss} = \left\langle\left(\frac{\hat P_e(\vec r) - P_e(\vec r)}{P_{200}}\right)^{\!\!2}\right\rangle_{\!|\vec r| < 2R_{200}}$',
             transform=ax.transAxes,
             ha='right', va='bottom')
 t.set_usetex(True)
