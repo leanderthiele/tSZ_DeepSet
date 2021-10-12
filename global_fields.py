@@ -114,26 +114,20 @@ class GlobalFields(np.ndarray, metaclass=FixedLenVec) :
             assert len(logM_idx) == 1
             logM_idx = logM_idx[0]
 
+            # we just want to be sure here
+            abs_dglobals = np.fabs(halo.dglobals)
+
             if cfg.GLOBALS_NOISE is not None :
 
                 for ii in filter(lambda x: x != logM_idx, range(cls.len_all())) :
 
-                    # generate Gaussian random number of unit variance and zero mean
-                    r = rng.normal()
-
-                    # rescale by the dglobals entry
-                    r *= halo.dglobals[ii, 0 if r<0 else 1]
-
-                    # add to the output with appropriate weight
-                    out[ii] += r * cfg.GLOBALS_NOISE
+                    out[ii] += cfg.GLOBALS_NOISE \
+                               * GlobalFields.draw_from_patched_gaussians(rng, **abs_dglobals[ii])
 
             if cfg.MASS_NOISE is not None :
                 
-                r = rng.normal()
-
-                r *= halo.dglobals[logM_idx, 0 if r<0 else 1]
-
-                out[logM_idx] += r * cfg.MASS_NOISE
+                out[logM_idx] += cfg.MASS_NOISE \
+                                 * GlobalFields.draw_from_patched_gaussians(rng, **abs_dglobals[logM_idx])
 
         # if halo has u_avg and u_std fields populated, normalize the output
         # (NOTE that the order is important here, we only normalize *after* adding the noise)
@@ -184,4 +178,26 @@ class GlobalFields(np.ndarray, metaclass=FixedLenVec) :
         end_idx = start_idx + cls._FIELDS[name]
 
         return list(range(start_idx, end_idx))
+    #}}}
+
+    @staticmethod
+    def draw_from_patched_gaussians(rng, sneg, spos) :
+        """
+        draws a number from the probability distribution:
+               /
+               | sqrt(2/pi) * sneg / [ spos*(sneg+spos) ] * exp(-x^2 / 2*spos^2)    ---- x>0
+        p(x) = |
+               | sqrt(2/pi) * spos / [ sneg*(sneg+spos) ] * exp(-x^2 / 2*sneg^2)    ---- x<0
+               \
+        """
+    #{{{
+        assert sneg > 0
+        assert spos > 0
+
+        if rng.random() > ( spos / (sneg+spos) ) :
+            # return from positive half
+            return spos * np.fabs(rng.normal())
+        else :
+            # return from negative half
+            return - sneg * np.fabs(rng.normal())
     #}}}
