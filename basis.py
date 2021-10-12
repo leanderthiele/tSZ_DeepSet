@@ -27,15 +27,18 @@ class Basis(np.ndarray, metaclass=FixedLenVec) :
         # make sure no typos in BASIS_USE dict
         assert set(cfg.BASIS_USE.keys()) == {'ang_mom', 'CM', 'inertia', 'vel_dispersion'}
 
-        _, v = LA.eigh(halo.inertia)
-        v = v.T # more intuitive
+        _, eigvec_inertia = LA.eigh(halo.inertia)
+        eigvec_inertia = eigvec_inertia.T # more intuitive
 
-        projections = v @ halo.ang_mom
+        _, eigvec_vel_dispersion = LA.eigh(halo.vel_dispersion)
+        eigvec_vel_dispersion = eigvec_vel_dispersion.T
 
         # choose the octant of the coordinate system where the angular momentum points
         # this fixes the coordinate system uniquely since the eigenvectors returned by eigh
         # are already ordered according to the eigenvalue magnitudes
-        v[projections < 0] *= -1
+        eigvec_inertia[eigvec_inertia @ halo.ang_mom < 0] *= -1
+        eigvec_vel_dispersion[eigvec_vel_dispersion @ halo.ang_mom < 0] *= -1
+
 
         out = []
 
@@ -44,9 +47,9 @@ class Basis(np.ndarray, metaclass=FixedLenVec) :
         if cfg.BASIS_USE['CM'] :
             out.append(halo.CM)
         if cfg.BASIS_USE['inertia'] :
-            out.extend(v)
+            out.extend(eigvec_inertia)
         if cfg.BASIS_USE['vel_dispersion'] :
-            out.extend(halo.vel_dispersion)
+            out.extend(eigvec_vel_dispersion)
 
         out = np.array(out)
 
