@@ -122,12 +122,12 @@ class GlobalFields(np.ndarray, metaclass=FixedLenVec) :
                 for ii in filter(lambda x: x != logM_idx, range(cls.len_all())) :
 
                     out[ii] += cfg.GLOBALS_NOISE \
-                               * GlobalFields.draw_from_patched_gaussians(rng, **abs_dglobals[ii])
+                               * GlobalFields.draw_from_patched_gaussians(rng, *abs_dglobals[ii])
 
             if cfg.MASS_NOISE is not None :
                 
                 out[logM_idx] += cfg.MASS_NOISE \
-                                 * GlobalFields.draw_from_patched_gaussians(rng, **abs_dglobals[logM_idx])
+                                 * GlobalFields.draw_from_patched_gaussians(rng, *abs_dglobals[logM_idx])
 
         # if halo has u_avg and u_std fields populated, normalize the output
         # (NOTE that the order is important here, we only normalize *after* adding the noise)
