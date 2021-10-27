@@ -16,7 +16,7 @@ ID = 'vae64_200epochs_usekld_onelatent_nr2074_ontestingset'
 
 halo_indices = GetIndices(NCOLS*NROWS)
 
-fig, ax = plt.subplots(ncols=NCOLS, nrows=NROWS, figsize=(5,5),
+fig, ax = plt.subplots(ncols=NCOLS, nrows=NROWS, figsize=(5,4),
                        gridspec_kw={'wspace': 0.3, 'hspace': 0.05})
 
 if NCOLS * NROWS > 1 :
@@ -32,7 +32,7 @@ for a, halo_idx in zip(ax, halo_indices) :
     target, prediction, gaussian_prediction, b12 = GetProfiles(ID, halo_idx)
 
     l = a.plot(RCENTERS, prediction, label='reconstruction')
-    a.plot(RCENTERS, b12, label='GNFW')
+    a.plot(RCENTERS, b12, label='GNFW benchmark')
     a.plot(RCENTERS, target, label='target', linestyle='none', marker='o', markersize=2)
 
     # confidence intervals
@@ -50,7 +50,7 @@ for a, halo_idx in zip(ax, halo_indices) :
     exponent = int(np.log10(M200c))
     mantissa = M200c / 10**exponent
     a.text(0.95, 0.95, r'$%.1f \times 10^{%d}\,h^{-1}M_\odot$'%(mantissa, 10+exponent),
-           transform=a.transAxes, ha='right', va='top')
+           transform=a.transAxes, ha='right', va='top', fontsize='x-small')
 
 for ii in range(NROWS) :
     ax[ii*NCOLS].set_ylabel('$P_e/P_{200}$')
@@ -62,6 +62,6 @@ for ii in range((NROWS-1)*NCOLS) :
     ax[ii].set_xticklabels([])
     
 
-ax[0].legend(loc='lower left', bbox_to_anchor=(0,1), ncol=2)
+ax[0].legend(loc='lower left', bbox_to_anchor=(0,1), ncol=2, fontsize='x-small')
 
 fig.savefig('profiles.pdf', bbox_inches='tight')

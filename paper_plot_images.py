@@ -91,7 +91,7 @@ for a, halo_idx in zip(ax, halo_indices) :
 
 ax[0][0].set_ylabel('target', fontsize='x-small')
 ax[0][1].set_ylabel('reconstruction', fontsize='x-small')
-ax[0][2].set_ylabel('benchmark', fontsize='x-small')
+ax[0][2].set_ylabel('GNFW benchmark', fontsize='x-small')
 
 
 fig.savefig('images.pdf', bbox_inches='tight')

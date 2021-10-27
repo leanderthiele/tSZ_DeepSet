@@ -37,7 +37,7 @@ am_xc = -0.8130
 A_beta = 13.8758
 am_beta = -0.6282
 
-fig, ax = plt.subplots(figsize=(5,5))
+fig, ax = plt.subplots(figsize=(5,3))
 
 for ii, halo_idx in enumerate(all_indices) :
     
@@ -78,11 +78,11 @@ for ii, halo_idx in enumerate(all_indices) :
     h, _ = np.histogram(np.log10(box_b12), bins=edges)
     h_b12 += h
 
-ax.step(centers, h_target, label='target', where='mid')
-ax.step(centers, h_prediction, label='prediction', where='mid')
+ax.step(centers, h_prediction, label='reconstruction', where='mid')
 ax.step(centers, h_b12, label='GNFW benchmark', where='mid')
+ax.scatter(centers, h_target, label='target', s=4, c='green', zorder=10)
 
-ax.legend(loc='upper right')
+ax.legend(loc='lower center')
 ax.set_xlabel('$\log_{10}(P_e/P_{200})$')
 ax.set_ylabel('counts')
 ax.set_yscale('log')
