@@ -209,11 +209,11 @@ ax_linear.set_xticks([])
 
 leg = ax.legend(list(legend_objs.keys()), list(legend_objs.values()), handler_map=legend_handlers,
                 loc='upper left', frameon=False,
-                title='         $\mathcal{L}_{\sf opt}$ (Eq. 3)%sincluded network modules'%(' '*5+'$\,$'))
+                title='         $\mathcal{L}_{\sf opt}$ (Eq. 8)%sincluded network modules'%(' '*4+'$\,\,$'))
 leg._legend_box.align='left'
 ax.plot([4.3e-3, 7e-2], [0.129, ]*2, color='black', linewidth=0.4)
 
-t = ax.text(1.005, 0.07,
+t = ax.text(0.98, 0.07,
             r'\large ${\sf loss} = \left\langle\left(\frac{\hat P_e(\vec r) - P_e(\vec r)}{P_{200}}\right)^{\!\!2}\right\rangle_{\!|\vec r| < 2R_{200}}$',
             transform=ax.transAxes,
             ha='right', va='bottom')
